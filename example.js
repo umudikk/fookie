@@ -31,25 +31,26 @@ API.setModel(User, {
     delete: ["system"],
 })
 
+API.on('run', (user, query) => {
+    let res0 = await API.run(user, {
+        method: 'delete',
+        endpoint: '/User/0/inventory/0',
+    })
 
+    let res1 = await API.run(user, {
+        method: 'giveItem',
+        endpoint: '/User/0/inventory',
+        data: {
+            key: "money",
+            amount: 500
+        }
+    })
 
-let res0 = await API.run({
-    method: 'delete',
-    endpoint: '/User/0/inventory/0',
+    let res2 = await API.run(user, {
+        method: 'get',
+        endpoint: 'User/0/inventory',
+    })
 })
 
-let res1 = await API.run({
-    method: 'giveItem',
-    endpoint: '/User/0/inventory',
-    data: {
-        key: "money",
-        amount: 500
-    }
-})
-
-let res2 = await API.run({
-    method: 'get',
-    endpoint: 'User/0/inventory',
-})
 
 API.listen(8080)
