@@ -1,20 +1,37 @@
-export default class {
+module.exports = class {
     requester = null
     models = new Map()
     roles = new Map()
-    constructor(options) {
+    constructor(options) {}
 
+    async parseRequester(req, res) {
+        let user = await this.requester.findOne(req.body)
+        return user != null ? { user } : false
     }
-    setRequester(model) {
+
+    async setRequester(model) {
         this.requester = model
     }
-    newRole(roleName, roleFunction) {
+
+    async newRole(roleName, roleFunction) {
         this.roles.set(roleName, roleFunction)
     }
-    setModel(model, auth) {
+
+    async setModel(model, auth) {
         this.models.set(model.name, { model, auth })
     }
-    run({ method, endpoint, data }) {
+
+    async run(user, { method, query, data }) {
+        user.queryRoutes = query.split('/')
+        for (let x in user.queryRoutes) {
+            console.log(user.queryRoutes[x]);
+        }
+
+    }
+    async listen(port) {
+        console.log(port + " listenin...");
+    }
+    async on(event, handler) {
 
     }
 }
