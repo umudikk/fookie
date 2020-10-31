@@ -3,13 +3,12 @@
  const Inventory = require('./models/Inventory.js')
 
  const API = new MYAPI({})
-
+ API.connect({ url: "mongodb://localhost:26422" })
  API.setRequester(User)
 
  API.newRole('admin', (User, model) => {
      return User.type == 'admin'
  })
-
  API.newRole('everyone', (User, model) => {
      return true
  })
@@ -19,27 +18,30 @@
  API.newRole('owner', (User, model) => {
      return User._id == model.owner ? true : false
  })
- API.newRole('editor', (User, model) => {
-     return User.type == "editor" ? true : false
- })
 
- API.setModel(User, {
-     post: ["self"],
-     get: ["everyone"],
-     delete: ["admin"],
+ API.setModel('User', {
+     model: User,
+     auth: {
+         post: ["self"],
+         get: ["everyone"],
+         delete: ["admin"],
 
+     }
  })
- API.setModel(Inventory, {
-     post: ["system"],
-     get: ["everyone"],
-     delete: ["admin", "system"],
-     giveItem: ['system', "admin"]
+ API.setModel('Inventory', {
+     model: Inventory,
+     auth: {
+         post: ["system"],
+         get: ["everyone"],
+         delete: ["admin", "system"],
+         giveItem: ['system', "admin"]
+     }
  })
 
  API.on('run', async(user, query) => {
      let res0 = await API.run(user, {
          method: 'delete',
-         query: '/User/0/inventory/0',
+         query: '/User/0/Inventory/0',
      })
 
      let res1 = await API.run(user, {
@@ -58,11 +60,10 @@
      API.run(user, query)
  })
 
-
  API.listen(8080)
 
 
  let res2 = API.run({ _id: 0, name: 'umut' }, {
      method: 'get',
-     query: 'User/0/inventory',
+     query: 'User/0/Inventory/items',
  })

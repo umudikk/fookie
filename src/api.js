@@ -4,6 +4,9 @@ module.exports = class {
     roles = new Map()
     constructor(options) {}
 
+    async connect(config) {
+
+    }
     async parseRequester(req, res) {
         let user = await this.requester.findOne(req.body)
         return user != null ? { user } : false
@@ -17,14 +20,28 @@ module.exports = class {
         this.roles.set(roleName, roleFunction)
     }
 
-    async setModel(model, auth) {
-        this.models.set(model.name, { model, auth })
+    async setModel(model, payload) {
+        this.models.set(model, payload)
     }
 
     async run(user, { method, query, data }) {
-        user.queryRoutes = query.split('/')
-        for (let x in user.queryRoutes) {
-            console.log(user.queryRoutes[x]);
+        let queryRoutes = query.split('/')
+        let model = null
+        let current = null
+        let next = null
+        let response = {}
+        let isLast = null
+
+        for (let x in queryRoutes) {
+            if (queryRoutes.length - 1 == x) isLast = true
+            current = queryRoutes[x]
+            next = queryRoutes[x + 1]
+
+            //isModel
+            if (this.models.has(current)) {
+                model = this.models.get(current)
+                model.findOne({ _id: next })
+            }
         }
 
     }
