@@ -1,33 +1,7 @@
 Skip to content
 Search or jump to…
 
-Pull requests
-Issues
-Marketplace
-Explore
- 
-@QueennN 
-brkblg
-/
-gitignore
-forked from github/gitignore
-1
-0
-58.8k
-Code
-Pull requests
-Actions
-Projects
-Security
-Insights
-gitignore/Node.gitignore
-@tejashah88
-tejashah88 Add .serverless to gitignore
-Latest commit 88e67f9 on 28 May 2018
- History
- 37 contributors
-@stuartpb@shiftkey@ro31337@melonmanchan@gouthamve@jucrouzet@cheddar@arcresu@tejashah88@sroberts@segayuu@rgbkrk
-67 lines (48 sloc)  992 Bytes
+
   
 # Logs
 logs
@@ -96,15 +70,4 @@ typings/
 
 # Serverless directories
 .serverless
-© 2020 GitHub, Inc.
-Terms
-Privacy
-Security
-Status
-Help
-Contact GitHub
-Pricing
-API
-Training
-Blog
-About
+
