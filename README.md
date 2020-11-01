@@ -1,2 +1,2 @@
-# Auto Generated Nodejs from Mongoose Model and Auth Object
+# Auto Generated Nodejs RestAPI from Mongoose Model and Auth Object
  
