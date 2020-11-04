@@ -10,4 +10,4 @@ schema.methods.giveItem = async function(data) {
     return true
 }
 
-module.exports = mongoose.model('inventory', schema);
+module.exports = schema
