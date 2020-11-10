@@ -12,6 +12,7 @@ module.exports = class API {
 
     async connect(url = 'mongodb://localhost:27017/API', config = {}) {
         this.connection = await this.mongoose.connect(url, config)
+        return this.connection
 
     }
 
@@ -29,24 +30,44 @@ module.exports = class API {
     }
 
     async setModel(name, schema) {
-        let model = this.mongoose.model(name, schema);
-        this.models.set(name, model)
+        if (schema instanceof this.mongoose.Schema) {
+            let model = this.mongoose.model(name, schema);
+            this.models.set(name, model)
+        } else if (typeof schema === 'object') {
+            this.models.set(name, schema)
+        } else {
+            throw Error('[API] Invalid Schema Type')
+        }
+
     }
+
     async controlAuth(User, Model, field) {
         return true
     }
-    async filter(User, Model, data) {
 
-
-
+    async filter(user, Model, model, method) {
+        let paths = Model.prototype.schema.paths
+        for (let i in paths) {
+            let roleFunc = this.roles.get(paths[i].options.auth[method])
+            if (!roleFunc(user, model)) {
+                model[i] = undefined
+            }
+            console.log(paths[i].options.auth)
+        }
+        return model
     }
 
     async parseQuery(rawQuery) {
         return this.rawQueryParser(rawQuery)
     }
+
     async parseUrl(rawUrl) {
         let res = this.queryString.parseUrl(rawUrl)
         return { modelName: res.url, rawQuery: res.query }
+    }
+
+    async isMongooseModel(model) {
+        return model.name == this.mongoose.Model.name.toLowerCase()
     }
 
     async run(user, { rawLongQuery, method }) {
@@ -70,24 +91,25 @@ module.exports = class API {
             if (this.models.has(modelName)) {
 
                 model = this.models.get(modelName)
-                console.log(this.connection);
-                if (model == this.mongoose.Model) {
+
+                //mongoose model control
+                if (this.isMongooseModel(model)) {
                     let mongooseQuery = await this.parseQuery(rawQuery)
-                    console.log(true);
                     data = await model.findOne(mongooseQuery)
+                    await this.filter(user, model, data)
 
                 } else {
-                    console.log(false);
                     data = model
                 }
 
-                //  response += API.filter(User, model, data)
+
 
 
             } else {
                 return 'err'
             }
         }
+        console.log(response);
 
     }
     async listen(port) {

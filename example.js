@@ -1,57 +1,62 @@
- const api = require('./src/index')
- const User = require('./schemas/User.js')
- const Inventory = require('./schemas/Inventory.js')
- const API = new api()
+async function main() {
+    const api = require('./src/index')
+    const User = require('./schemas/User.js')
+    const Inventory = require('./schemas/Inventory.js')
+    const API = new api()
 
- API.connect('mongodb://localhost:27017/API', {})
 
- API.setRequester(User)
+    await API.connect('mongodb://localhost:27017/API', {})
 
- API.newRole('admin', (User, model) => {
-     return User.type == 'admin'
- })
- API.newRole('everyone', (User, model) => {
-     return true
- })
- API.newRole('nobody', (User, model) => {
-     return false
- })
- API.newRole('owner', (User, model) => {
-     return User._id == model.owner ? true : false
- })
+    API.setRequester(User)
 
- API.setModel('User', User, )
- API.setModel('Inventory', Inventory)
+    API.newRole('admin', (User, model) => {
+        return User.type == 'admin'
+    })
+    API.newRole('everyone', (User, model) => {
+        return true
+    })
+    API.newRole('nobody', (User, model) => {
+        return false
+    })
+    API.newRole('owner', (User, model) => {
+        return User._id == model.owner ? true : false
+    })
 
- API.on('run', async(user, query) => {
+    API.setModel('User', User)
+    API.setModel('Inventory', Inventory)
 
-     API.run(user, query)
- })
+    API.on('run', async(user, query) => {
 
- API.listen(8080)
+        API.run(user, query)
+    })
 
- //EXAMPLE RUN
+    API.listen(8080)
 
- let res0 = API.run({ _id: 0, name: 'umut', type: "admin" }, {
-     method: 'get',
-     rawLongQuery: 'User?_id=0//Inventory/items',
- })
+    //EXAMPLE RUN
 
- let res1 = API.run({ _id: 0, name: 'umut', type: "admin" }, {
-     method: 'delete',
-     rawLongQuery: 'User?_id=0//Inventory/0',
- })
+    let res0 = API.run({ _id: 0, name: 'umut', type: "admin" }, {
+        method: 'get',
+        rawLongQuery: 'User?_id=0//Inventory/items',
+    })
 
- let res2 = API.run({ _id: 0, name: 'umut', type: "admin" }, {
-     method: 'giveItem',
-     rawLongQuery: 'User?_id=0/inventory',
-     body: {
-         key: "money",
-         amount: 500
-     }
- })
+    let res1 = API.run({ _id: 0, name: 'umut', type: "admin" }, {
+        method: 'delete',
+        rawLongQuery: 'User?_id=0//Inventory/0',
+    })
 
- let res3 = API.run({ _id: 0, name: 'umut', type: "admin" }, {
-     method: 'get',
-     rawLongQuery: 'User?_id=0/inventory',
- })
+    let res2 = API.run({ _id: 0, name: 'umut', type: "admin" }, {
+        method: 'giveItem',
+        rawLongQuery: 'User?_id=0/inventory',
+        body: {
+            key: "money",
+            amount: 500
+        }
+    })
+
+    let res3 = API.run({ _id: 0, name: 'umut', type: "admin" }, {
+        method: 'get',
+        rawLongQuery: 'User?_id=0/inventory',
+    })
+}
+
+main()

@@ -1,7 +1,13 @@
 const mongoose = require('mongoose')
 
 const schema = new mongoose.Schema({
-    items: [Object]
+    items: {
+        type: [Object],
+        auth: {
+            read: ["self"],
+            write: ["system"],
+        }
+    }
 });
 
 schema.methods.giveItem = async function(data) {
