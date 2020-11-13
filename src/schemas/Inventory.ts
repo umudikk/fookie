@@ -1,4 +1,4 @@
-const mongoose = require('mongoose')
+import * as mongoose from 'mongoose'
 
 const schema = new mongoose.Schema({
     items: {
@@ -10,10 +10,11 @@ const schema = new mongoose.Schema({
     }
 });
 
-schema.methods.giveItem = async function(data) {
+schema.methods.giveItem = async function (data) {
     this.items.push(data)
     await this.save()
     return true
 }
 
-module.exports = schema
+export default schema
+

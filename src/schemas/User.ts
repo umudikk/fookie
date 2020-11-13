@@ -1,34 +1,35 @@
-const mongoose = require('mongoose')
+import * as mongoose from 'mongoose'
+
 const schema = new mongoose.Schema({
     name: {
         type: String,
         auth: {
-            read: ["everybody"],
-            write: ["self"],
+            get: ["everybody"],
+            post: ["self"],
         }
     },
     Inventory: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'inventory',
         auth: {
-            read: ["self"],
-            write: ["system"],
+            get: ["self"],
+            post: ["system"],
         }
     },
     mail: {
         type: String,
         auth: {
-            read: ["self"],
-            write: ["system"],
+            get: ["self"],
+            post: ["system"],
         }
     },
     password: {
         type: String,
         auth: {
-            read: ["system"],
-            write: ["system"],
+            get: ["system"],
+            post: ["system"],
         }
     },
 });
 
-module.exports = schema
+export default schema

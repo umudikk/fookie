@@ -1,8 +1,13 @@
-async function main() {
-    const api = require('./src/index')
-    const User = require('./schemas/User.js')
-    const Inventory = require('./schemas/Inventory.js')
-    const API = new api()
+import api from './src'
+import User from './src/schemas/User'
+import Inventory from './src/schemas/Inventory'
+
+
+(async () => {
+
+    const API = new api({})
+
+
 
 
     await API.connect('mongodb://localhost:27017/API', {})
@@ -25,7 +30,7 @@ async function main() {
     API.setModel('User', User)
     API.setModel('Inventory', Inventory)
 
-    API.on('run', async(user, query) => {
+    API.on('run', async (user, query) => {
 
         API.run(user, query)
     })
@@ -57,6 +62,4 @@ async function main() {
         method: 'get',
         rawLongQuery: 'User?_id=0/inventory',
     })
-}
-
-main()
+})()

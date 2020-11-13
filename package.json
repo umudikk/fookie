@@ -1,17 +1,21 @@
 {
-  "name": "api",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "umudik",
-  "license": "ISC",
-  "dependencies": {
-    "api-query-params": "^5.0.0",
-    "mongoose": "^5.10.11",
-    "mongoose-query-parser": "^1.1.9",
-    "query-string": "^6.13.6"
-  }
+    "name": "api",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index",
+    "scripts": {
+        "serve": "ts-node ./src/index.ts",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "umudik",
+    "license": "ISC",
+    "dependencies": {
+        "@types/mongoose": "^5.10.0",
+        "@types/query-string": "^6.3.0",
+        "@types/url-parse": "^1.4.3",
+        "api-query-params": "^5.0.0",
+        "mongoose": "^5.10.11",
+        "mongoose-query-parser": "^1.1.9",
+        "query-string": "^6.13.6"
+    }
 }
