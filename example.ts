@@ -41,17 +41,17 @@ import Inventory from './src/schemas/Inventory'
 
     let res0 = API.run({ _id: 0, name: 'umut', type: "admin" }, {
         method: 'get',
-        rawLongQuery: 'User?_id=0//Inventory/items',
+        query: 'User?_id=0/Inventory/items',
     })
 
     let res1 = API.run({ _id: 0, name: 'umut', type: "admin" }, {
         method: 'delete',
-        rawLongQuery: 'User?_id=0//Inventory/0',
+        query: 'User?_id=0&name=umudik&color=red/Inventory',
     })
 
     let res2 = API.run({ _id: 0, name: 'umut', type: "admin" }, {
         method: 'giveItem',
-        rawLongQuery: 'User?_id=0/inventory',
+        query: 'User?_id=0/inventory',
         body: {
             key: "money",
             amount: 500
@@ -59,7 +59,15 @@ import Inventory from './src/schemas/Inventory'
     })
 
     let res3 = API.run({ _id: 0, name: 'umut', type: "admin" }, {
-        method: 'get',
-        rawLongQuery: 'User?_id=0/inventory',
+        method: 'giveItem',
+        query: 'User?status=sent&timestamp>2016-01-01&author.firstName=/john/i&limit=100&skip=50&sort=-timestamp&populate=logs&fields=id,logs.ip',
+        body: {
+            key: "money",
+            amount: 500
+        }
     })
+
+
+
+
 })()
