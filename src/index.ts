@@ -2,6 +2,7 @@ import * as mongoose from 'mongoose'
 import { Req, rawQuery } from './types'
 import * as queryString from "query-string"
 import * as rawQueryParser from 'api-query-params'
+import * as methods from './methods'
 
 export default class API {
     queryString
@@ -21,25 +22,6 @@ export default class API {
         this.queryString = queryString
         this.rawQueryParser = rawQueryParser
 
-
-        this.methods.set('getOne', (Model, filter) => {
-
-        })
-        this.methods.set('get', (Model, filter) => {
-
-        })
-        this.methods.set('post', (Model, data) => {
-
-        })
-        this.methods.set('delete', (model, filter) => {
-
-        })
-        this.methods.set('put', (model, data) => {
-
-        })
-        this.methods.set('patch', (model, data) => {
-
-        })
     }
 
     async connect(url: string = 'mongodb://localhost:27017/API', config: object = {}) {
@@ -62,6 +44,15 @@ export default class API {
     }
 
     async setModel(modelName: string, schema: mongoose.Schema<any>) {
+
+        schema.statics.get = methods._get
+        schema.statics.post = methods._post
+        schema.statics.delete = methods._delete
+        schema.statics.patch = methods._patch
+        schema.statics.put = methods._put
+        schema.statics.option = methods._option
+        schema.statics.pagination = methods._pagination
+
         let model = mongoose.model(modelName, schema);
         this.models.set(modelName, model)
     }
@@ -91,7 +82,7 @@ export default class API {
 
             let Model = queryArray[step].Model
             let query = queryArray[step].query
-            
+
             if (last != step) {
                 data = Model.findOne(query.filter)
                 data = this.filter(user, Model, data)
@@ -101,13 +92,8 @@ export default class API {
             }
 
 
-            res[Model.modelName] = data
+
         }
-
-
-        console.log(res);
-
-
     }
 
 
