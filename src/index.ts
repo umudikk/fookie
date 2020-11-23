@@ -3,7 +3,7 @@ import { Req, rawQuery } from './types'
 import * as queryString from "query-string"
 import * as rawQueryParser from 'api-query-params'
 import * as methods from './methods'
-
+import mongoosePaginate from 'mongoose-paginate-v2'
 export default class API {
     queryString
     rawQueryParser
@@ -45,13 +45,14 @@ export default class API {
 
     async setModel(modelName: string, schema: mongoose.Schema<any>) {
 
+        schema.plugin(mongoosePaginate);
+
         schema.statics.get = methods._get
         schema.statics.post = methods._post
         schema.statics.delete = methods._delete
         schema.statics.patch = methods._patch
-        schema.statics.put = methods._put
-        schema.statics.option = methods._option
         schema.statics.pagination = methods._pagination
+
 
         let model = mongoose.model(modelName, schema);
         this.models.set(modelName, model)
@@ -61,39 +62,6 @@ export default class API {
 
 
     async run<T extends Req>(user, req: T) {
-
-        //parse
-        let queryArray = []
-        let url = this.longUrl(req.query)
-
-        url.forEach((str) => {
-            let { modelName, rawQuery } = this.url(str)
-            queryArray.push({
-                Model: this.models.get(modelName),
-                query: this.query(rawQuery)
-            })
-        })
-
-        //run
-
-        let data = null
-        let last = queryArray.length - 1
-        for (let step = 0; step < queryArray.length; step++) {
-
-            let Model = queryArray[step].Model
-            let query = queryArray[step].query
-
-            if (last != step) {
-                data = Model.findOne(query.filter)
-                data = this.filter(user, Model, data)
-
-            } else {
-                data = Model.find(query.filter)
-            }
-
-
-
-        }
     }
 
 
