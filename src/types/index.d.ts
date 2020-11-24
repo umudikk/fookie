@@ -1,7 +1,6 @@
-type Method = "post" | "get" | "patch" | "delete"
 
 export interface Req {
-    method: Method,
+    method: string,
     query: string
 }
 
@@ -14,9 +13,7 @@ export interface Get extends Req {
 export interface Delete extends Req {
  
 }
-export interface Patch extends Req {
+export interface Update extends Req {
     body: object
 }
-export interface Put extends Req {
-    body: object
-}
+

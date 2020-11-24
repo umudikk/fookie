@@ -15,6 +15,7 @@ import Inventory from './src/schemas/Inventory'
     API.newRole('admin', (User, model) => {
         return User.type == 'admin'
     })
+    
     API.newRole('everyone', (User, model) => {
         return true
     })
@@ -30,42 +31,18 @@ import Inventory from './src/schemas/Inventory'
     API.setModel('Inventory', Inventory)
 
     //Event
-    API.on('/run', async (user, query) => {
-
-
-
-        let res1 = API.run({ _id: 0, name: 'umut', type: "admin" }, {
-            method: 'delete',
-            query: '',
-        })
-
-        let res2 = API.run({ _id: 0, name: 'umut', type: "admin" }, {
-            method: 'giveItem',
-            query: '',
-            body: {
-                key: "money",
-                amount: 500
-            }
-        })
-
-        let res3 = API.run({ _id: 0, name: 'umut', type: "admin" }, {
-            method: 'giveItem',
-            query: '',
-            body: {
-                key: "money",
-                amount: 500
-            }
-        })
-
+    API.on('/run', async (req, res) => {
 
     })
 
     API.listen(8080)
 
-    let res0 = await  API.run({ _id: 0, name: 'umut', type: "admin" }, {
+    let res0 = await API.run({ _id: 0, name: 'umut', type: "admin" }, {
         method: 'get',
-        query: 'http://localhost:3000/User?id=umut'
+        query: 'http://localhost:3000/User?_id=546545'
     })
+    console.log(res0);
+    
 })()
 
 

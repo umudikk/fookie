@@ -26,7 +26,7 @@ const schema = new mongoose.Schema({
     password: {
         type: String,
         auth: {
-            get: ["system"],
+            get: ["nobody"],
             post: ["system"],
         }
     },

@@ -64,7 +64,7 @@
         "InsertSpaceAfterTypeAssertion": true
     },
     "include": [
-        "**/*.ts"
+        "**/*.ts", "test/fakeData.ts"
     ],
     "exclude": [
         "node_modules"

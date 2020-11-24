@@ -1,5 +1,4 @@
 import * as mongoose from 'mongoose'
-import { Req, rawQuery } from './types'
 import * as queryString from "query-string"
 import * as urlParser from 'url-parse'
 import * as rawQueryParser from 'api-query-params'
@@ -58,30 +57,37 @@ export default class API {
         this.models.set(modelName, model)
     }
 
-    async run<T extends Req>(user, req: T) {
+    async run(user, req) {
 
         let parsedUrl = this.urlParser(req.query)
 
         // Model Name +| Method +| Query +
-        let method = req.method
-        let modelName = parsedUrl.pathname
+
+        // /User?_id=5&get=items&items.type=4/vxcvx
+        let method: string = req.method
+        let modelName: string = parsedUrl.pathname.replace('/', '')
+
         let mongooseQuery = this.rawQueryParser(parsedUrl.query)
-        let Model = this.models.get(modelName)
-     
-        Model[method](mongooseQuery.filter,req.body)
+
+        if (this.models.has(modelName)) {
+            let Model = this.models.get(modelName)
+            let result = await Model[method]({
+                body: req.body,
+                filter: mongooseQuery
+            })
+
+            return this.filter(user, result, Model)
+        }
+
+
     }
 
     async listen(port) {
-        console.log(port + " listenin...");
+        console.log(port + " listening...");
     }
     async on(event, handler) {
 
     }
-
-    private async controlAuth(User: mongoose.Document, Model: mongoose.Model<any>, field: String) {
-        return true
-    }
-
 
     private filter(user: mongoose.Document, Model: mongoose.Model<any>, model: mongoose.Document): mongoose.Document {
         let paths = Model.prototype.schema.paths
@@ -93,15 +99,5 @@ export default class API {
         }
         return model
     }
-
-    private url(rawUrl: string) {
-        //let res = this.queryString.parseUrl(rawUrl)
-        //  return { modelName: res.url, rawQuery: res.query }
-    }
-
-    private query(rawQuery: string) {
-        return this.rawQueryParser(rawQuery)
-    }
-
-
 }
+

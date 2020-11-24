@@ -1,19 +1,23 @@
 import * as mongoose from 'mongoose'
 
-const schema = new mongoose.Schema({
-    items: {
-        type: [Object],
+const schema = new mongoose.Schema<IPlayer>({
+    name:String,
+    items: [{
+        type: Object,
         auth: {
-            read: ["self"],
-            write: ["system"],
+            get: ["self"],
+            post: ["system"],
         }
-    }
+    }]
 });
 
-schema.methods.giveItem = async function (data) {
+schema.methods.giveItem = function (data) {
     this.items.push(data)
-    await this.save()
-    return true
+}
+
+
+ export interface IPlayer extends mongoose.Document {
+    giveItem(data: any): void;
 }
 
 export default schema
