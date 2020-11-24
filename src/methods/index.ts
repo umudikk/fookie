@@ -1,3 +1,5 @@
+
+
 export async function _post(data) {
     let model = new this(data)
     let tmp = await model.save()

@@ -1,11 +1,13 @@
 import * as mongoose from 'mongoose'
 import { Req, rawQuery } from './types'
 import * as queryString from "query-string"
+import * as urlParser from 'url-parse'
 import * as rawQueryParser from 'api-query-params'
 import * as methods from './methods'
 import mongoosePaginate from 'mongoose-paginate-v2'
+
 export default class API {
-    queryString
+    urlParser
     rawQueryParser
     connection
     requester
@@ -19,7 +21,7 @@ export default class API {
         this.models = new Map()
         this.roles = new Map()
         this.methods = new Map()
-        this.queryString = queryString
+        this.urlParser = urlParser
         this.rawQueryParser = rawQueryParser
 
     }
@@ -45,25 +47,29 @@ export default class API {
 
     async setModel(modelName: string, schema: mongoose.Schema<any>) {
 
-        schema.plugin(mongoosePaginate);
-
+        //schema.plugin(mongoosePaginate);
         schema.statics.get = methods._get
         schema.statics.post = methods._post
         schema.statics.delete = methods._delete
         schema.statics.patch = methods._patch
         schema.statics.pagination = methods._pagination
 
-
         let model = mongoose.model(modelName, schema);
         this.models.set(modelName, model)
     }
 
-
-
-
     async run<T extends Req>(user, req: T) {
-    }
 
+        let parsedUrl = this.urlParser(req.query)
+
+        // Model Name +| Method +| Query +
+        let method = req.method
+        let modelName = parsedUrl.pathname
+        let mongooseQuery = this.rawQueryParser(parsedUrl.query)
+        let Model = this.models.get(modelName)
+     
+        Model[method](mongooseQuery.filter,req.body)
+    }
 
     async listen(port) {
         console.log(port + " listenin...");
@@ -72,8 +78,6 @@ export default class API {
 
     }
 
-
-    // RUN 
     private async controlAuth(User: mongoose.Document, Model: mongoose.Model<any>, field: String) {
         return true
     }
@@ -90,17 +94,9 @@ export default class API {
         return model
     }
 
-
-
-    //PARSE
-
-    private longUrl(rawLongQuery: string): Array<string> {
-        return rawLongQuery.split('/')
-    }
-
-    private url(rawUrl: string): rawQuery {
-        let res = this.queryString.parseUrl(rawUrl)
-        return { modelName: res.url, rawQuery: res.query }
+    private url(rawUrl: string) {
+        //let res = this.queryString.parseUrl(rawUrl)
+        //  return { modelName: res.url, rawQuery: res.query }
     }
 
     private query(rawQuery: string) {
