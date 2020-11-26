@@ -12,28 +12,23 @@ import Inventory from './src/schemas/Inventory'
     API.setRequester(User)
 
     //Roles
-    API.newRole('admin', (User, model) => {
-        return User.type == 'admin'
+    API.newRole('admin', (user, model) => {
+        return user.type == 'admin'
     })
-    
-    API.newRole('everyone', (User, model) => {
+
+    API.newRole('everyone', (user, model) => {
         return true
     })
-    API.newRole('nobody', (User, model) => {
+    API.newRole('nobody', (user, model) => {
         return false
     })
-    API.newRole('owner', (User, model) => {
-        return User._id == model.owner ? true : false
+    API.newRole('self', (user, model) => {
+        return user._id == model.owner ? true : false
     })
 
     //Models
     API.setModel('User', User)
     API.setModel('Inventory', Inventory)
-
-    //Event
-    API.on('/run', async (req, res) => {
-
-    })
 
     API.listen(8080)
 
@@ -41,8 +36,7 @@ import Inventory from './src/schemas/Inventory'
         method: 'get',
         query: 'http://localhost:3000/User?_id=546545'
     })
-    console.log(res0);
-    
+
 })()
 
 

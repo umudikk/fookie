@@ -8,14 +8,6 @@ const schema = new mongoose.Schema({
             post: ["self"],
         }
     },
-    Inventory: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'inventory',
-        auth: {
-            get: ["self"],
-            post: ["system"],
-        }
-    },
     mail: {
         type: String,
         auth: {

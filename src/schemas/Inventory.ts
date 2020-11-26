@@ -1,7 +1,14 @@
 import * as mongoose from 'mongoose'
 
-const schema = new mongoose.Schema<IPlayer>({
-    name:String,
+const schema = new mongoose.Schema({
+    owner: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'inventory',
+        auth: {
+            get: ["everybody"],
+            post: ["system"],
+        }
+    },
     items: [{
         type: Object,
         auth: {
@@ -15,10 +22,6 @@ schema.methods.giveItem = function (data) {
     this.items.push(data)
 }
 
-
- export interface IPlayer extends mongoose.Document {
-    giveItem(data: any): void;
-}
 
 export default schema
 
