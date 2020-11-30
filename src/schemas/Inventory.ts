@@ -6,7 +6,7 @@ const schema = new mongoose.Schema({
         ref: 'inventory',
         auth: {
             get: ["everybody"],
-            post: ["system"],
+            post: ["admin"],
         }
     },
     items: [{

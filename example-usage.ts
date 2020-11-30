@@ -1,11 +1,15 @@
-import api from './src'
+import Api from './src'
 import User from './src/schemas/User'
 import Inventory from './src/schemas/Inventory'
-
+import * as express from 'express'
+import * as bodyParser from 'body-parser'
 
 (async () => {
+    const app = express()
+    const API = new Api({})
 
-    const API = new api({})
+    app.use(bodyParser.urlencoded({ extended: false }))
+    app.use(bodyParser.json())
 
     await API.connect('mongodb://localhost:27017/API', {})
 
@@ -15,7 +19,6 @@ import Inventory from './src/schemas/Inventory'
     API.newRole('admin', (user, model) => {
         return user.type == 'admin'
     })
-
     API.newRole('everyone', (user, model) => {
         return true
     })
@@ -30,14 +33,19 @@ import Inventory from './src/schemas/Inventory'
     API.setModel('User', User)
     API.setModel('Inventory', Inventory)
 
-    API.listen(8080)
-
-    let res0 = await API.run({ _id: 0, name: 'umut', type: "admin" }, {
-        method: 'get',
-        query: 'http://localhost:3000/User?_id=546545'
+    app.use(async (req, res) => { 
+        console.log(req.method);
+        
+        // let user = API.parseRequester(req.headers.authentication)
+        let user = { id: 0, type: 'admin', name: 'umut' }
+        let result = await API.run(user, req.method, req.originalUrl, req.body)
+        res.json(result)
     })
 
+    app.listen(8080)
 })()
+
+
 
 
 

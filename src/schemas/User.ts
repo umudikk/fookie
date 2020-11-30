@@ -5,21 +5,21 @@ const schema = new mongoose.Schema({
         type: String,
         auth: {
             get: ["everybody"],
-            post: ["self"],
+            post: ["admin"],
         }
     },
     mail: {
         type: String,
         auth: {
             get: ["self"],
-            post: ["system"],
+            post: ["admin"],
         }
     },
     password: {
         type: String,
         auth: {
             get: ["nobody"],
-            post: ["system"],
+            post: ["admin"],
         }
     },
 });

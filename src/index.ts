@@ -1,8 +1,9 @@
 import * as mongoose from 'mongoose'
 import * as queryString from "query-string"
-import * as urlParser from 'url-parse'
+//import * as urlParser from 'url-parse'
+import * as urlParser from 'query-string'
 import * as rawQueryParser from 'api-query-params'
-import mongoosePaginate from 'mongoose-paginate-v2'
+import * as mongoosePaginate from 'mongoose-paginate-v2'
 import { EventEmitter } from 'events'
 
 export default class API {
@@ -12,7 +13,7 @@ export default class API {
     requester
     models
     roles
-    methods
+    paginate
 
     constructor(options) {
         // super()
@@ -20,22 +21,22 @@ export default class API {
         this.requester = null
         this.models = new Map()
         this.roles = new Map()
-        this.methods = new Map()
-        this.urlParser = urlParser
+        this.urlParser = queryString
         this.rawQueryParser = rawQueryParser
+        this.paginate = mongoosePaginate
     }
 
     async listen(port) {
         console.log(port + " listening...");
     }
 
-    async connect(url: string = 'mongodb://localhost:27017/API', config: object = {}) {
+    async connect(url: string, config: object = {}) {
         this.connection = await mongoose.connect(url, config)
         return this.connection
 
     }
 
-    async parseRequester(req, res) {
+    async parseRequester(req) {
         let user = await this.requester.findOne(req.body)
         return user != null ? { user } : false
     }
@@ -50,82 +51,84 @@ export default class API {
 
     async setModel(modelName: string, schema: mongoose.Schema<any>) {
 
-        // schema.plugin(mongoosePaginate);
+        let roles = this.roles
+        schema.plugin(this.paginate)
 
-        schema.methods.filter = function (user) {
-            let paths = this.model.prototype.schema.paths
-            for (let i in paths) {
-                let roleFunc = this.roles.get(paths[i].options.auth)
-                if (!roleFunc(user, model)) {
-                    this[i] = undefined
-                }
-            }
-            return model
-        }
-
-        schema.statics.get = async function ({ user, filter }) {
-            let tmp = this.findOne(filter)
-            tmp.filter(user)
+        schema.statics.GET = async function ({ user, filter }) {
+            let tmp = await this.findOne(filter)
             return tmp
         }
 
-        schema.statics.post = async function ({ body }) {
+        schema.statics.POST = async function ({ user, body }) {
             let model = new this(body)
-            let tmp = await model.save()
-            return tmp
+            if (model.checkAuth(user, body, 'post')) {
+                let tmp = await model.save()
+                return tmp
+            } else {
+                return false
+            }
+
+
         }
 
-        schema.statics.delete = async function ({ filter }) {
+        schema.statics.DELETE = async function ({ filter }) {
             return await this.deleteOne(filter)
         }
 
-        schema.statics.update = async function ({ filter, body }) {
-            let tmp = this.findOne(filter)
+        schema.statics.PATCH = async function ({ filter, body }) {
+            let tmp = await this.findOne(filter)
             for (let i in body) {
                 tmp[i] = body[i]
             }
             return await tmp.save()
         }
 
-        schema.statics.pagination = async function ({ filter, body }) {
+        schema.statics.PAGINATION = async function ({ filter, body }) {
             return this.paginate(filter, body)
+        }
+
+
+        schema.methods.filter = function (user) {
+            let paths = this.model.prototype.schema.paths
+            console.log(paths);
+        }
+        schema.methods.checkAuth = function (user, model, method: string): boolean {
+            let keys = Object.keys(model)
+            for (let i in keys) {
+                console.log(keys[i]);
+
+                let str = this.schema.tree[keys[i]].auth[method]
+                if (str.every(i => roles.has(i))) {
+                    return str.every(i => roles.get(i)(user, model))
+                }
+                else {
+                    return false
+                }
+            }
         }
 
         let model = mongoose.model(modelName, schema);
         this.models.set(modelName, model)
     }
 
-    async run(user, req) {
-        let parsedUrl = this.urlParser(req.query)
-        let method: string = req.method
-        let modelName: string = parsedUrl.pathname.replace('/', '')
+
+    async exec(user, Model, method, filter, body) {
+
+        return await Model[method]({
+            user,
+            body,
+            filter: filter
+        })
+    }
+    async run(user, method: string, query: string, body: object) {
+        let parsedUrl = this.urlParser.parseUrl(query)
+        let modelName: string = parsedUrl.url.replace('/', '')
         let mongooseQuery = this.rawQueryParser(parsedUrl.query)
 
         if (this.models.has(modelName)) {
-
             let Model = this.models.get(modelName)
-
-
-            return await Model[method]({
-                user,
-                body: req.body,
-                filter: mongooseQuery
-            })
-
+            return await this.exec(user, Model, method, mongooseQuery.filter, body)
         }
-    }
-
-    private roleControl(user: mongoose.Document, body: object, method: string, Model: mongoose.Model<any>): boolean {
-        let res = true
-        let paths = Model.prototype.schema.paths
-
-        console.log(body);
-
-        return false
-    }
-
-    private filter(user: mongoose.Document, Model: mongoose.Model<any>, model: mongoose.Document): mongoose.Document {
-
     }
 }
 
