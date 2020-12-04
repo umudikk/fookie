@@ -4,15 +4,17 @@ const schema = new mongoose.Schema({
     name: {
         type: String,
         auth: {
-            get: ["everybody"],
+            get: ["everybody", "admin"],
             post: ["admin"],
+            delete: ['admin'],
         }
     },
     mail: {
         type: String,
         auth: {
-            get: ["self"],
+            get: ["everybody"],
             post: ["admin"],
+            delete: ['admin'],
         }
     },
     password: {
@@ -20,8 +22,11 @@ const schema = new mongoose.Schema({
         auth: {
             get: ["nobody"],
             post: ["admin"],
+            delete: ['admin'],
         }
     },
+}, {
+    versionKey: false // You should be aware of the outcome after set to false
 });
 
 export default schema

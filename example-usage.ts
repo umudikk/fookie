@@ -19,7 +19,7 @@ import * as bodyParser from 'body-parser'
     API.newRole('admin', (user, model) => {
         return user.type == 'admin'
     })
-    API.newRole('everyone', (user, model) => {
+    API.newRole('everybody', (user, model) => {
         return true
     })
     API.newRole('nobody', (user, model) => {

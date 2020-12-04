@@ -50,56 +50,77 @@ export default class API {
     }
 
     async setModel(modelName: string, schema: mongoose.Schema<any>) {
-
         let roles = this.roles
         schema.plugin(this.paginate)
 
         schema.statics.GET = async function ({ user, filter }) {
-            let tmp = await this.findOne(filter)
-            return tmp
+            let document = await this.findOne(filter)
+            return document.filter(user)
         }
 
         schema.statics.POST = async function ({ user, body }) {
-            let model = new this(body)
-            if (model.checkAuth(user, body, 'post')) {
-                let tmp = await model.save()
+            let document = new this(body)
+            if (document.checkAuth(user, 'post', body)) {
+                let tmp = await document.save()
                 return tmp
             } else {
                 return false
             }
-
-
         }
 
-        schema.statics.DELETE = async function ({ filter }) {
-            return await this.deleteOne(filter)
-        }
-
-        schema.statics.PATCH = async function ({ filter, body }) {
-            let tmp = await this.findOne(filter)
-            for (let i in body) {
-                tmp[i] = body[i]
+        schema.statics.DELETE = async function ({ user, filter }) {
+            let document = await this.findOne(filter)
+            let obj = document.toObject()
+            delete obj._id
+            if (document.checkAuth(user, 'delete', obj)) {
+                return await document.remove()
             }
-            return await tmp.save()
+            return false
         }
 
-        schema.statics.PAGINATION = async function ({ filter, body }) {
+        schema.statics.PATCH = async function ({ user, filter, body }) {
+            let document = await this.findOne(filter)
+            let obj = document.toObject()
+            delete obj._id
+            if (document.checkAuth(user, 'patch', obj)) {
+                for (let i in body) {
+                    document[i] = body[i]
+                }
+                return await document.save()
+            }
+
+        }
+
+        schema.statics.PAGINATION = async function ({ user, filter, body }) {
             return this.paginate(filter, body)
         }
 
 
         schema.methods.filter = function (user) {
-            let paths = this.model.prototype.schema.paths
-            console.log(paths);
+            let objectDocument = this.toObject()
+            let keys = Object.keys(objectDocument)
+            keys = keys.filter(key => key != '_id')
+
+            for (let i in keys) {
+                let requiredRoles = this.schema.tree[keys[i]].auth['get']
+                if (requiredRoles.every(role => roles.has(role))) {
+                    let canAccess = requiredRoles.some(role => roles.get(role)(user, objectDocument))
+                    canAccess ? console.log('canAcess yes') : delete objectDocument[keys[i]]            
+                }
+                else {
+                   throw new Error('invalid roles')
+
+                }
+            }
+            return objectDocument
         }
-        schema.methods.checkAuth = function (user, model, method: string): boolean {
+
+        schema.methods.checkAuth = function (user, method: string, model): boolean {
             let keys = Object.keys(model)
             for (let i in keys) {
-                console.log(keys[i]);
-
-                let str = this.schema.tree[keys[i]].auth[method]
-                if (str.every(i => roles.has(i))) {
-                    return str.every(i => roles.get(i)(user, model))
+                let requiredRoles = this.schema.tree[keys[i]].auth[method]
+                if (requiredRoles.every(i => roles.has(i))) {
+                    return requiredRoles.some(i => roles.get(i)(user, model))
                 }
                 else {
                     return false
