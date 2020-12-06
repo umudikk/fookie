@@ -1,15 +1,12 @@
 import Api from './src'
-import User from './src/schemas/User'
-import Inventory from './src/schemas/Inventory'
+import User from './schemas/User'
+import Inventory from './schemas/Inventory'
 import * as express from 'express'
 import * as bodyParser from 'body-parser'
 
 (async () => {
     const app = express()
-    const API = new Api({
-        PRIVATE_KEY: process.env.PRIVATE_KEY || 'secret_key',
-
-    })
+    const API = new Api({})
 
     app.use(bodyParser.urlencoded({ extended: false }))
     app.use(bodyParser.json())
