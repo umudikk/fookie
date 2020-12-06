@@ -1,5 +1,4 @@
 # Auto generated RestAPI from Mongoose Schema
-## seyitumutbicer@gmail.com
 ### Does NOT ready to product.
 
 ```javascript
