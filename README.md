@@ -1,82 +1,43 @@
-# Auto Generated Nodejs RestAPI from Mongoose Model and Auth Object
+# Auto generated RestAPI from Mongoose Schema
+## seyitumutbicer@gmail.com
+### Does NOT ready to product.
 
 ```javascript
- const API = require('./src/api')
- const User = require('./models/User.js')
- const Inventory = require('./models/Inventory.js')
+import Api from './src'
+import User from './src/schemas/User'
+import Inventory from './src/schemas/Inventory'
+import * as express from 'express'
+import * as bodyParser from 'body-parser'
 
- API.connect({ url: 'mongodburl' })
+(async () => {
+    const app = express()
+    const API = new Api({})
 
- API.setRequester(User)
+    app.use(bodyParser.urlencoded({ extended: false }))
+    app.use(bodyParser.json())
 
- API.newRole('admin', (User, model) => {
-     return User.type == 'admin'
- })
- API.newRole('everyone', (User, model) => {
-     return true
- })
- API.newRole('nobody', (User, model) => {
-     return false
- })
- API.newRole('owner', (User, model) => {
-     return User._id == model.owner ? true : false
- })
+    await API.connect('mongodb://localhost:27017/API', {})
 
- API.setModel('User', {
-     model: User,
-     auth: {
-         post: ["admin"],
-         get: ["everyone"],
-         delete: ["admin"],
+    API.setRequester(User)
 
-     }
- })
- API.setModel('Inventory', {
-     model: Inventory,
-     auth: {
-         post: ["system"],
-         get: ["everyone"],
-         delete: ["admin", "system"],
-         giveItem: ['system', "admin"]
-     }
- })
+    //everybody and nobody static roles.You dont need to define.
+    // define custom roles    
+    API.newRole('admin', (user, document) => {
+        return user.type == 'admin'
+    })
 
- API.on('run', async(user, query) => {
+    API.newRole('owner', (user, document) => {
+        return user._id == document.owner ? true : false
+    })
 
-     API.run(user, query)
- })
+    //make model from your schemas
+    API.setModel('User', User)
+    API.setModel('Inventory', Inventory)
 
- API.listen(8080)
+    app.use(API.expressMiddleware)
 
-
- let res0 = API.run({ _id: 0, name: 'umut', type: "admin" }, {
-     method: 'get',
-     query: 'User/0/Inventory/items',
- })
-
- let res1 = await API.run({ _id: 0, name: 'umut', type: "admin" }, {
-     method: 'delete',
-     query: '/User/0/Inventory/0',
- })
-
- let res2 = await API.run({ _id: 0, name: 'umut', type: "admin" }, {
-     method: 'giveItem',
-     query: '/User/0/inventory',
-     data: {
-         key: "money",
-         amount: 500
-     }
- })
-
- let res3 = await API.run({ _id: 0, name: 'umut', type: "admin" }, {
-     method: 'get',
-     query: 'User/0/inventory',
- })
-
- console.log(res0);
- console.log(res1);
- console.log(res2);
- console.log(res3);
+    app.listen(3000)
+})()
 
 ```
  

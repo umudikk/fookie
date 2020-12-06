@@ -4,9 +4,10 @@ const schema = new mongoose.Schema({
     name: {
         type: String,
         auth: {
-            get: ["everybody", "admin"],
+            get: ["everybody"],
             post: ["admin"],
             delete: ['admin'],
+            patch: ['admin'],
         }
     },
     mail: {
@@ -15,6 +16,7 @@ const schema = new mongoose.Schema({
             get: ["everybody"],
             post: ["admin"],
             delete: ['admin'],
+            patch: ['admin'],
         }
     },
     password: {
@@ -23,6 +25,7 @@ const schema = new mongoose.Schema({
             get: ["nobody"],
             post: ["admin"],
             delete: ['admin'],
+            patch: ['nobody'],
         }
     },
 }, {

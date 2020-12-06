@@ -6,7 +6,7 @@ import * as rawQueryParser from 'api-query-params'
 import * as mongoosePaginate from 'mongoose-paginate-v2'
 import { EventEmitter } from 'events'
 
-export default class API {
+export default class API extends EventEmitter {
     urlParser
     rawQueryParser
     connection
@@ -16,7 +16,7 @@ export default class API {
     paginate
 
     constructor(options) {
-        // super()
+        super()
         this.connection = null
         this.requester = null
         this.models = new Map()
@@ -24,25 +24,19 @@ export default class API {
         this.urlParser = queryString
         this.rawQueryParser = rawQueryParser
         this.paginate = mongoosePaginate
-    }
 
-    async listen(port) {
-        console.log(port + " listening...");
+        this.roles.set('everybody', () => {
+            return true
+        })
+        this.roles.set('nobody', () => {
+            return false
+        })
     }
 
     async connect(url: string, config: object = {}) {
         this.connection = await mongoose.connect(url, config)
         return this.connection
 
-    }
-
-    async parseRequester(req) {
-        let user = await this.requester.findOne(req.body)
-        return user != null ? { user } : false
-    }
-
-    async setRequester(model: mongoose.Schema<any>) {
-        this.requester = model
     }
 
     async newRole(roleName: String, roleFunction: Function) {
@@ -55,7 +49,12 @@ export default class API {
 
         schema.statics.GET = async function ({ user, filter }) {
             let document = await this.findOne(filter)
-            return document.filter(user)
+            if (document instanceof mongoose.Model) {
+                return document.filter(user)
+            } else {
+                return false
+            }
+
         }
 
         schema.statics.POST = async function ({ user, body }) {
@@ -70,24 +69,36 @@ export default class API {
 
         schema.statics.DELETE = async function ({ user, filter }) {
             let document = await this.findOne(filter)
-            let obj = document.toObject()
-            delete obj._id
-            if (document.checkAuth(user, 'delete', obj)) {
-                return await document.remove()
+            if (document instanceof mongoose.Model) {
+                let obj = document.toObject()
+                delete obj._id
+                if (document.checkAuth(user, 'delete', obj)) {
+                    return await document.remove()
+                } else {
+                    return false
+                }
+            } else {
+                return false
             }
-            return false
         }
 
         schema.statics.PATCH = async function ({ user, filter, body }) {
             let document = await this.findOne(filter)
-            let obj = document.toObject()
-            delete obj._id
-            if (document.checkAuth(user, 'patch', obj)) {
-                for (let i in body) {
-                    document[i] = body[i]
+            if (document instanceof mongoose.Model) {
+                let obj = document.toObject()
+                delete obj._id
+                if (document.checkAuth(user, 'patch', obj)) {
+                    for (let i in body) {
+                        document[i] = body[i]
+                    }
+                    return await document.save()
+                } else {
+                    return false
                 }
-                return await document.save()
+            } else {
+                return false
             }
+
 
         }
 
@@ -105,22 +116,22 @@ export default class API {
                 let requiredRoles = this.schema.tree[keys[i]].auth['get']
                 if (requiredRoles.every(role => roles.has(role))) {
                     let canAccess = requiredRoles.some(role => roles.get(role)(user, objectDocument))
-                    canAccess ? console.log('canAcess yes') : delete objectDocument[keys[i]]            
+                    canAccess ? console.log('canAcess yes') : delete objectDocument[keys[i]]
                 }
                 else {
-                   throw new Error('invalid roles')
+                    throw new Error('invalid roles')
 
                 }
             }
             return objectDocument
         }
 
-        schema.methods.checkAuth = function (user, method: string, model): boolean {
-            let keys = Object.keys(model)
+        schema.methods.checkAuth = function (user, method: string, body): boolean {
+            let keys = Object.keys(body)
             for (let i in keys) {
                 let requiredRoles = this.schema.tree[keys[i]].auth[method]
                 if (requiredRoles.every(i => roles.has(i))) {
-                    return requiredRoles.some(i => roles.get(i)(user, model))
+                    return requiredRoles.some(i => roles.get(i)(user, body))
                 }
                 else {
                     return false
@@ -132,15 +143,14 @@ export default class API {
         this.models.set(modelName, model)
     }
 
-
     async exec(user, Model, method, filter, body) {
-
         return await Model[method]({
             user,
             body,
             filter: filter
         })
     }
+
     async run(user, method: string, query: string, body: object) {
         let parsedUrl = this.urlParser.parseUrl(query)
         let modelName: string = parsedUrl.url.replace('/', '')
@@ -151,5 +161,6 @@ export default class API {
             return await this.exec(user, Model, method, mongooseQuery.filter, body)
         }
     }
-}
 
+
+}
