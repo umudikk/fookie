@@ -8,6 +8,41 @@ import User from './src/schemas/User'
 import Inventory from './src/schemas/Inventory'
 import * as express from 'express'
 import * as bodyParser from 'body-parser'
+import * as mongoose from 'mongoose'
+
+
+const Blog = new mongoose.Schema({
+    title: {
+        type: String,
+        auth: {
+            get: ["everybody"],
+            post: ["editor"],
+            delete: ['admin'],
+            patch: ['editor','admin'],
+        }
+    },
+    text:{
+        type: String,
+        auth: {
+            get: ["everybody"],
+            post: ["editor"],
+            delete: ['admin'],
+            patch: ['editor','admin'],
+        }
+    },
+    editor:{
+        type: { type: Schema.Types.ObjectId, ref: 'User' }
+        auth: {
+            get: ["everybody"],
+            post: ["admin"],
+            delete: ['nobody'],
+            patch: ['nobody'],
+        }
+    },
+
+}, {
+    versionKey: false
+});
 
 (async () => {
     const app = express()
@@ -24,13 +59,13 @@ import * as bodyParser from 'body-parser'
         return user.type == 'admin'
     })
 
-    API.newRole('owner', (user, document) => {
-        return user._id == document.owner ? true : false
+    API.newRole('editor', (user, document) => {
+        return user._id == document.editor ? true : false
     })
 
     //make model from your schemas
-    API.setModel('User', User)
-    API.setModel('Inventory', Inventory)
+    API.setModel('Blog', Blog)
+
 
     app.use(async (req, res)=> {
         let user = { id: 0, type: 'admin', name: 'umut' }
@@ -43,3 +78,7 @@ import * as bodyParser from 'body-parser'
 
 ```
  
+
+
+
+
