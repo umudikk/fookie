@@ -18,8 +18,6 @@ import * as bodyParser from 'body-parser'
 
     await API.connect('mongodb://localhost:27017/API', {})
 
-    API.setRequester(User)
-
     //everybody and nobody static roles.You dont need to define.
     // define custom roles    
     API.newRole('admin', (user, document) => {
@@ -34,7 +32,11 @@ import * as bodyParser from 'body-parser'
     API.setModel('User', User)
     API.setModel('Inventory', Inventory)
 
-    app.use(API.expressMiddleware)
+    app.use(async (req, res)=> {
+        let user = { id: 0, type: 'admin', name: 'umut' }
+        let result = await API.run(user, req.method, req.originalUrl, req.body)
+        res.json(result)
+    })
 
     app.listen(3000)
 })()
