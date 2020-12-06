@@ -1,7 +1,5 @@
 import * as mongoose from 'mongoose'
 import * as queryString from "query-string"
-//import * as urlParser from 'url-parse'
-import * as urlParser from 'query-string'
 import * as rawQueryParser from 'api-query-params'
 import * as mongoosePaginate from 'mongoose-paginate-v2'
 import { EventEmitter } from 'events'
