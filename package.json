@@ -1,15 +1,14 @@
 {
-    "name": "api",
-    "version": "1.0.0",
-    "description": "",
-    "main": "index",
-    "scripts": {
-        "serve": "ts-node ./src/index.ts",
-        "test": "ts-node example-usage.ts",
-        "fake": "ts-node ./test/fakeData.ts"
+    "publishConfig": {
+        "registry": "https://npm.pkg.github.com"
     },
+    "name": "@umudikk/fookie",
+    "version": "1.0.2",
+    "description": "Auto-generate Restful API from mongoose schema.",
+    "main": "index.js",
+    "scripts": {},
     "author": "umudik",
-    "license": "ISC",
+    "license": "MIT",
     "dependencies": {
         "@types/mongoose": "^5.10.2",
         "@types/query-string": "^6.3.0",
@@ -24,5 +23,17 @@
         "mongoose-query-parser": "^1.1.9",
         "query-string": "^6.13.7",
         "url-parse": "^1.4.7"
-    }
+    },
+    "directories": {
+        "test": "test"
+    },
+    "devDependencies": {},
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/umudikk/fookie.git"
+    },
+    "bugs": {
+        "url": "https://github.com/umudikk/fookie/issues"
+    },
+    "homepage": "https://github.com/umudikk/fookie#readme"
 }

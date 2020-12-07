@@ -41,7 +41,7 @@ export default class API extends EventEmitter {
         this.roles.set(roleName, roleFunction)
     }
 
-    async setModel(modelName: string, schema: mongoose.Schema<any>) {
+    async setModel(modelName: string, schema:mongoose.Schema) {
         let roles = this.roles
         schema.plugin(this.paginate)
 
