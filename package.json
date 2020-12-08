@@ -1,6 +1,6 @@
 {
     "publishConfig": {
-        "registry": "https://npm.pkg.github.com"
+        "registry": "https://npm.pkg.github.com/umudikk"
     },
     "name": "@umudikk/fookie",
     "version": "1.0.2",
