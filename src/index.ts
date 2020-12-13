@@ -3,6 +3,10 @@ import * as queryString from "query-string"
 import * as rawQueryParser from 'api-query-params'
 import * as mongoosePaginate from 'mongoose-paginate-v2'
 import { EventEmitter } from 'events'
+import * as express from 'express'
+import * as jwt from 'jsonwebtoken'
+import { sha512 } from 'js-sha512';
+import * as bodyParser from 'body-parser'
 
 export default class API extends EventEmitter {
     urlParser
@@ -11,23 +15,63 @@ export default class API extends EventEmitter {
     requester
     models
     roles
+    effects
     paginate
+    app
+    jwt
+    config
 
-    constructor(options) {
+    constructor(config) {
         super()
         this.connection = null
-        this.requester = null
         this.models = new Map()
         this.roles = new Map()
+        this.effects = new Map()
         this.urlParser = queryString
         this.rawQueryParser = rawQueryParser
         this.paginate = mongoosePaginate
+        this.app = express()
+        this.jwt = jwt
+        this.config = config
 
+
+        //LOGIN REGISTER
+        this.app.post('/login', (req, res) => {
+            let mail = req.body.mail
+            let password = req.body.password
+
+            if (this.models.has('User')) {
+                let Model = this.models.get('User')
+                let user = Model.findOne({ mail, password: sha512(password) })
+                console.log(sha512(user.password))
+
+                if (user instanceof mongoose.Model) {
+                    let token = jwt.sign(user._id, this.config.secret);
+                    res.json({ token })
+                }
+            }
+
+            let token = jwt.sign({ foo: 'bar' }, 'shhhhh')
+            res.json({ token })
+        })
+
+        this.app.post('/register', (req, res) => {
+            console.log('register');
+        })
+
+        //CONST ROLES
         this.roles.set('everybody', () => {
             return true
         })
         this.roles.set('nobody', () => {
             return false
+        })
+        this.app.use(bodyParser.urlencoded({ extended: false }))
+        this.app.use(bodyParser.json())
+        this.app.use(async (req, res) => {
+            let user = { id: 0, type: 'admin', name: 'umut' }
+            let result = await this.run(user, req.method, req.originalUrl, req.body)
+            res.json(result)
         })
     }
 
@@ -37,12 +81,16 @@ export default class API extends EventEmitter {
 
     }
 
-    async newRole(roleName: String, roleFunction: Function) {
-        this.roles.set(roleName, roleFunction)
+    async newRole(name: String, role: Function) {
+        this.roles.set(name, role)
     }
 
     async setModel(modelName: string, schema: mongoose.Schema) {
         let roles = this.roles
+        let models = this.models
+        let config = this.config
+        let effects = this.effects
+
         schema.plugin(this.paginate)
 
         schema.statics.GET = async function ({ user, filter }) {
@@ -108,14 +156,13 @@ export default class API extends EventEmitter {
             keys = keys.filter(key => key != '_id')
 
             for (let i in keys) {
-                let requiredRoles = this.schema.tree[keys[i]].auth['get']
+                let requiredRoles = this.schema.tree[keys[i]].fookie.get.auth
                 if (requiredRoles.every(role => roles.has(role))) {
                     let canAccess = requiredRoles.some(role => roles.get(role)(user, objectDocument))
                     canAccess ? console.log('canAcess yes') : delete objectDocument[keys[i]]
                 }
                 else {
                     throw new Error('invalid roles')
-
                 }
             }
             return objectDocument
@@ -124,7 +171,7 @@ export default class API extends EventEmitter {
         schema.methods.checkAuth = function (user, method: string, body): boolean {
             let keys = Object.keys(body)
             for (let i in keys) {
-                let requiredRoles = this.schema.tree[keys[i]].auth[method]
+                let requiredRoles = this.schema.tree[keys[i]].fookie[method].auth
                 if (requiredRoles.every(i => roles.has(i))) {
                     return requiredRoles.some(i => roles.get(i)(user, body))
                 }
@@ -134,22 +181,50 @@ export default class API extends EventEmitter {
             }
         }
 
+        schema.statics.calcEffects = function (user, method, document) {
+            if (document instanceof mongoose.Model) {
+                document = document.toObject()
+                delete document._id
+                let keys = Object.keys(document)
+                console.log(document);
+                
+                for (let i in keys) {
+                    console.log(document.schema.tree[keys[i]].fookie[method]['effect']);
+                    let requiredEffects = document.schema.tree[keys[i]].fookie[method].effect
+                 
+
+                    if (requiredEffects.every(e => effects.has(e))) {
+                        requiredEffects.forEach(effect => {
+                            try {
+                                effects[effect](user, this, models, config)
+                            }
+                            catch (error) {
+
+                            }
+                        });
+                    }
+                }
+            }
+        }
+
         let model = mongoose.model(modelName, schema);
         this.models.set(modelName, model)
+    }
+
+    async setEffect(name: string, effect: (user: mongoose.Document, document: mongoose.Document, Models: Array<mongoose.Model<any>>, config: Object) => void) {
+        this.effects.set(name, effect)
     }
 
     async exec(user, Model, method, filter, body) {
         let result = await Model[method]({
             user,
             body,
-            filter: filter
+            filter
         })
-
-        this.emit('notification', result)
-        return
-
-
-
+        if (result) {
+            Model.calcEffects(user, method, result)
+        }
+        return result
     }
 
     async run(user, method: string, query: string, body: object) {
@@ -163,5 +238,12 @@ export default class API extends EventEmitter {
         }
     }
 
+    listen(port) {
+        this.app.listen(port, () => {
+            console.log(`[API] ${port} is listening...`);
+
+        })
+
+    }
 
 }

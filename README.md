@@ -5,9 +5,7 @@
 import Api from './src'
 import User from './src/schemas/User'
 import Inventory from './src/schemas/Inventory'
-import * as express from 'express'
-import * as bodyParser from 'body-parser'
-import * as mongoose from 'mongoose'
+
 
 
 const Blog = new mongoose.Schema({
