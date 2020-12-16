@@ -70,7 +70,7 @@ export default class API extends EventEmitter {
         this.app.use(bodyParser.json())
         this.app.use(async (req, res) => {
             let user = { id: 0, type: 'admin', name: 'umut' }
-            let result = await this.run(user, req.method, req.originalUrl, req.body)
+            let result = await this.run(user, req.method.toLowerCase(), req.originalUrl, req.body)
             res.json(result)
         })
     }
@@ -93,7 +93,7 @@ export default class API extends EventEmitter {
 
         schema.plugin(this.paginate)
 
-        schema.statics.GET = async function ({ user, filter }) {
+        schema.statics.get = async function ({ user, filter }) {
             let document = await this.findOne(filter)
             if (document instanceof mongoose.Model) {
                 return document.filter(user)
@@ -102,7 +102,7 @@ export default class API extends EventEmitter {
             }
         }
 
-        schema.statics.POST = async function ({ user, body }) {
+        schema.statics.post = async function ({ user, body }) {
             let document = new this(body)
             if (document.checkAuth(user, 'post', body)) {
                 let tmp = await document.save()
@@ -112,7 +112,7 @@ export default class API extends EventEmitter {
             }
         }
 
-        schema.statics.DELETE = async function ({ user, filter }) {
+        schema.statics.delete = async function ({ user, filter }) {
             let document = await this.findOne(filter)
             if (document instanceof mongoose.Model) {
                 let obj = document.toObject()
@@ -127,7 +127,7 @@ export default class API extends EventEmitter {
             }
         }
 
-        schema.statics.PATCH = async function ({ user, filter, body }) {
+        schema.statics.patch = async function ({ user, filter, body }) {
             let document = await this.findOne(filter)
             if (document instanceof mongoose.Model) {
                 let obj = document.toObject()
@@ -145,7 +145,7 @@ export default class API extends EventEmitter {
             }
         }
 
-        schema.statics.PAGINATION = async function ({ user, filter, body }) {
+        schema.statics.pagination = async function ({ user, filter, body }) {
             return this.paginate(filter, body)
         }
 
@@ -159,9 +159,8 @@ export default class API extends EventEmitter {
                 let requiredRoles = this.schema.tree[keys[i]].fookie.get.auth
                 if (requiredRoles.every(role => roles.has(role))) {
                     let canAccess = requiredRoles.some(role => roles.get(role)(user, objectDocument))
-                    canAccess ? console.log('canAcess yes') : delete objectDocument[keys[i]]
-                }
-                else {
+                    canAccess ? null : delete objectDocument[keys[i]]
+                } else {
                     throw new Error('invalid roles')
                 }
             }
@@ -174,8 +173,7 @@ export default class API extends EventEmitter {
                 let requiredRoles = this.schema.tree[keys[i]].fookie[method].auth
                 if (requiredRoles.every(i => roles.has(i))) {
                     return requiredRoles.some(i => roles.get(i)(user, body))
-                }
-                else {
+                } else {
                     return false
                 }
             }
@@ -186,21 +184,12 @@ export default class API extends EventEmitter {
                 document = document.toObject()
                 delete document._id
                 let keys = Object.keys(document)
-                console.log(document);
-                
-                for (let i in keys) {
-                    console.log(document.schema.tree[keys[i]].fookie[method]['effect']);
-                    let requiredEffects = document.schema.tree[keys[i]].fookie[method].effect
-                 
 
+                for (let i in keys) {
+                    let requiredEffects = this.schema.path(keys[i]).options['fookie'][method].effect
                     if (requiredEffects.every(e => effects.has(e))) {
                         requiredEffects.forEach(effect => {
-                            try {
-                                effects[effect](user, this, models, config)
-                            }
-                            catch (error) {
-
-                            }
+                            effects.get(effect)(user, document)
                         });
                     }
                 }

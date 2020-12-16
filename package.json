@@ -3,7 +3,7 @@
         "registry": "https://npm.pkg.github.com/umudikk"
     },
     "name": "@umudikk/fookie",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "description": "Auto-generate Restful API from mongoose schema.",
     "main": "./src/index.ts",
     "scripts": {},

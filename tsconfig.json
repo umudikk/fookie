@@ -65,7 +65,7 @@
     },
     "include": [
         "**/*.ts", "test/fakeData.ts"
-    ],
+, "src/index.ts", "examples/example1/index.ts"    ],
     "exclude": [
         "node_modules"
     ]
