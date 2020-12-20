@@ -7,6 +7,11 @@ import * as express from 'express'
 import * as jwt from 'jsonwebtoken'
 import { sha512 } from 'js-sha512';
 import * as bodyParser from 'body-parser'
+import * as cachegoose from 'cachegoose'
+import { Method } from './types/index'
+import { hasFields, response } from './helpers'
+const methods = ['get', 'post', 'delete', 'patch', 'put', 'option']
+
 
 export default class API extends EventEmitter {
     urlParser
@@ -20,6 +25,7 @@ export default class API extends EventEmitter {
     app
     jwt
     config
+    routines
 
     constructor(config) {
         super()
@@ -27,6 +33,7 @@ export default class API extends EventEmitter {
         this.models = new Map()
         this.roles = new Map()
         this.effects = new Map()
+        this.routines = new Map()
         this.urlParser = queryString
         this.rawQueryParser = rawQueryParser
         this.paginate = mongoosePaginate
@@ -43,7 +50,6 @@ export default class API extends EventEmitter {
             if (this.models.has('User')) {
                 let Model = this.models.get('User')
                 let user = Model.findOne({ mail, password: sha512(password) })
-                console.log(sha512(user.password))
 
                 if (user instanceof mongoose.Model) {
                     let token = jwt.sign(user._id, this.config.secret);
@@ -56,7 +62,7 @@ export default class API extends EventEmitter {
         })
 
         this.app.post('/register', (req, res) => {
-            console.log('register');
+
         })
 
         //CONST ROLES
@@ -69,9 +75,13 @@ export default class API extends EventEmitter {
         this.app.use(bodyParser.urlencoded({ extended: false }))
         this.app.use(bodyParser.json())
         this.app.use(async (req, res) => {
+            let method = methods.includes(req.method.toLowerCase()) ? req.method.toLowerCase() : req.body.method.toLowerCase()
+            let body = methods.includes(req.method.toLowerCase()) ? req.body : req.body.body
             let user = { id: 0, type: 'admin', name: 'umut' }
-            let result = await this.run(user, req.method.toLowerCase(), req.originalUrl, req.body)
+
+            let result = await this.run(user, method, req.originalUrl, body)
             res.json(result)
+
         })
     }
 
@@ -117,6 +127,7 @@ export default class API extends EventEmitter {
             if (document instanceof mongoose.Model) {
                 let obj = document.toObject()
                 delete obj._id
+                delete obj.__v
                 if (document.checkAuth(user, 'delete', obj)) {
                     return await document.remove()
                 } else {
@@ -132,6 +143,7 @@ export default class API extends EventEmitter {
             if (document instanceof mongoose.Model) {
                 let obj = document.toObject()
                 delete obj._id
+                delete obj.__v
                 if (document.checkAuth(user, 'patch', obj)) {
                     for (let i in body) {
                         document[i] = body[i]
@@ -179,17 +191,19 @@ export default class API extends EventEmitter {
             }
         }
 
-        schema.statics.calcEffects = function (user, method, document) {
+        schema.statics.calcEffects = async function (user, method, document) {
+            let ctx = this
             if (document instanceof mongoose.Model) {
                 document = document.toObject()
                 delete document._id
+                delete document.__v
                 let keys = Object.keys(document)
 
                 for (let i in keys) {
                     let requiredEffects = this.schema.path(keys[i]).options['fookie'][method].effect
                     if (requiredEffects.every(e => effects.has(e))) {
-                        requiredEffects.forEach(effect => {
-                            effects.get(effect)(user, document)
+                        requiredEffects.forEach(async (effect) => {
+                            await effects.get(effect)(user, document, ctx)
                         });
                     }
                 }
@@ -200,20 +214,28 @@ export default class API extends EventEmitter {
         this.models.set(modelName, model)
     }
 
-    async setEffect(name: string, effect: (user: mongoose.Document, document: mongoose.Document, Models: Array<mongoose.Model<any>>, config: Object) => void) {
+    async setEffect(name: string, effect: (user: mongoose.Document, document: mongoose.Document, Models: Array<mongoose.Model<any>>, config: Object) => Promise<any>) {
         this.effects.set(name, effect)
     }
 
-    async exec(user, Model, method, filter, body) {
-        let result = await Model[method]({
-            user,
-            body,
-            filter
-        })
-        if (result) {
-            Model.calcEffects(user, method, result)
+    async exec(user, Model, method = 'get', filter = {}, body = {}) {
+        if (hasFields(Model, body)) {
+            let result = await Model[method]({
+                user,
+                body,
+                filter
+            })
+            if (result) {
+                await Model.calcEffects(user, method, result)
+                return response(200, 'OK', result)
+            } else {
+                return response(400, 'Error', null)
+            }
+
+        } else {
+            return response(400, 'incorrent fields', null)
         }
-        return result
+
     }
 
     async run(user, method: string, query: string, body: object) {
@@ -221,10 +243,27 @@ export default class API extends EventEmitter {
         let modelName: string = parsedUrl.url.replace('/', '')
         let mongooseQuery = this.rawQueryParser(parsedUrl.query)
 
+
         if (this.models.has(modelName)) {
             let Model = this.models.get(modelName)
-            return await this.exec(user, Model, method, mongooseQuery.filter, body)
+            if (typeof Model[method] == 'function') {
+                console.log(`[${method}] Model:${modelName} |  Query:${query}`);
+                return await this.exec(user, Model, method, mongooseQuery.filter, body)
+            } else {
+                return false
+            }
+        } else {
+            return false
         }
+    }
+
+    async setRoutine(name, time, func) {
+        let API = this
+        let routine = setInterval(() => {
+            func(API)
+        }, time);
+
+        this.routines.set(name, routine)
     }
 
     listen(port) {

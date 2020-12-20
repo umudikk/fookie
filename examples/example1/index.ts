@@ -6,7 +6,7 @@ This example example makes an explosion
 
 
 
-(async() => {
+(async () => {
 
 
     const Player = new mongoose.Schema({
@@ -15,7 +15,7 @@ This example example makes an explosion
             fookie: {
                 get: {
                     auth: ["everybody"],
-                    effect: ['explode']
+                    effect: []
                 },
                 post: {
                     auth: ["everybody"],
@@ -27,26 +27,42 @@ This example example makes an explosion
                 },
                 patch: {
                     auth: ["everybody"],
-                    effect: ['explode']
+                    effect: []
                 }
             }
         },
-    }, {
-        versionKey: false
     });
 
-    const API = new Fookie({})
+    const API = new Fookie({
+        register: true,
+        login: true,
+        cache: 0,
+    })
     await API.connect('mongodb://localhost:27017/API', {})
+
+    // ROLES
 
     API.newRole('system', (user, document) => {
         return user.type == 'admin'
     })
 
-    API.setEffect('explode', (user, document) => {
+    //EFFECTS
+
+    API.setEffect('explode', async (user, document, ctx) => {
         console.log('big explode')
     })
 
+    //MODELS
+
     API.setModel('User', Player)
 
-    API.listen(3000)
+
+    //ROUTINES
+
+    API.setRoutine('backup', 1000 * 10, async (ctx) => {
+    
+
+    })
+
+    API.listen(9999)
 })()
