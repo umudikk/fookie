@@ -8,9 +8,9 @@ import * as jwt from 'jsonwebtoken'
 import { sha512 } from 'js-sha512';
 import * as bodyParser from 'body-parser'
 import * as cachegoose from 'cachegoose'
-import { Method } from './types/index'
+import { Method, Login } from './types/index'
 import { hasFields, response } from './helpers'
-const methods = ['get', 'post', 'delete', 'patch', 'put', 'option']
+import * as http from 'http'
 
 
 export default class API extends EventEmitter {
@@ -36,32 +36,43 @@ export default class API extends EventEmitter {
         this.routines = new Map()
         this.urlParser = queryString
         this.rawQueryParser = rawQueryParser
-        this.paginate = mongoosePaginate
         this.app = express()
-        this.jwt = jwt
         this.config = config
+        this.app.use(bodyParser.urlencoded({ extended: false }))
+        this.app.use(bodyParser.json())
 
 
         //LOGIN REGISTER
-        this.app.post('/login', (req, res) => {
-            let mail = req.body.mail
-            let password = req.body.password
+        this.app.post('/login', async (req, res) => {
+            let { email, password }: Login = req.body
 
             if (this.models.has('User')) {
                 let Model = this.models.get('User')
-                let user = Model.findOne({ mail, password: sha512(password) })
+                let user = await Model.findOne({ email, password: sha512(password) })
 
-                if (user instanceof mongoose.Model) {
-                    let token = jwt.sign(user._id, this.config.secret);
-                    res.json({ token })
+                if (user instanceof mongoose.Model && this.config.login) {
+                    const token = jwt.sign({ _id: user._id }, this.config.secret);
+                    res.json(response(200, { token, user:user.filter(user) }))
+                } else {
+                    res.json(response(401, {}))
                 }
             }
-
-            let token = jwt.sign({ foo: 'bar' }, 'shhhhh')
-            res.json({ token })
+            
         })
 
-        this.app.post('/register', (req, res) => {
+        this.app.post('/register', async (req, res) => {
+            let { email, password }: Login = req.body
+
+            if (this.models.has('User') && this.config.register) {
+                let Model = this.models.get('User')
+                let user = new Model({ email, password: sha512(password) })
+                user = await user.save()
+                if (user) {
+                    res.json(response(201, {}))
+                } else {
+                    res.json(response(503, {}))
+                }
+            }
 
         })
 
@@ -72,39 +83,48 @@ export default class API extends EventEmitter {
         this.roles.set('nobody', () => {
             return false
         })
-        this.app.use(bodyParser.urlencoded({ extended: false }))
-        this.app.use(bodyParser.json())
+
+
         this.app.use(async (req, res) => {
-            let method = methods.includes(req.method.toLowerCase()) ? req.method.toLowerCase() : req.body.method.toLowerCase()
-            let body = methods.includes(req.method.toLowerCase()) ? req.body : req.body.body
-            let user = { id: 0, type: 'admin', name: 'umut' }
+            console.log("ım here");
+            
+            let method = req.method.toLowerCase()
+            let body = req.body || {}
+            let token = req.headers.TOKEN || ''
+            let payload = {}
+            let user = {}
+
+            try {
+                payload = jwt.verify(token, this.config.secret) // deceded typeof _id
+                let User = this.models.get('User')
+                user = await User.findOne({ payload })
+            } catch (error) {
+            }
 
             let result = await this.run(user, method, req.originalUrl, body)
             res.json(result)
-
         })
     }
 
     async connect(url: string, config: object = {}) {
         this.connection = await mongoose.connect(url, config)
         return this.connection
-
     }
 
-    async newRole(name: String, role: Function) {
+    async role(name: String, role: Function) {
         this.roles.set(name, role)
     }
 
-    async setModel(modelName: string, schema: mongoose.Schema) {
+    async model(modelName: string, schema: mongoose.Schema) {
         let roles = this.roles
         let models = this.models
         let config = this.config
         let effects = this.effects
 
-        schema.plugin(this.paginate)
+        schema.plugin(mongoosePaginate)
 
-        schema.statics.get = async function ({ user, filter }) {
-            let document = await this.findOne(filter)
+        schema.statics.get = async function ({ user, query }) {
+            let document = await this.findOne(query)
             if (document instanceof mongoose.Model) {
                 return document.filter(user)
             } else {
@@ -122,13 +142,10 @@ export default class API extends EventEmitter {
             }
         }
 
-        schema.statics.delete = async function ({ user, filter }) {
-            let document = await this.findOne(filter)
+        schema.statics.delete = async function ({ user, query }) {
+            let document = await this.findOne(query)
             if (document instanceof mongoose.Model) {
-                let obj = document.toObject()
-                delete obj._id
-                delete obj.__v
-                if (document.checkAuth(user, 'delete', obj)) {
+                if (document.checkAuth(user, 'delete', document.toObject())) {
                     return await document.remove()
                 } else {
                     return false
@@ -138,13 +155,10 @@ export default class API extends EventEmitter {
             }
         }
 
-        schema.statics.patch = async function ({ user, filter, body }) {
-            let document = await this.findOne(filter)
+        schema.statics.patch = async function ({ user, query, body }) {
+            let document = await this.findOne(query)
             if (document instanceof mongoose.Model) {
-                let obj = document.toObject()
-                delete obj._id
-                delete obj.__v
-                if (document.checkAuth(user, 'patch', obj)) {
+                if (document.checkAuth(user, 'patch', document.toObject())) {
                     for (let i in body) {
                         document[i] = body[i]
                     }
@@ -157,15 +171,21 @@ export default class API extends EventEmitter {
             }
         }
 
-        schema.statics.pagination = async function ({ user, filter, body }) {
-            return this.paginate(filter, body)
+        schema.statics.pagination = async function ({ user, query, body }) {
+            return this.paginate(query, body)
         }
 
+        schema.statics.options = async function ({ user, query, body }) {
+            return this.schema.paths
+        }
 
+        //HELPERS 
         schema.methods.filter = function (user) {
             let objectDocument = this.toObject()
+            delete objectDocument._id
+            delete objectDocument.__v
             let keys = Object.keys(objectDocument)
-            keys = keys.filter(key => key != '_id')
+           
 
             for (let i in keys) {
                 let requiredRoles = this.schema.tree[keys[i]].fookie.get.auth
@@ -180,11 +200,19 @@ export default class API extends EventEmitter {
         }
 
         schema.methods.checkAuth = function (user, method: string, body): boolean {
+            delete body._id
+            delete body.__v
             let keys = Object.keys(body)
             for (let i in keys) {
                 let requiredRoles = this.schema.tree[keys[i]].fookie[method].auth
                 if (requiredRoles.every(i => roles.has(i))) {
-                    return requiredRoles.some(i => roles.get(i)(user, body))
+                    try {
+                        return requiredRoles.some(i => roles.get(i)(user, body))
+                    } catch (error) {
+                        console.log(error)
+                        return false
+                    }
+
                 } else {
                     return false
                 }
@@ -214,26 +242,26 @@ export default class API extends EventEmitter {
         this.models.set(modelName, model)
     }
 
-    async setEffect(name: string, effect: (user: mongoose.Document, document: mongoose.Document, Models: Array<mongoose.Model<any>>, config: Object) => Promise<any>) {
+    async effect(name: string, effect: (user: mongoose.Document, document: mongoose.Document, ctx) => Promise<any>) {
         this.effects.set(name, effect)
     }
 
-    async exec(user, Model, method = 'get', filter = {}, body = {}) {
+    async exec(user, Model, method, query = {}, body = {}) {
         if (hasFields(Model, body)) {
             let result = await Model[method]({
                 user,
                 body,
-                filter
+                query
             })
             if (result) {
                 await Model.calcEffects(user, method, result)
-                return response(200, 'OK', result)
+                return response(200, result)
             } else {
-                return response(400, 'Error', null)
+                return response(400, null)
             }
 
         } else {
-            return response(400, 'incorrent fields', null)
+            return response(400, null)
         }
 
     }
@@ -243,21 +271,20 @@ export default class API extends EventEmitter {
         let modelName: string = parsedUrl.url.replace('/', '')
         let mongooseQuery = this.rawQueryParser(parsedUrl.query)
 
-
         if (this.models.has(modelName)) {
             let Model = this.models.get(modelName)
             if (typeof Model[method] == 'function') {
                 console.log(`[${method}] Model:${modelName} |  Query:${query}`);
                 return await this.exec(user, Model, method, mongooseQuery.filter, body)
             } else {
-                return false
+                return response(405, {})
             }
         } else {
-            return false
+            return response(404, {})
         }
     }
 
-    async setRoutine(name, time, func) {
+    async routine(name, time, func) {
         let API = this
         let routine = setInterval(() => {
             func(API)
@@ -271,7 +298,5 @@ export default class API extends EventEmitter {
             console.log(`[API] ${port} is listening...`);
 
         })
-
     }
-
 }
