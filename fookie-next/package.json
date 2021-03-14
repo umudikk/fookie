@@ -1,0 +1,27 @@
+{
+    "name": "appgen",
+    "version": "0.0.0",
+    "description": "This README would normally document whatever steps are necessary to get your application up and running.",
+    "main": "./src/index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://umudik@bitbucket.org/intesasoft/appgen.git"
+    },
+    "author": "",
+    "license": "ISC",
+    "homepage": "https://bitbucket.org/intesasoft/appgen#readme",
+    "dependencies": {
+        "body-parser": "^1.19.0",
+        "cors": "^2.8.5",
+        "express": "^4.17.1",
+        "js-sha512": "^0.8.0",
+        "jsonwebtoken": "^8.5.1",
+        "pg": "^8.5.1",
+        "query-string": "^6.13.8",
+        "sequelize": "^6.3.5",
+        "sequelize-querystring": "^0.10.0"
+    }
+}

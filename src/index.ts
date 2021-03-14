@@ -10,8 +10,7 @@ import * as bodyParser from 'body-parser'
 import * as cachegoose from 'cachegoose'
 import { Method, Login } from './types/index'
 import { hasFields, response } from './helpers'
-import * as http from 'http'
-
+import * as cors from 'cors'
 
 export default class API extends EventEmitter {
     urlParser
@@ -26,9 +25,12 @@ export default class API extends EventEmitter {
     jwt
     config
     routines
+    httpServer
+    io
 
     constructor(config) {
         super()
+        this.config = config
         this.connection = null
         this.models = new Map()
         this.roles = new Map()
@@ -36,10 +38,12 @@ export default class API extends EventEmitter {
         this.routines = new Map()
         this.urlParser = queryString
         this.rawQueryParser = rawQueryParser
+
         this.app = express()
-        this.config = config
+        this.app.use(cors())
         this.app.use(bodyParser.urlencoded({ extended: false }))
         this.app.use(bodyParser.json())
+
 
 
         //LOGIN REGISTER
@@ -52,12 +56,12 @@ export default class API extends EventEmitter {
 
                 if (user instanceof mongoose.Model && this.config.login) {
                     const token = jwt.sign({ _id: user._id }, this.config.secret);
-                    res.json(response(200, { token, user:user.filter(user) }))
+                    res.json(response(200, { token, user: user.filter(user) }))
                 } else {
                     res.json(response(401, {}))
                 }
             }
-            
+
         })
 
         this.app.post('/register', async (req, res) => {
@@ -84,10 +88,7 @@ export default class API extends EventEmitter {
             return false
         })
 
-
         this.app.use(async (req, res) => {
-            console.log("ım here");
-            
             let method = req.method.toLowerCase()
             let body = req.body || {}
             let token = req.headers.TOKEN || ''
@@ -98,8 +99,7 @@ export default class API extends EventEmitter {
                 payload = jwt.verify(token, this.config.secret) // deceded typeof _id
                 let User = this.models.get('User')
                 user = await User.findOne({ payload })
-            } catch (error) {
-            }
+            } catch (error) { }
 
             let result = await this.run(user, method, req.originalUrl, body)
             res.json(result)
@@ -180,15 +180,15 @@ export default class API extends EventEmitter {
         }
 
         //HELPERS 
-        schema.methods.filter = function (user) {
+        schema.methods.filter = function (user,method) {
             let objectDocument = this.toObject()
             delete objectDocument._id
             delete objectDocument.__v
             let keys = Object.keys(objectDocument)
-           
+
 
             for (let i in keys) {
-                let requiredRoles = this.schema.tree[keys[i]].fookie.get.auth
+                let requiredRoles = this.schema.tree[keys[i]].fookie[method].auth
                 if (requiredRoles.every(role => roles.has(role))) {
                     let canAccess = requiredRoles.some(role => roles.get(role)(user, objectDocument))
                     canAccess ? null : delete objectDocument[keys[i]]
