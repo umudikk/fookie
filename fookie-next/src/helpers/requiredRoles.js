@@ -1,5 +1,5 @@
 module.exports = function(model, body, method, selector) {
-    let methods = ['get', 'patch']
+    let methods = ['patch']
     if (!(methods.includes(method))) {
         return model.fookie[method][selector ? selector : "auth"]
 

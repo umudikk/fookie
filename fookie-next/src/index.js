@@ -22,15 +22,14 @@ class Fookie extends EventEmitter {
     paginate
     app
     jwt
-    config
+
     routines
     httpServer
     io
     sequelize
 
-    constructor(config) {
+    constructor(cb) {
         super()
-        this.config = config
         this.connection = null
         this.models = new Map()
         this.roles = new Map()
@@ -38,7 +37,7 @@ class Fookie extends EventEmitter {
         this.effects = new Map()
         this.routines = new Map()
         this.modifies = new Map()
-        this.store = new Set()
+        this.store = new Map()
         this.helpers = {
             calcEffects,
             check,
@@ -56,12 +55,12 @@ class Fookie extends EventEmitter {
         this.app.post('/login', async(req, res) => {
             let { email, password } = req.body
 
-            if (this.models.has('User')) {
-                let Model = this.models.get('User')
+            if (this.models.has('system_user')) {
+                let Model = this.models.get('system_user')
                 let user = await Model.findOne({ where: { email, password: sha512(password) } })
 
-                if (user instanceof Model && this.config.login) {
-                    const token = jwt.sign({ id: user.id }, this.config.secret);
+                if (user instanceof Model && this.store.get("login")) {
+                    const token = jwt.sign({ id: user.id }, this.store.get("secret"));
                     res.json(response(200, { token, user: user.filter(user, 'get') }))
                 } else {
                     res.json(response(401, {}))
@@ -72,7 +71,7 @@ class Fookie extends EventEmitter {
         this.app.post('/register', async(req, res) => {
             let { email, password } = req.body
 
-            if (this.models.has('User') && this.config.register) {
+            if (this.models.has('User') && this.store.get("register")) {
                 let Model = this.models.get('User')
                 let user = await Model.findOne({ email, password: sha512(password) })
                 if (user instanceof Model) {
@@ -98,7 +97,7 @@ class Fookie extends EventEmitter {
             let user = {}
 
             try {
-                payload = jwt.verify(token, this.config.secret) // deceded typeof _id
+                payload = jwt.verify(token, this.store.get("secret")) // deceded typeof _id
                 let User = this.models.get('User')
                 user = await User.findOne({ where: { payload } })
             } catch (error) {}
@@ -106,6 +105,7 @@ class Fookie extends EventEmitter {
             let result = await this.run(user, req, method, model, query, body)
             res.json(result)
         })
+        cb(this)
     }
 
 
@@ -115,14 +115,13 @@ class Fookie extends EventEmitter {
     }
 
     async rule(name, rule) {
-        this.roles.set(name, rule)
+        this.rules.set(name, rule)
     }
     async modify(name, modify) {
         this.modifies.set(name, modify)
     }
 
     async model(model) {
-        console.log(modelParser(model));
         let Model = this.sequelize.define(model.name, modelParser(model).schema)
         let ctx = this
         Model.get = async function({ query }) {
@@ -133,6 +132,7 @@ class Fookie extends EventEmitter {
         }
 
         Model.post = async function({ body }) {
+            console.log(1);
             let document = Model.build(body)
             return await document.save()
         }
@@ -199,9 +199,9 @@ class Fookie extends EventEmitter {
             console.log(`[${method}] Model:${modelName} |  Query:${query}`);
             if (check({ user, req, body, model, method, ctx: this })) {
                 let result = await model.model[method]({ user, body, query })
+                result = calcModify(({ user, model, result, method, ctx: this }))
                 calcEffects({ user, req, model, result, method, ctx: this })
-                return calcModify(({ user, model, result, method, ctx: this }))
-
+                return result
             }
         } else {
             return "Model yok veya Method desteklenmiyor."
@@ -265,27 +265,27 @@ class Fookie extends EventEmitter {
 
 
     async prepare() {
+
+        //MODELS
         let system_model = await this.model(require('./defaults/model/system_model.js'))
+        await this.model(require('./defaults/model/system_user.js'))
+        await this.model(require('./defaults/model/system_admin.js'))
+
+        //SYNC
         let models = await system_model.findAll()
         for (let m of models) {
-            console.log(m.schema.name + " SENKRONIZE EDILDI");
             let parsedModel = modelParser(m.schema)
-            console.log(parsedModel);
             this.model(parsedModel)
         }
 
+        //RULES
+        this.rule('has_fields', require('./defaults/rule/has_fields'))
+        this.rule('check_auth', require('./defaults/rule/check_auth'))
+
         //ROLES 
         this.role('everybody', require('./defaults/role/everybody'))
-        this.role('everybody', require('./defaults/role/nobody'))
+        this.role('nobody', require('./defaults/role/nobody'))
         this.role('system_admin', ({ user }) => {
-            return true
-        })
-
-        //RULES
-        this.rule('check_fields', ({ user }) => {
-            return true
-        })
-        this.rule('check_auth', ({ user }) => {
             return true
         })
 

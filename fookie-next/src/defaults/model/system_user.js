@@ -1,12 +1,19 @@
 module.exports = {
-    name: 'system_model',
+    name: 'system_user',
     schema: {
-        schema: {
-            type: "JSONB",
-            input: "json",
+        email: {
+            type: "STRING",
+            input: "text",
             read: ['everybody'],
             write: ['everybody'],
 
+
+        },
+        password: {
+            type: "STRING",
+            input: "password",
+            read: ['everybody'],
+            write: ['everybody'],
         },
     },
     fookie: {
@@ -23,18 +30,16 @@ module.exports = {
         patch: {
             auth: ["everybody"],
             rule: [],
-            modify: [],
-            effect: ['sync'],
+            modify: []
         },
         post: {
             rule: [],
             auth: ["everybody"],
-            effect: ['sync'],
             modify: []
         },
         delete: {
             rule: [],
-            auth: ["everybody"],
+            auth: ["system_admin"],
         },
         options: {
             auth: ["everybody"],

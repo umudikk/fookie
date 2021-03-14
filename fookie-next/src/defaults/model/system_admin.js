@@ -1,40 +1,41 @@
 module.exports = {
-    name: 'system_model',
+    name: 'system_admin',
     schema: {
-        schema: {
-            type: "JSONB",
-            input: "json",
+        system_user: {
+            type: "INTEGER",
+            relation: {
+                model: "system_user",
+                key: "id"
+            },
             read: ['everybody'],
-            write: ['everybody'],
+            write: ['system'],
 
         },
     },
     fookie: {
         get: {
-            auth: ["everybody"],
-            rule: [],
-            modify: []
-        },
-        getAll: {
-            auth: ["everybody"],
-            rule: [],
-            modify: []
-        },
-        patch: {
-            auth: ["everybody"],
             rule: [],
             modify: [],
-            effect: ['sync'],
+            auth: ["everybody"],
+        },
+        getAll: {
+            rule: [],
+            modify: [],
+            auth: ["everybody"],
+        },
+        patch: {
+            auth: ["system_admin"],
+            rule: [],
+            modify: []
         },
         post: {
             rule: [],
-            auth: ["everybody"],
-            effect: ['sync'],
+            auth: ["system"],
             modify: []
         },
         delete: {
             rule: [],
-            auth: ["everybody"],
+            auth: ["system_admin"],
         },
         options: {
             auth: ["everybody"],
