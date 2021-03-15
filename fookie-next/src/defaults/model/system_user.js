@@ -12,7 +12,7 @@ module.exports = {
         password: {
             type: "STRING",
             input: "password",
-            read: ['everybody'],
+            read: ['nobody'],
             write: ['everybody'],
         },
     },
@@ -35,7 +35,8 @@ module.exports = {
         post: {
             rule: [],
             auth: ["everybody"],
-            modify: []
+            modify: [],
+            before: ["password"]
         },
         delete: {
             rule: [],
@@ -44,6 +45,9 @@ module.exports = {
         options: {
             auth: ["everybody"],
             modify: []
+        },
+        random: {
+            auth: ["everybody"],
         }
     }
 }

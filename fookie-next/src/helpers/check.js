@@ -20,10 +20,8 @@ module.exports = function({ user, req, body, model, method, ctx }) {
         rules.push("has_fields")
         rules.push("check_auth")
     }
-
     if (rules.every(i => ctx.rules.has(i))) {
-        let isRulesOkey = rules.every(i => ctx.rules.get(i)({ user, req, body, model, method, ctx }))
-        return isRulesOkey
+        return rules.every(i => ctx.rules.get(i)({ user, req, body, model, method, ctx }))
     } else {
         throw Error('Missing role or rule')
     }

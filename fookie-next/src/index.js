@@ -12,6 +12,7 @@ const findRequiredRoles = require('./helpers/requiredRoles');
 const check = require('./helpers/check');
 const calcEffects = require('./helpers/calcEffect')
 const calcModify = require('./helpers/calcModify')
+const calcBefore = require('./helpers/calcBefore')
 
 class Fookie extends EventEmitter {
     connection
@@ -36,6 +37,7 @@ class Fookie extends EventEmitter {
         this.rules = new Map()
         this.effects = new Map()
         this.routines = new Map()
+        this.befores = new Map()
         this.modifies = new Map()
         this.store = new Map()
         this.helpers = {
@@ -105,7 +107,6 @@ class Fookie extends EventEmitter {
             let result = await this.run(user, req, method, model, query, body)
             res.json(result)
         })
-        cb(this)
     }
 
 
@@ -120,10 +121,12 @@ class Fookie extends EventEmitter {
     async modify(name, modify) {
         this.modifies.set(name, modify)
     }
+    async before(name, before) {
+        this.befores.set(name, before)
+    }
 
     async model(model) {
         let Model = this.sequelize.define(model.name, modelParser(model).schema)
-        let ctx = this
         Model.get = async function({ query }) {
             return await Model.findOne(query)
         }
@@ -132,7 +135,6 @@ class Fookie extends EventEmitter {
         }
 
         Model.post = async function({ body }) {
-            console.log(1);
             let document = Model.build(body)
             return await document.save()
         }
@@ -154,33 +156,8 @@ class Fookie extends EventEmitter {
             return await document.save()
         }
 
-        Model.pagination = async function({ user, query, body }) {
-
-        }
-
         Model.options = async function({ user, body }) {
-            let document = model.schema
-            let method = body.method || 'patch'
-            let r = {}
-            let res = {}
-
-
-            let requiredRoles = findRequiredRoles(model, document, method)
-            for (let i in keys) {
-
-                if (requiredRoles.every(role => this.roles.has(role))) {
-                    let canAccess = requiredRoles.some(role => this.roles.get(role)(user, document))
-                    if (canAccess) {
-                        res[keys[i]] = document[keys[i]]
-                    }
-                } else {
-                    throw new Error('invalid roles')
-                }
-            }
-            r.fields = res
-            r.fookie = model.fookie
-            return r
-
+            return model.schema
         }
 
         await this.sequelize.sync({ alter: true })
@@ -197,12 +174,13 @@ class Fookie extends EventEmitter {
         if (this.models.has(modelName) && typeof this.models.get(modelName).model[method] == 'function') {
             let model = this.models.get(modelName)
             console.log(`[${method}] Model:${modelName} |  Query:${query}`);
+            body = calcBefore({ user, model, body, method, ctx: this })
             if (check({ user, req, body, model, method, ctx: this })) {
                 let result = await model.model[method]({ user, body, query })
-                result = calcModify(({ user, model, result, method, ctx: this }))
+                result = calcModify({ user, model, result, method, ctx: this })
                 calcEffects({ user, req, model, result, method, ctx: this })
                 return result
-            }
+            } else {}
         } else {
             return "Model yok veya Method desteklenmiyor."
         }
@@ -254,7 +232,7 @@ class Fookie extends EventEmitter {
         })
         try {
             await this.sequelize.authenticate();
-            await this.prepare()
+            await this.prepareDefaults()
             console.log('Connection has been established successfully.');
 
 
@@ -263,8 +241,11 @@ class Fookie extends EventEmitter {
         }
     }
 
+    async prepare(cb) {
+        await cb(this)
+    }
 
-    async prepare() {
+    async prepareDefaults() {
 
         //MODELS
         let system_model = await this.model(require('./defaults/model/system_model.js'))
@@ -294,6 +275,9 @@ class Fookie extends EventEmitter {
 
         //MODIFY
         this.modify('filter', require('./defaults/modify/filter'))
+
+        //BEFORES
+        this.before('password', require('./defaults/before/password'))
     }
 
     listen(port) {

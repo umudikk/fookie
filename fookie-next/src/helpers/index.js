@@ -23,10 +23,13 @@ function response(status, data) {
 }
 
 function clear(document) {
-    delete document.id
-    delete document.updatedAt
-    delete document.createdAt
-    return document
+    let res = {}
+    for (let i in document) {
+        if (i == "id" || i == "updatedAt" || i == "createdAt") {} else {
+            res[i] = document[i]
+        }
+    }
+    return res
 }
 
 module.exports.hasFields = hasFields
