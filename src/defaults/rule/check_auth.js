@@ -12,7 +12,9 @@ module.exports = async function({ user, req, model, query, method, body, ctx }) 
 
     else {
         if (roles.every(e => ctx.roles.has(e))) {
-            let res = roles.some(async role => await ctx.roles.get(role)({ user, req, model, query, method, body, ctx }));
+            let res = roles.some(function(role) {
+                ctx.roles.get(role)({ user, req, model, query, method, body, ctx })
+            });
             return res
         } else {
             throw Error('Missing role')

@@ -13,12 +13,12 @@ module.exports = {
         schema: {
             type: "JSONB",
             input: "json",
-            read: ["nobody"]
+            read: ["system_admin"]
         },
         fookie: {
             type: "JSONB",
             input: "json",
-            read: ["nobody"]
+            read: ["system_admin"]
         },
     },
     fookie: {

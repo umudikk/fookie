@@ -59,24 +59,24 @@ class Fookie extends EventEmitter {
             let body = req.body.body || {}
             let model = req.body.model || ""
             let query = req.body.query || {}
-            let token = req.headers.TOKEN || ""
+            let token = req.headers.token || ""
 
             //auth
-            let payload = {}
+            let payload = { id: -1 }
             let user = {}
 
             try {
-                payload = jwt.verify(token, this.store.get("secret")) // deceded typeof _id
-                let User = this.models.get('User')
-                user = await User.findOne({ where: { payload } })
+                payload = jwt.verify(String(token), this.store.get("secret"))
             } catch (error) {}
+
+            let User = this.models.get('system_user').model
+            user = await User.findOne({ where: { id: 2 } })
 
             let result = await this.run(user, req, method, model, query, body)
             res.json(result)
+
         })
     }
-
-
 
     role(name, role) {
         this.roles.set(name, role)

@@ -4,8 +4,8 @@ module.exports = function({ user, ctx, model, body, method, result }) {
 
     if (filters.every(e => ctx.filters.has(e))) {
         let res = result
-        filters.forEach(m => {
-            res = ctx.filters.get(m)({ user, model, body, method, result: res, ctx })
+        filters.forEach(f => {
+            res = ctx.filters.get(f)({ user, model, body, method, result: res, ctx })
         });
         return res
     } else {
