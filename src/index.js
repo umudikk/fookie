@@ -12,6 +12,7 @@ const check = require('./helpers/check');
 const calcEffects = require('./helpers/calcEffect')
 const calcFilter = require('./helpers/calcFilter')
 const calcModify = require('./helpers/calcModify')
+var lodash = require('lodash');
 
 class Fookie extends EventEmitter {
     connection
@@ -30,6 +31,7 @@ class Fookie extends EventEmitter {
 
     constructor(cb) {
         super()
+        this.lodash = lodash
         this.connection = null
         this.models = new Map()
         this.roles = new Map()
@@ -147,11 +149,11 @@ class Fookie extends EventEmitter {
 
                 let result = await model.model[method]({ user, body, query })
                 if (result) {
-                    result = await calcFilter({ user, model, result, body, method, ctx: this })
+                    await calcFilter({ user, req, model, result, body, method, ctx: this })
                     calcEffects({ user, req, model, result, body, method, ctx: this })
                 }
-
                 return result
+
             } else {
                 return "NO AUTH"
             }
