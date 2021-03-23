@@ -62,19 +62,16 @@ class Fookie extends EventEmitter {
             let token = req.headers.token || ""
 
             //auth
-            let payload = { id: -1 }
             let user = {}
 
-            try {
-                payload = jwt.verify(String(token), this.store.get("secret"))
-            } catch (error) {}
-
-            let User = this.models.get('system_user').model
-            user = await User.findOne({ where: { id: 2 } })
-
-            let result = await this.run(user, req, method, model, query, body)
-            res.json(result)
-
+            jwt.verify(token, this.store.get("secret"), async(err, payload) => {
+                let User = this.models.get('system_user').model
+                if (!err) {
+                    console.log(payload);
+                    user = await User.findOne({ where: { id: payload.id } })
+                }
+                res.json(await this.run(user, req, method, model, query, body))
+            });
         })
     }
 
@@ -95,7 +92,8 @@ class Fookie extends EventEmitter {
     model(model) {
         let Model = this.sequelize.define(model.name, modelParser(model).schema)
         Model.get = async function({ query }) {
-            return await Model.findOne(query)
+            let res = await Model.findOne(query)
+            return res
         }
         Model.getAll = async function({ query }) {
             return await Model.findAll(query)
@@ -145,12 +143,18 @@ class Fookie extends EventEmitter {
             let model = this.models.get(modelName)
             console.log(`[${method}] Model:${modelName} |  Query:${query}`);
             calcModify({ user, model, body, method, ctx: this })
-            if (check({ user, req, body, model, query, method, ctx: this })) {
+            if (await check({ user, req, body, model, query, method, ctx: this })) {
+
                 let result = await model.model[method]({ user, body, query })
-                result = calcFilter({ user, model, result, body, method, ctx: this })
-                calcEffects({ user, req, model, result, body, method, ctx: this })
+                if (result) {
+                    result = await calcFilter({ user, model, result, body, method, ctx: this })
+                    calcEffects({ user, req, model, result, body, method, ctx: this })
+                }
+
                 return result
-            } else {}
+            } else {
+                return "NO AUTH"
+            }
         } else {
             return "Model yok veya Method desteklenmiyor."
         }

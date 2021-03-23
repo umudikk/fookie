@@ -12,10 +12,11 @@ module.exports = async function({ user, req, model, query, method, body, ctx }) 
 
     else {
         if (roles.every(e => ctx.roles.has(e))) {
-            let res = roles.some(function(role) {
-                ctx.roles.get(role)({ user, req, model, query, method, body, ctx })
-            });
-            return res
+            let auth = false
+            for (let role of roles) {
+                auth = auth || await ctx.roles.get(role)({ user, req, model, query, method, body, ctx })
+            }
+            return auth
         } else {
             throw Error('Missing role')
         }
