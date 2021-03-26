@@ -1,8 +1,33 @@
 
+
+# Fookie JS
 ### FookieJS creates a API using JSON schema.
 
+#### Featues
+ - Create delete or edit your API on runtime
+ - Store your schemas in database
+ - Auto generated methods (post , delete , patch , count , schema, get , getAll) 
+ - Supports custom methods
+ - MongoDB and PostgreSQL support
+ - Request Life Cycle
+ - Routines
+ - Deafult models, rules, roles, filters, effects, modifies and methods.
+## Last Version
 ```
-const Fookie = require("../src/index")
+1.1.0
+```
+## Installation
+```
+npm install @umudikk/fookie@1.1.0 --save
+```
+
+## Documentation
+
+https://github.com/umudikk/fookie/wiki
+
+## Examples
+```
+const Fookie = require("@umudikk/fookie@1.1.0")
 
 let start = async function() {
     const api = new Fookie()
