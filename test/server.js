@@ -1,34 +1,4 @@
-<<<<<<< HEAD
-
-
-# Fookie JS
-### FookieJS creates a API using JSON schema.
-
-#### Featues
- - Create delete or edit your API on runtime
- - Store your schemas in database
- - Auto generated methods (post , delete , patch , count , schema, get , getAll) 
- - Supports custom methods
- - MongoDB and PostgreSQL support
- - Request Life Cycle
- - Routines
- - Deafult models, rules, roles, filters, effects, modifies and methods.
-## Last Version
-```
-1.1.0
-```
-## Installation
-```
-npm install @umudikk/fookie@1.1.0 --save
-```
-
-## Documentation
-
-https://github.com/umudikk/fookie/wiki
-
-## Examples
-```javascript
-const Fookie = require("@umudikk/fookie@1.1.0")
+const Fookie = require("../src/index")
 
 let start = async function() {
     const api = new Fookie()
@@ -60,6 +30,7 @@ let start = async function() {
                 input: "text",
                 type: "string",
                 required: false,
+                default: "Slug...",
                 read: [],
                 write: []
             },
@@ -68,6 +39,7 @@ let start = async function() {
                 type: "string",
                 required: true,
                 input: "date",
+                default: "Content here...",
                 read: [],
                 write: []
             },
@@ -175,36 +147,3 @@ let start = async function() {
 }
 
 start()
-
-```
-=======
-# README #
-
-This README would normally document whatever steps are necessary to get your application up and running.
-
-### What is this repository for? ###
-
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
-
-### How do I get set up? ###
-
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
-
-### Contribution guidelines ###
-
-* Writing tests
-* Code review
-* Other guidelines
-
-### Who do I talk to? ###
-
-* Repo owner or admin
-* Other community or team contact
->>>>>>> develop
