@@ -11,6 +11,10 @@ module.exports = {
             input: "password",
             read: ['nobody'],
         },
+        type: {
+            type: "STRING",
+            input: "password",
+        }
     },
     fookie: {
         get: {
