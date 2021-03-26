@@ -59,7 +59,6 @@ let start = async function() {
                 input: "text",
                 type: "string",
                 required: false,
-                default: "Slug...",
                 read: [],
                 write: []
             },
@@ -68,7 +67,6 @@ let start = async function() {
                 type: "string",
                 required: true,
                 input: "date",
-                default: "Content here...",
                 read: [],
                 write: []
             },
