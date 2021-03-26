@@ -26,7 +26,7 @@ npm install @umudikk/fookie@1.1.0 --save
 https://github.com/umudikk/fookie/wiki
 
 ## Examples
-```
+```javascript
 const Fookie = require("@umudikk/fookie@1.1.0")
 
 let start = async function() {
