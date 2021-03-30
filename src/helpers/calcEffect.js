@@ -4,5 +4,7 @@ module.exports = async function({ user, req, model, method, body, result, ctx })
         effs.forEach(async(eff) => {
             await ctx.effects.get(eff)({ user, req, model, method, body, result, ctx })
         });
+    } else {
+        throw Error("Missing Effect")
     }
 }

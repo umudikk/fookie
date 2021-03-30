@@ -144,9 +144,8 @@ class Fookie extends EventEmitter {
         if (this.models.has(modelName) && typeof this.models.get(modelName).model[method] == 'function') {
             let model = this.models.get(modelName)
             console.log(`[${method}] Model:${modelName} |  Query:${query}`);
-            calcModify({ user, model, body, method, ctx: this })
+            await calcModify({ user, model, body, method, ctx: this })
             if (await check({ user, req, body, model, query, method, ctx: this })) {
-
                 let result = await model.model[method]({ user, body, query })
                 if (result) {
                     await calcFilter({ user, req, model, result, body, method, ctx: this })
@@ -237,6 +236,7 @@ class Fookie extends EventEmitter {
 
         //RULES
         this.rule('has_fields', require('./defaults/rule/has_fields'))
+        this.rule('check_required', require('./defaults/rule/check_required'))
         this.rule('check_auth', require('./defaults/rule/check_auth'))
         this.rule('has_pwemail', require('./defaults/rule/has_pwemail'))
 
