@@ -1,4 +1,4 @@
-module.exports = async({ user, document, ctx }) => {
-    let parsedModel = ctx.helpers.modelParser(document)
+module.exports = async(user, req, model, result, body, method, ctx) => {
+    let parsedModel = ctx.helpers.modelParser(result)
     ctx.model(parsedModel)
 }
