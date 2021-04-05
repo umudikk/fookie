@@ -70,7 +70,7 @@ let start = async function() {
             },
             author: {
                 unique: false,
-                realtion: {
+                relation: {
                     model: "system_user",
                     key: "id"
                 },
