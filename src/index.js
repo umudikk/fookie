@@ -57,22 +57,23 @@ class Fookie extends EventEmitter {
         this.app.use(async(req, res) => {
 
             //req
-            let method = req.body.method || ""
-            let body = req.body.body || {}
-            let model = req.body.model || ""
-            let query = req.body.query || {}
-            let token = req.headers.token || ""
+            let payload = {
+                method: req.body.method || "",
+                body: req.body.body || {},
+                modelName: req.body.model || "",
+                query: req.body.query || {},
+                token: req.headers.token || "",
+                options: req.body.options || {},
+            }
+
 
             //auth
-            let user = {}
-
-            jwt.verify(token, this.store.get("secret"), async(err, payload) => {
+            jwt.verify(payload.token, this.store.get("secret"), async(err, parsed) => {
                 let User = this.models.get('system_user').model
                 if (!err) {
-                    console.log(payload);
-                    user = await User.findOne({ where: { id: payload.id } })
+                    payload.user = await User.findOne({ where: { id: parsed.id } })
                 }
-                res.json(await this.run(user, req, method, model, query, body))
+                res.json(await this.run(payload))
             });
         })
     }
@@ -140,18 +141,19 @@ class Fookie extends EventEmitter {
         this.effects.set(name, effect)
     }
 
-    async run(user, req, method, modelName, query, body) {
-        if (this.models.has(modelName) && typeof this.models.get(modelName).model[method] == 'function') {
-            let model = this.models.get(modelName)
-            console.log(`[${method}] Model:${modelName} |  Query:${query}`);
-            await calcModify({ user, model, body, method, ctx: this })
-            if (await check({ user, req, body, model, query, method, ctx: this })) {
-                let result = await model.model[method]({ user, body, query })
-                if (result) {
-                    await calcFilter({ user, req, model, result, body, method, ctx: this })
-                    calcEffects({ user, req, model, result, body, method, ctx: this })
+    async run(payload) {
+        if (this.models.has(payload.modelName) && typeof this.models.get(payload.modelName).model[payload.method] == 'function') {
+            let model = this.models.get(payload.modelName)
+            payload.model = model
+            payload.ctx = this
+            await calcModify(payload)
+            if (await check(payload)) {
+                payload.result = await model.model[payload.method](payload)
+                if (payload.result) {
+                    await calcFilter(payload)
+                    calcEffects(payload)
                 }
-                return result
+                return payload.result
 
             } else {
                 return "NO AUTH"
@@ -231,7 +233,7 @@ class Fookie extends EventEmitter {
         //SYNC
         let models = await system_model.findAll()
         for (let m of models) {
-            this.model(modelParser(m))
+            await this.model(modelParser(m))
         }
 
         //RULES

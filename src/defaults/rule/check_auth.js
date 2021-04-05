@@ -5,9 +5,8 @@ module.exports = async function({ user, req, model, query, method, body, ctx }) 
         roles = roles.concat(model.fookie[method].auth || [])
     }
     if (["post", "patch"].includes(method)) {
-        roles = roles.concat(...keys.map(key => model.schema[key].write || []))
+        roles = roles.concat(...keys.map(key => model.schema[key].write) || [])
     }
-    console.log(roles);
 
     if (roles.length == 0) return true
     else {
