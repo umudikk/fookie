@@ -12,7 +12,6 @@ const check = require('./helpers/check');
 const calcEffects = require('./helpers/calcEffect')
 const calcFilter = require('./helpers/calcFilter')
 const calcModify = require('./helpers/calcModify')
-var lodash = require('lodash');
 
 class Fookie extends EventEmitter {
     connection
@@ -30,7 +29,6 @@ class Fookie extends EventEmitter {
 
     constructor(cb) {
         super()
-        this.lodash = lodash
         this.connection = null
         this.models = new Map()
         this.roles = new Map()
@@ -256,6 +254,7 @@ class Fookie extends EventEmitter {
 
         //MODIFIES
         this.modify('password', require('./defaults/modify/password'))
+        this.modify("set_defaults", require('./defaults/modify/set_defaults'))
 
         //METHODS
         let system_user = this.models.get('system_user').model

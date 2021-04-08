@@ -8,8 +8,10 @@ module.exports = {
             input: "text",
         },
         display: {
+            required: true,
             type: "string",
             input: "text",
+            default:"id"
         },
         schema: {
             required: true,
