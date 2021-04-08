@@ -23,7 +23,6 @@ class Fookie extends EventEmitter {
     paginate
     app
     jwt
-
     routines
     httpServer
     io

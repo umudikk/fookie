@@ -1,6 +1,6 @@
 {
-    "name": "appgen",
-    "version": "0.0.0",
+    "name": "fookie",
+    "version": "1.0.5",
     "description": "This README would normally document whatever steps are necessary to get your application up and running.",
     "main": "./src/index.js",
     "scripts": {
@@ -8,11 +8,11 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://umudik@bitbucket.org/intesasoft/appgen.git"
+        "url": "https://github.com/umudikk/fookie.git"
     },
     "author": "",
     "license": "ISC",
-    "homepage": "https://bitbucket.org/intesasoft/appgen#readme",
+    "homepage": "https://github.com/umudikk/fookie.git#readme",
     "dependencies": {
         "body-parser": "^1.19.0",
         "cors": "^2.8.5",

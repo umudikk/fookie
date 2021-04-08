@@ -1,9 +1,9 @@
-const Fookie = require("../src/index")
+const Fookie = require("../src")
 
 let start = async function() {
     const api = new Fookie()
-    await api.connect("postgres://postgres:123@127.0.0.1:5432/test")
-    api.model({
+    await api.connect("postgres://postgres:123@localhost:5432/test")
+    await api.model({
         name: "blog",
         display: "title",
         schema: {
@@ -143,7 +143,7 @@ let start = async function() {
         console.log("backup");
     })
 
-    api.listen(8080)
+    api.listen(7777)
 }
 
 start()
