@@ -92,7 +92,7 @@ let start = async function() {
             get: {
                 effect: [],
                 filter: [],
-                role: ["system_admin"],
+                role: ["everybody"],
                 modify: [],
                 rule: []
             },
