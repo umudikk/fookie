@@ -30,7 +30,7 @@ module.exports = {
             auth: ["system_admin"],
         },
         post: {
-            auth: ["system", "system_admin"],
+            auth: ["system_admin"],
             modify: ["password"]
         },
         delete: {

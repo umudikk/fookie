@@ -1,10 +1,9 @@
 const { Sequelize, Op } = require('sequelize');
-const { EventEmitter } = require('events')
 const express = require('express')
 const jwt = require('jsonwebtoken')
 const { sha512 } = require('js-sha512')
 const bodyParser = require('body-parser')
-const { hasFields, response, clear } = require('./helpers')
+const { hasFields, clear } = require('./helpers')
 const cors = require('cors')
 const modelParser = require('./helpers/modelParser')
 const findRequiredRoles = require('./helpers/requiredRoles');
@@ -13,7 +12,7 @@ const calcEffects = require('./helpers/calcEffect')
 const calcFilter = require('./helpers/calcFilter')
 const calcModify = require('./helpers/calcModify')
 
-class Fookie extends EventEmitter {
+class Fookie {
     connection
     requester
     models
@@ -21,14 +20,10 @@ class Fookie extends EventEmitter {
     effects
     paginate
     app
-    jwt
     routines
-    httpServer
-    io
     sequelize
 
-    constructor(cb) {
-        super()
+    constructor() {
         this.connection = null
         this.models = new Map()
         this.roles = new Map()
@@ -51,7 +46,7 @@ class Fookie extends EventEmitter {
         this.app.use(bodyParser.urlencoded({ extended: true }))
         this.app.use(bodyParser.json())
 
-        this.app.use(async(req, res) => {
+        this.app.use(async (req, res) => {
 
             //req
             let payload = {
@@ -63,9 +58,8 @@ class Fookie extends EventEmitter {
                 options: req.body.options || {},
             }
 
-
             //auth
-            jwt.verify(payload.token, this.store.get("secret"), async(err, parsed) => {
+            jwt.verify(payload.token, this.store.get("secret"), async (err, parsed) => {
                 let User = this.models.get('system_user').model
                 if (!err) {
                     payload.user = await User.findOne({ where: { id: parsed.id } })
@@ -91,20 +85,21 @@ class Fookie extends EventEmitter {
 
     model(model) {
         let Model = this.sequelize.define(model.name, modelParser(model).schema)
-        Model.get = async function({ query }) {
+
+        Model.get = async function ({ query }) {
             let res = await Model.findOne(query)
             return res
         }
-        Model.getAll = async function({ query }) {
+        Model.getAll = async function ({ query }) {
             return await Model.findAll(query)
         }
 
-        Model.post = async function({ body }) {
+        Model.post = async function ({ body }) {
             let document = Model.build(body)
             return await document.save()
         }
 
-        Model.delete = async function({ query }) {
+        Model.delete = async function ({ query }) {
             let document = await this.findOne(query)
             if (document instanceof Model) {
                 return await document.destroy(query)
@@ -113,7 +108,7 @@ class Fookie extends EventEmitter {
             }
         }
 
-        Model.patch = async function({ query, body }) {
+        Model.patch = async function ({ query, body }) {
             let document = await this.findOne(query)
             for (let f in body) {
                 document[f] = body[f]
@@ -121,11 +116,11 @@ class Fookie extends EventEmitter {
             return await document.save()
         }
 
-        Model.schema = async function({ user, body }) {
+        Model.schema = async function () {
             return model.schema
         }
-        Model.fookie = async function({ user, body }) {
-            return model.fookie.display
+        Model.count = async function ({ body }) {
+            return await this.count(query)
         }
 
         this.sequelize.sync({ alter: true })
@@ -256,43 +251,14 @@ class Fookie extends EventEmitter {
         this.modify('password', require('./defaults/modify/password'))
         this.modify("set_defaults", require('./defaults/modify/set_defaults'))
 
-        //METHODS
-        let system_user = this.models.get('system_user').model
-        let system_admin = this.models.get('system_admin').model
-
-        let adminCount = await system_admin.count()
-        if (adminCount == 0) {
-            let user = await system_user.create({ email: "admin", password: sha512("admin") })
-            await system_admin.create({ system_user: user.id })
-        }
-
-
-        system_user.login = async({ body }) => {
-            let { email, password } = body
-            let user = await system_user.findOne({ where: { email, password: sha512(password) } })
-            if (user instanceof system_user) {
-                const token = jwt.sign({ id: user.id }, this.store.get("secret"));
-                return token
-            } else {
-                return false
-            }
-
-        }
-        system_user.register = async({ body }) => {
-            let { email, password } = body
-            let user = await system_user.findOne({ email, password: sha512(password) })
-            if (user instanceof system_user) {
-                return false
-            } else {
-                user = await system_user.create({ email, password: sha512(password) })
-                return true
-            }
-        }
+        // PLUGINS
+        this.set(require("./defaults/plugin/health_check"))
+        this.set(require("./defaults/plugin/login_register"))
     }
 
     listen(port) {
         this.app.listen(port, () => {
-            console.log(`[API] ${port} is listening...`);
+            console.log(`FOOKIE ${port} is listening...`);
 
         })
     }
