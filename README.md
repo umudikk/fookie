@@ -25,7 +25,7 @@ https://github.com/umudikk/fookie/wiki
 
 ## Examples
 ```javascript
-const Fookie = require("@umudikk/fookie@1.1.0")
+const Fookie = require("fookie")
 
 let start = async function() {
     const api = new Fookie()
