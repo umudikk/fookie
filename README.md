@@ -12,11 +12,11 @@
  - Deafult models, rules, roles, filters, effects, modifies and methods.
 ## Last Version
 ```
-1.1.0
+-
 ```
 ## Installation
 ```
-npm install @umudikk/fookie@1.1.0 --save
+npm install fookie --save
 ```
 
 ## Documentation
