@@ -1,4 +1,3 @@
-"use-strick"
 module.exports = async function({ user, method, model, result, body, ctx }) {
     let keys = []
     if (result instanceof model.model) keys = Object.keys(result.toJSON())

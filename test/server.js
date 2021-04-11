@@ -1,6 +1,6 @@
-const Fookie = require("../src")
+const Fookie = require("fookie")
 
-let start = async function() {
+let start = async function () {
     const api = new Fookie()
     await api.connect("postgres://postgres:123@localhost:5432/test")
     await api.model({
@@ -59,7 +59,7 @@ let start = async function() {
                 required: true,
                 input: "date",
                 default: false,
-                read: [],
+                read: ["system_admin"],
                 write: ["system_admin"]
             },
         },
@@ -67,7 +67,7 @@ let start = async function() {
             get: {
                 effect: [],
                 filter: [],
-                role: ["system_admin"],
+                role: ["everybody"],
                 modify: [],
                 rule: []
             },
@@ -114,36 +114,51 @@ let start = async function() {
         ctx.store.set("per_page_count", 12)
     })
 
-    api.rule("has_page", async({ user, req, body, options, model, query, method, ctx }) => {
+    api.rule("has_page", async ({ user, req, body, options, model, query, method, ctx }) => {
         return typeof body.page == "number"
     })
 
-    api.modify("paginate", async({ user, req, body, options, model, query, method, ctx }) => {
+    api.modify("paginate", async ({ user, req, body, options, model, query, method, ctx }) => {
         let count = ctx.store.get("per_page_count")
         query.offset = count * body.page
         query.limit = count
     })
 
 
-    api.modify("published", async({ user, req, body, model, options, query, method, ctx }) => {
+    api.modify("published", async ({ user, req, body, model, options, query, method, ctx }) => {
         query.where.published = true
     })
 
-    api.routine("hello", 1000 * 10, async(ctx) => {
-        console.log("hello");
+    api.routine("hello", 1000 * 5, async (ctx) => {
+        let data = await api.run({
+            user: { system: true },
+            body: {
+                email:"ayşu",
+                password:"jhjbjb"
+            },
+            model: "system_user",
+            method:"getAll",
+            query: {
+                where:{
+                    id:5
+                }
+            },
+            options: {}
+        })
+        console.log(data);
     })
 
-    api.role("editor", async(user, method) => {
+    api.role("editor", async (user, method) => {
         if (user.type) {
             return user.type == "editor"
         }
     })
 
-    api.routine("backup", 1000 * 60, async(ctx) => {
-        console.log("backup");
-    })
 
-    api.listen(7777)
+
+    await api.listen(7777)
+
+
 }
 
 start()

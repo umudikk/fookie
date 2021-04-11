@@ -11,7 +11,7 @@ module.exports = {
             required: true,
             type: "string",
             input: "text",
-            default:"id"
+            default: "id"
         },
         schema: {
             required: true,
@@ -26,25 +26,31 @@ module.exports = {
     },
     fookie: {
         get: {
-            auth: ["system_admin"],
+            role: ["system_admin"],
+            rule:[],
+            effect:[],
+            modify:[]
         },
         getAll: {
             filter: ["add_static_models"],
-            auth: ["system_admin"],
+            role: ["system_admin"],
         },
         patch: {
-            auth: ["system_admin"],
+            role: ["system_admin"],
             effect: ['sync'],
         },
         post: {
-            auth: ["system_admin"],
+            role: ["system_admin"],
             effect: ['sync'],
         },
         delete: {
-            auth: ["system_admin"],
+            role: ["system_admin"],
         },
         schema: {
-            auth: ["system_admin"],
+            role: ["system_admin"],
+        },
+        count: {
+            role: ["system_admin"],
         }
     }
 }

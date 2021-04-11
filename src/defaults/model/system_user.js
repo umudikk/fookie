@@ -17,27 +17,28 @@ module.exports = {
             required: true,
             type: "string",
             input: "password",
+            default:"normal"
         }
     },
     fookie: {
         get: {
-            auth: ["system_admin"],
+            role: ["system_admin"],
         },
         getAll: {
-            auth: ["system_admin"],
+            role: ["system_admin"],
         },
         patch: {
-            auth: ["system_admin"],
+            role: ["system_admin"],
         },
         post: {
-            auth: ["system_admin"],
+            role: ["system_admin"],
             modify: ["password"]
         },
         delete: {
-            auth: ["system_admin"],
+            role: ["system_admin"],
         },
         schema: {
-            auth: ["everybody"],
+            role: ["everybody"],
         },
         login: {
             rule: ["has_pwemail"],

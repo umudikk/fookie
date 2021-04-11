@@ -1,6 +1,6 @@
 {
     "name": "fookie",
-    "version": "1.0.5",
+    "version": "0.0.5",
     "description": "This README would normally document whatever steps are necessary to get your application up and running.",
     "main": "./src/index.js",
     "scripts": {
@@ -10,8 +10,8 @@
         "type": "git",
         "url": "https://github.com/umudikk/fookie.git"
     },
-    "author": "",
-    "license": "ISC",
+    "author": "umudik",
+    "license": "MIT",
     "homepage": "https://github.com/umudikk/fookie.git#readme",
     "dependencies": {
         "body-parser": "^1.19.0",

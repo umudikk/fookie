@@ -12,22 +12,22 @@ module.exports = {
     },
     fookie: {
         get: {
-            auth: ["system_admin", "system"],
+            role: ["system_admin", "system"],
         },
         getAll: {
-            auth: ["system_admin", "system"],
+            role: ["system_admin", "system"],
         },
         patch: {
-            auth: ["system_admin", "system"],
+            role: ["system_admin", "system"],
         },
         post: {
-            auth: ["system_admin", "system"],
+            role: ["system_admin", "system"],
         },
         delete: {
-            auth: ["system_admin", "system"],
+            role: ["system_admin", "system"],
         },
         schema: {
-            auth: ["everybody"],
+            role: ["everybody"],
         }
     }
 }

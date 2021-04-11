@@ -1,9 +1,12 @@
-module.exports = async function({ user, req, model, query, method, body, ctx }) {
+module.exports = async function ({ user, req, model, query, method, body, ctx }) {
+    if (user.system) {
+        return true
+    }
     let roles = []
     let keys = Object.keys(body)
-    if (["post", "delete", "get", "getAll"].includes(method)) {
-        roles = roles.concat(model.fookie[method].auth || [])
-    }
+
+    roles = roles.concat(model.fookie[method].role || [])
+
     if (["post", "patch"].includes(method)) {
         roles = roles.concat(...keys.map(key => model.schema[key].write) || [])
     }

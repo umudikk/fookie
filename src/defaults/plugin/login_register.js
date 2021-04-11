@@ -1,7 +1,8 @@
 module.exports = async function (ctx) {
     system_user =  ctx.models.get("system_user").model
+    system_admin =  ctx.models.get("system_admin").model
 
-    let adminCount = await system_admin.count()
+    let adminCount = await system_admin.count({})
     if (adminCount == 0) {
         let user = await system_user.create({ email: "admin", password: sha512("admin") })
         await system_admin.create({ system_user: user.id })

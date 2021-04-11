@@ -85,43 +85,39 @@ class Fookie {
 
     model(model) {
         let Model = this.sequelize.define(model.name, modelParser(model).schema)
-
-        Model.get = async function ({ query }) {
+        model.methods = new Map()
+        model.methods.set("get", async function ({ query }) {
             let res = await Model.findOne(query)
             return res
-        }
-        Model.getAll = async function ({ query }) {
-            return await Model.findAll(query)
-        }
-
-        Model.post = async function ({ body }) {
+        })
+        model.methods.set("post", async function ({ body }) {
             let document = Model.build(body)
             return await document.save()
-        }
-
-        Model.delete = async function ({ query }) {
-            let document = await this.findOne(query)
+        })
+        model.methods.set("getAll", async function ({ query }) {
+            return await Model.findAll(query)
+        })
+        model.methods.set("delete", async function ({ query }) {
+            let document = await Model.findOne(query)
             if (document instanceof Model) {
                 return await document.destroy(query)
             } else {
                 return false
             }
-        }
-
-        Model.patch = async function ({ query, body }) {
-            let document = await this.findOne(query)
+        })
+        model.methods.set("patch", async function ({ query, body }) {
+            let document = await Model.findOne(query)
             for (let f in body) {
                 document[f] = body[f]
             }
             return await document.save()
-        }
-
-        Model.schema = async function () {
+        })
+        model.methods.set("schema", async function () {
             return model.schema
-        }
-        Model.count = async function ({ body }) {
-            return await this.count(query)
-        }
+        })
+        model.methods.set("count", async function ({ query }) {
+            return await Model.count(query)
+        })
 
         this.sequelize.sync({ alter: true })
         model.model = Model
@@ -134,13 +130,13 @@ class Fookie {
     }
 
     async run(payload) {
-        if (this.models.has(payload.modelName) && typeof this.models.get(payload.modelName).model[payload.method] == 'function') {
-            let model = this.models.get(payload.modelName)
+        if (this.models.has(payload.model) && typeof this.models.get(payload.model).methods.get(payload.method) == 'function') {
+            let model = this.models.get(payload.model)
             payload.model = model
             payload.ctx = this
             await calcModify(payload)
             if (await check(payload)) {
-                payload.result = await model.model[payload.method](payload)
+                payload.result = await model.methods.get(payload.method)(payload)
                 if (payload.result) {
                     await calcFilter(payload)
                     calcEffects(payload)
@@ -156,9 +152,8 @@ class Fookie {
     }
 
     routine(name, time, func) {
-        let API = this
         let routine = setInterval(() => {
-            func(API)
+            func(this)
         }, time);
 
         this.routines.set(name, routine)
