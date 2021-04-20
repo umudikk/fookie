@@ -251,6 +251,7 @@ class Fookie {
         //MODIFIES
         this.modify('password', require('./defaults/modify/password'))
         this.modify("set_defaults", require('./defaults/modify/set_defaults'))
+        this.modify("attributes", require('./defaults/modify/attributes'))
 
         // PLUGINS
         this.use(require("./defaults/plugin/health_check"))
