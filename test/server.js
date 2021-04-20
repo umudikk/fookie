@@ -1,4 +1,4 @@
-const Fookie = require("fookie")
+const Fookie = require("../src")
 
 let start = async function () {
     const api = new Fookie()
@@ -74,8 +74,11 @@ let start = async function () {
             getAll: {
                 effect: [],
                 filter: [],
-                role: ["everybody"],
-                modify: ["paginate", "published"],
+                role: ["system_admin","everybody"],
+                reject:{
+                    system_admin:["paginate", "published"]
+                },
+                modify: [],
                 rule: ["has_page"]
             },
             patch: {
@@ -109,8 +112,7 @@ let start = async function () {
         }
     })
 
-
-    api.set((ctx) => {
+    api.use((ctx) => {
         ctx.store.set("per_page_count", 12)
     })
 
@@ -129,24 +131,6 @@ let start = async function () {
         query.where.published = true
     })
 
-    api.routine("hello", 1000 * 5, async (ctx) => {
-        let data = await api.run({
-            user: { system: true },
-            body: {
-                email:"ayşu",
-                password:"jhjbjb"
-            },
-            model: "system_user",
-            method:"getAll",
-            query: {
-                where:{
-                    id:5
-                }
-            },
-            options: {}
-        })
-        console.log(data);
-    })
 
     api.role("editor", async (user, method) => {
         if (user.type) {
@@ -154,11 +138,19 @@ let start = async function () {
         }
     })
 
-
-
     await api.listen(7777)
 
-
+    api.routine("test", 2000, async (ctx) => {
+        let res = await ctx.run({
+            user: { id: 5, email: "djdjf" },
+            body: { email: "testoo", password: "password" ,page:1},
+            method: "getAll",
+            model: "blog",
+            ctx:api,
+            query:{where:{}}
+        })
+        console.log(res);
+    })
 }
 
 start()

@@ -5,31 +5,24 @@ module.exports = {
         name: {
             required: true,
             type: "string",
-            input: "text",
         },
         display: {
             required: true,
             type: "string",
-            input: "text",
             default: "id"
         },
         schema: {
             required: true,
             type: "jsonb",
-            input: "json",
         },
         fookie: {
             required: true,
             type: "jsonb",
-            input: "json",
         },
     },
     fookie: {
         get: {
             role: ["system_admin"],
-            rule:[],
-            effect:[],
-            modify:[]
         },
         getAll: {
             filter: ["add_static_models"],

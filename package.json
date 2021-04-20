@@ -22,6 +22,7 @@
         "pg": "^8.5.1",
         "query-string": "^6.13.8",
         "sequelize": "^6.3.5",
-        "sequelize-querystring": "^0.10.0"
+        "sequelize-querystring": "^0.10.0",
+        "validate.js": "^0.13.1"
     }
 }

@@ -1,7 +1,6 @@
 const { Sequelize, Op } = require('sequelize');
 const express = require('express')
 const jwt = require('jsonwebtoken')
-const { sha512 } = require('js-sha512')
 const bodyParser = require('body-parser')
 const { hasFields, clear } = require('./helpers')
 const cors = require('cors')
@@ -119,10 +118,15 @@ class Fookie {
             return await Model.count(query)
         })
 
+        model.methods.set("try", async function (payload) {
+            await payload.ctx.helpers.calcModify(payload)
+            return await payload.ctx.helpers.check(payload)
+        })
+
         this.sequelize.sync({ alter: true })
         model.model = Model
         this.models.set(model.name, model)
-        return Model
+        return model
     }
 
     async effect(name, effect) {
@@ -206,14 +210,15 @@ class Fookie {
         }
     }
 
-    async set(cb) {
+    async use(cb) {
         await cb(this)
     }
 
     async prepareDefaults() {
 
         //MODELS
-        let system_model = await this.model(require('./defaults/model/system_model.js'))
+        let model = await this.model(require('./defaults/model/system_model.js'))
+        let system_model = model.model
         await this.model(require('./defaults/model/system_user.js'))
         await this.model(require('./defaults/model/system_admin.js'))
 
@@ -228,6 +233,7 @@ class Fookie {
         this.rule('check_required', require('./defaults/rule/check_required'))
         this.rule('check_auth', require('./defaults/rule/check_auth'))
         this.rule('has_pwemail', require('./defaults/rule/has_pwemail'))
+        this.rule('check_type', require('./defaults/rule/check_type'))
 
         //ROLES 
         this.role('everybody', require('./defaults/role/everybody'))
@@ -247,8 +253,17 @@ class Fookie {
         this.modify("set_defaults", require('./defaults/modify/set_defaults'))
 
         // PLUGINS
-        this.set(require("./defaults/plugin/health_check"))
-        this.set(require("./defaults/plugin/login_register"))
+        this.use(require("./defaults/plugin/health_check"))
+        this.use(require("./defaults/plugin/login_register"))
+        this.store.set("validators",{
+            string:"isString",
+            number:"isNumber",
+            integer:"isInteger",
+            jsonb:"isObject",
+            json:"isObject",
+            date:"isDate",
+            time:"isTime"
+        })
     }
 
     listen(port) {

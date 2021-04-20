@@ -1,24 +1,26 @@
-module.exports = async function ({ user, req, model, query, method, body, ctx }) {
-    if (user.system) {
-        return true
-    }
-    let roles = []
-    let keys = Object.keys(body)
+module.exports = async function (payload) {
+    let roles = ["system"]
+    let keys = Object.keys(payload.body)
 
-    roles = roles.concat(model.fookie[method].role || [])
+    roles = roles.concat(payload.model.fookie[payload.method].role || [])
 
-    if (["post", "patch"].includes(method)) {
-        roles = roles.concat(...keys.map(key => model.schema[key].write) || [])
+    if (["post", "patch"].includes(payload.method)) {
+        roles = roles.concat(...keys.map(key => payload.model.schema[key].write) || [])
     }
 
     if (roles.length == 0) return true
     else {
-        if (roles.every(e => ctx.roles.has(e))) {
-            let auth = false
+        if (roles.every(e => payload.ctx.roles.has(e))) {
             for (let role of roles) {
-                auth = auth || await ctx.roles.get(role)({ user, req, model, query, method, body, ctx })
+                let res = await payload.ctx.roles.get(role)(payload)
+                if (res) {
+                    return true
+                } else {
+                    let modifies = payload.model.fookie[payload.method].reject[role] || []
+                    await Promise.all(modifies.map(m => payload.ctx.modifies.get(m)(payload)))
+                }
             }
-            return auth
+            return false
         } else {
             throw Error('Missing role')
         }
