@@ -105,8 +105,11 @@ let start = async function() {
             getAll: {
                 effect: [],
                 filter: [],
-                role: ["everybody"],
-                modify: ["paginate", "published"],
+                role: ["system_admin","everybody"],
+                reject:{
+                    system_admin:["paginate", "published"]
+                },
+                modify: [],
                 rule: ["has_page"]
             },
             patch: {
