@@ -1,6 +1,8 @@
 module.exports = async function(payload) {
     let rules = payload.model.fookie[payload.method].rule || []
-
+    if (payload.method == "get" || payload.method == "getAll") {
+        rules.push("valid_attributes") 
+    }
     if (payload.method == "post" || payload.method == "patch") {
         rules.push("has_fields")
         rules.push("check_type")    
@@ -9,6 +11,7 @@ module.exports = async function(payload) {
         rules.push("check_required")
     }
     rules.push("check_auth")
+    
     if (rules.every(i => payload.ctx.rules.has(i))) {
         let flag = true
         for (let i of rules) {

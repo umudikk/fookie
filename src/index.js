@@ -234,6 +234,7 @@ class Fookie {
         this.rule('check_auth', require('./defaults/rule/check_auth'))
         this.rule('has_pwemail', require('./defaults/rule/has_pwemail'))
         this.rule('check_type', require('./defaults/rule/check_type'))
+        this.rule('valid_attributes', require('./defaults/rule/valid_attributes'))
 
         //ROLES 
         this.role('everybody', require('./defaults/role/everybody'))
