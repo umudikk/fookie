@@ -80,6 +80,7 @@ let start = async function() {
                     model: "system_user",
                     key: "id"
                 },
+                default:1,
                 required: true,
                 read: [],
                 write: []
@@ -105,8 +106,11 @@ let start = async function() {
             getAll: {
                 effect: [],
                 filter: [],
-                role: ["everybody"],
-                modify: ["paginate", "published"],
+                role: ["system_admin","everybody"],
+                reject:{
+                    system_admin:["paginate", "published"]
+                },
+                modify: [],
                 rule: ["has_page"]
             },
             patch: {
@@ -178,5 +182,26 @@ let start = async function() {
 }
 
 start()
+
+```
+
+
+```javascript
+
+//Example Request
+
+axios.post("http://localhost:80808", {
+    body:{},
+    method:"post",
+    model:"blog",
+    // query:{
+        I // where:{
+        I 
+        // }
+    },
+    options{
+       // attributes:[]
+    },
+})
 
 ```
