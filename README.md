@@ -194,7 +194,11 @@ axios.post("http://localhost:80808", {
     body:{},
     method:"post",
     model:"blog",
-    // query:{},
+    // query:{
+        I // where:{
+        I 
+        // }
+    },
     options{
        // attributes:[]
     },
