@@ -257,6 +257,7 @@ class Fookie {
         // PLUGINS
         this.use(require("./defaults/plugin/health_check"))
         this.use(require("./defaults/plugin/login_register"))
+        this.use(require("./defaults/plugin/default_life_cycle_controls"))
         this.store.set("validators",{
             string:"isString",
             number:"isNumber",

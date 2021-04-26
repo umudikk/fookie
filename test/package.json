@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "fookie": "0.0.5"
+    "fookie": "0.0.5",
+    "nodemon": "^2.0.7"
   }
 }

@@ -9,20 +9,24 @@ module.exports = async function (payload) {
     }
 
     if (roles.length == 0) return true
-    else {
-        if (roles.every(e => payload.ctx.roles.has(e))) {
-            for (let role of roles) {
-                let res = await payload.ctx.roles.get(role)(payload)
-                if (res) {
-                    return true
-                } else {
-                    let modifies = payload.model.fookie[payload.method].reject[role] || []
-                    await Promise.all(modifies.map(m => payload.ctx.modifies.get(m)(payload)))
-                }
+
+    if (roles.every(e => payload.ctx.roles.has(e))) {
+        for (let role of roles) {
+            let res = await payload.ctx.roles.get(role)(payload)
+            if (res) {
+                return true
             }
-            return false
-        } else {
-            throw Error('Missing role')
+
+            let modifies = []
+            try {
+                modifies = payload.model.fookie[payload.method].reject[role]
+            } catch (error) {}
+            await Promise.all(modifies.map(m => payload.ctx.modifies.get(m)(payload)))
+
         }
+        return false
+    } else {
+        throw Error('Missing role')
     }
+
 }

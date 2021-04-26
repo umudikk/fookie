@@ -142,12 +142,11 @@ let start = async function () {
 
     api.routine("test", 2000, async (ctx) => {
         let res = await ctx.run({
-            user: { id: 5, email: "djdjf" },
+            user: { id: 1, email: "djdjf" },
             body: { email: "testoo", password: "password" ,page:1},
             method: "getAll",
-            model: "blog",
-            ctx:api,
-            query:{where:{}}
+            model: "system_model",
+            query:{}
         })
         console.log(res);
     })

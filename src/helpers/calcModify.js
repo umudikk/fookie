@@ -1,13 +1,12 @@
-module.exports = async function ({ user, ctx, body, model, method }) {
-    let modifies = []
+module.exports = async function (payload) {
+    let arr = []
+    arr.concat(payload.ctx.store.get("default_life_cycle_controls").modifies[payload.method].before || [])
+    arr.concat(payload.model.fookie[payload.method].modifies || [])
+    arr.concat(payload.ctx.store.get("default_life_cycle_controls").modifies[payload.method].after || [])
     
-    if(method=="post") modifies.push("set_defaults")
-    if(method == "get" || method=="getAll")modifies.push("attributes")
-
-    modifies.concat(model.fookie[method].modify || [])
-    if (modifies.every(e => ctx.modifies.has(e))) {
-        modifies.forEach(async (m) => {
-            await ctx.modifies.get(m)({ user, model, method, body, ctx })
+    if (arr.every(e => payload.ctx.modifies.has(e))) {
+        arr.forEach(async (m) => {
+            await payload.ctx.modifies.get(m)({ user, model, method, body, ctx })
         });
     } else {
         throw Error('Mssing modify')
