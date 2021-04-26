@@ -145,7 +145,7 @@ let start = async function() {
     })
 
 
-    api.set((ctx) => {
+    api.use((ctx) => {
         ctx.store.set("per_page_count", 12)
     })
 
