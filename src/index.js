@@ -12,8 +12,6 @@ const calcFilter = require('./helpers/calcFilter')
 const calcModify = require('./helpers/calcModify')
 const client = require('prom-client');
 
-
-
 class Fookie {
     connection
     requester
@@ -53,20 +51,21 @@ class Fookie {
         this.app.use(bodyParser.urlencoded({ extended: true }))
         this.app.use(bodyParser.json())
 
-        this.app.use(async (req, res) => {
+        this.app.use(async(req, res) => {
 
             //req
             let payload = {
+                user: {},
                 method: req.body.method || "",
                 body: req.body.body || {},
-                modelName: req.body.model || "",
+                model: req.body.model || "",
                 query: req.body.query || {},
                 token: req.headers.token || "",
                 options: req.body.options || {},
             }
 
             //auth
-            jwt.verify(payload.token, this.store.get("secret"), async (err, parsed) => {
+            jwt.verify(payload.token, this.store.get("secret"), async(err, parsed) => {
                 let User = this.models.get('system_user').model
                 if (!err) {
                     payload.user = await User.findOne({ where: { id: parsed.id } })
@@ -93,18 +92,18 @@ class Fookie {
     model(model) {
         let Model = this.sequelize.define(model.name, modelParser(model).schema)
         model.methods = new Map()
-        model.methods.set("get", async function ({ query }) {
+        model.methods.set("get", async function({ query }) {
             let res = await Model.findOne(query)
             return res
         })
-        model.methods.set("post", async function ({ body }) {
+        model.methods.set("post", async function({ body }) {
             let document = Model.build(body)
             return await document.save()
         })
-        model.methods.set("getAll", async function ({ query }) {
+        model.methods.set("getAll", async function({ query }) {
             return await Model.findAll(query)
         })
-        model.methods.set("delete", async function ({ query }) {
+        model.methods.set("delete", async function({ query }) {
             let document = await Model.findOne(query)
             if (document instanceof Model) {
                 return await document.destroy(query)
@@ -112,21 +111,21 @@ class Fookie {
                 return false
             }
         })
-        model.methods.set("patch", async function ({ query, body }) {
+        model.methods.set("patch", async function({ query, body }) {
             let document = await Model.findOne(query)
             for (let f in body) {
                 document[f] = body[f]
             }
             return await document.save()
         })
-        model.methods.set("schema", async function () {
+        model.methods.set("schema", async function() {
             return model.schema
         })
-        model.methods.set("count", async function ({ query }) {
+        model.methods.set("count", async function({ query }) {
             return await Model.count(query)
         })
 
-        model.methods.set("try", async function (payload) {
+        model.methods.set("try", async function(payload) {
             await payload.ctx.helpers.calcModify(payload)
             return await payload.ctx.helpers.check(payload)
         })
@@ -142,6 +141,7 @@ class Fookie {
     }
 
     async run(payload) {
+        console.log(payload);
         if (this.models.has(payload.model) && typeof this.models.get(payload.model).methods.get(payload.method) == 'function') {
             let model = this.models.get(payload.model)
             payload.model = model
@@ -263,6 +263,7 @@ class Fookie {
         this.modify("attributes", require('./defaults/modify/attributes'))
 
         // PLUGINS
+        this.use(require("./defaults/plugin/file_storage"))
         this.use(require("./defaults/plugin/health_check"))
         this.use(require("./defaults/plugin/login_register"))
         this.use(require("./defaults/plugin/default_life_cycle_controls"))

@@ -1,11 +1,12 @@
 var multer = require('multer')
 
-module.exports = async function (ctx) {
+module.exports = async function(ctx) {
+    console.log(1);
     var storage = multer.diskStorage({
-        destination: function (req, file, cb) {
+        destination: function(req, file, cb) {
             cb(null, '/uploads')
         },
-        filename: function (req, file, cb) {
+        filename: function(req, file, cb) {
             cb(null, file.fieldname + '-' + Date.now())
         }
     })
@@ -17,16 +18,17 @@ module.exports = async function (ctx) {
         display: "name",
         schema: {
             name: {
-                type: "string"
+                type: "string",
+                required: true
             },
             mimeType: {
-                type: "string"
+                type: "string",
             },
             path: {
-                type: "string"
+                type: "string",
             },
             byte: {
-                type: "number"
+                type: "integer",
             }
         },
         fookie: {
@@ -54,8 +56,10 @@ module.exports = async function (ctx) {
         }
     })
 
-    ctx.effect("form_data", function (payload) {
-        console.log("form data");
+    ctx.effect("form_data", function(payload) {
+        payload.ctx.upload(payload.req, null, async function(err) {
+            console.log(err);
+        })
     })
 
 }
