@@ -1,6 +1,6 @@
 {
     "name": "fookie",
-    "version": "0.0.8",
+    "version": "0.0.9",
     "description": "This README would normally document whatever steps are necessary to get your application up and running.",
     "main": "./src/index.js",
     "scripts": {

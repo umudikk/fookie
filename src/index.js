@@ -10,6 +10,9 @@ const check = require('./helpers/check');
 const calcEffects = require('./helpers/calcEffect')
 const calcFilter = require('./helpers/calcFilter')
 const calcModify = require('./helpers/calcModify')
+const client = require('prom-client');
+
+
 
 class Fookie {
     connection
@@ -39,6 +42,11 @@ class Fookie {
             clear,
             hasFields,
         }
+
+        const collectDefaultMetrics = client.collectDefaultMetrics;
+        const Registry = client.Registry;
+        const register = new Registry();
+        collectDefaultMetrics({ register });
 
         this.app = express()
         this.app.use(cors())
@@ -258,14 +266,14 @@ class Fookie {
         this.use(require("./defaults/plugin/health_check"))
         this.use(require("./defaults/plugin/login_register"))
         this.use(require("./defaults/plugin/default_life_cycle_controls"))
-        this.store.set("validators",{
-            string:"isString",
-            number:"isNumber",
-            integer:"isInteger",
-            jsonb:"isObject",
-            json:"isObject",
-            date:"isDate",
-            time:"isTime"
+        this.store.set("validators", {
+            string: "isString",
+            number: "isNumber",
+            integer: "isInteger",
+            jsonb: "isObject",
+            json: "isObject",
+            date: "isDate",
+            time: "isTime"
         })
     }
 
