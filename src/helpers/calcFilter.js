@@ -6,7 +6,7 @@ module.exports = async function(payload) {
 
     if (arr.every(e => payload.ctx.filters.has(e))) {
         for (let f of arr) {
-            await payload.ctx.filters.get(f)({ user, model, req, body, method, result, ctx })
+            await payload.ctx.filters.get(f)(payload)
         }
     } else {
         throw Error('Mssing filter')
