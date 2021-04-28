@@ -47,5 +47,5 @@ Thumbs.db
 *.flv
 *.mov
 *.wmv
-
+lib
 .npmrc

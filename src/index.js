@@ -13,16 +13,6 @@ const calcModify = require('./helpers/calcModify')
 const client = require('prom-client');
 
 class Fookie {
-    connection
-    requester
-    models
-    roles
-    effects
-    paginate
-    app
-    routines
-    sequelize
-
     constructor() {
         this.connection = null
         this.models = new Map()
@@ -51,8 +41,7 @@ class Fookie {
         this.app.use(bodyParser.urlencoded({ extended: true }))
         this.app.use(bodyParser.json())
 
-        this.app.use(async(req, res) => {
-
+        this.app.post("/",async(req, res) => {
             //req
             let payload = {
                 user: {},

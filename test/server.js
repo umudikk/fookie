@@ -1,8 +1,8 @@
-const Fookie = require("../src")
+const Fookie = require(".././lib/index.js")
 
 let start = async function() {
     const api = new Fookie()
-    await api.connect("postgres://postgres:123@localhost:5432/roleplay")
+    await api.connect("postgres://postgres:123@localhost:5432/test")
     await api.model({
         name: "blog",
         display: "title",
