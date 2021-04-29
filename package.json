@@ -1,8 +1,8 @@
 {
     "name": "fookie",
-    "version": "0.0.9",
+    "version": "0.1.0",
     "description": "This README would normally document whatever steps are necessary to get your application up and running.",
-    "main": "./src/index.js",
+    "main": "./lib/index.js",
     "scripts": {
         "build": "babel src -d lib",
         "babel-node": "babel-node --presets='@babel/preset-env'",
