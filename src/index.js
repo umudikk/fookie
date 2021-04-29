@@ -114,7 +114,7 @@ class Fookie {
             return await Model.count(query)
         })
 
-        model.methods.set("try", async function(payload) {
+        model.methods.set("test", async function(payload) {
             await payload.ctx.helpers.calcModify(payload)
             return await payload.ctx.helpers.check(payload)
         })

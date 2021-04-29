@@ -20,7 +20,6 @@ module.exports = async function(ctx) {
         } else {
             return false
         }
-
     })
 
     system_user.methods.set("register", async({ body }) => {
