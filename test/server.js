@@ -1,8 +1,8 @@
-const Fookie = require(".././lib/index.js")
+const Fookie = require("../src/")
 
-let start = async function() {
+let start = async function () {
     const api = new Fookie()
-    await api.connect("postgres://postgres:123@localhost:5432/test")
+    await api.connect("postgres://postgres:123@localhost:5432/roleplay")
     await api.model({
         name: "blog",
         display: "title",
@@ -116,25 +116,39 @@ let start = async function() {
         ctx.store.set("per_page_count", 12)
     })
 
-    api.rule("has_page", async({ user, req, body, options, model, query, method, ctx }) => {
+    api.rule("has_page", async ({ user, req, body, options, model, query, method, ctx }) => {
         return typeof body.page == "number"
     })
 
-    api.modify("paginate", async({ user, req, body, options, model, query, method, ctx }) => {
+    api.modify("paginate", async ({ user, req, body, options, model, query, method, ctx }) => {
         let count = ctx.store.get("per_page_count")
         query.offset = count * body.page
         query.limit = count
     })
 
-    api.modify("published", async({ user, req, body, model, options, query, method, ctx }) => {
+    api.modify("published", async ({ user, req, body, model, options, query, method, ctx }) => {
         query.where.published = true
     })
 
-    api.role("editor", async(user, method) => {
+    api.role("editor", async (user, method) => {
         if (user.type) {
             return user.type == "editor"
         }
     })
+
+
+    setTimeout(async () => {
+        let res = await api.run({
+            user: { system: true },
+            model: "system_user",
+            method: "login",
+            body: {
+                email: "admin",
+                password: "admin"
+            }
+        })
+        console.log(res);
+    }, 3000);
 
     await api.listen(7777)
 

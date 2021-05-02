@@ -1,4 +1,4 @@
-module.exports = async function({ user, req, body, model, query, method, ctx }) {
+module.exports = async function ({ user, req, body, model, query, method, ctx }) {
     if (user.id == undefined) return false
     let system_admin = ctx.models.get('system_admin').model
     let count = await system_admin.count({

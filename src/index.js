@@ -41,7 +41,7 @@ class Fookie {
         this.app.use(bodyParser.urlencoded({ extended: true }))
         this.app.use(bodyParser.json())
 
-        this.app.post("/",async(req, res) => {
+        this.app.post("/", async (req, res) => {
             //req
             let payload = {
                 user: {},
@@ -54,7 +54,7 @@ class Fookie {
             }
 
             //auth
-            jwt.verify(payload.token, this.store.get("secret"), async(err, parsed) => {
+            jwt.verify(payload.token, this.store.get("secret"), async (err, parsed) => {
                 let User = this.models.get('system_user').model
                 if (!err) {
                     payload.user = await User.findOne({ where: { id: parsed.id } })
@@ -81,18 +81,18 @@ class Fookie {
     model(model) {
         let Model = this.sequelize.define(model.name, modelParser(model).schema)
         model.methods = new Map()
-        model.methods.set("get", async function({ query }) {
+        model.methods.set("get", async function ({ query }) {
             let res = await Model.findOne(query)
             return res
         })
-        model.methods.set("post", async function({ body }) {
+        model.methods.set("post", async function ({ body }) {
             let document = Model.build(body)
             return await document.save()
         })
-        model.methods.set("getAll", async function({ query }) {
+        model.methods.set("getAll", async function ({ query }) {
             return await Model.findAll(query)
         })
-        model.methods.set("delete", async function({ query }) {
+        model.methods.set("delete", async function ({ query }) {
             let document = await Model.findOne(query)
             if (document instanceof Model) {
                 return await document.destroy(query)
@@ -100,21 +100,21 @@ class Fookie {
                 return false
             }
         })
-        model.methods.set("patch", async function({ query, body }) {
+        model.methods.set("patch", async function ({ query, body }) {
             let document = await Model.findOne(query)
             for (let f in body) {
                 document[f] = body[f]
             }
             return await document.save()
         })
-        model.methods.set("schema", async function() {
+        model.methods.set("schema", async function () {
             return model.schema
         })
-        model.methods.set("count", async function({ query }) {
+        model.methods.set("count", async function ({ query }) {
             return await Model.count(query)
         })
 
-        model.methods.set("test", async function(payload) {
+        model.methods.set("test", async function (payload) {
             await payload.ctx.helpers.calcModify(payload)
             return await payload.ctx.helpers.check(payload)
         })
@@ -256,6 +256,8 @@ class Fookie {
         this.use(require("./defaults/plugin/health_check"))
         this.use(require("./defaults/plugin/login_register"))
         this.use(require("./defaults/plugin/default_life_cycle_controls"))
+        this.use(require("./defaults/plugin/after_before_calculater"))
+
         this.store.set("validators", {
             string: "isString",
             number: "isNumber",
@@ -265,6 +267,10 @@ class Fookie {
             date: "isDate",
             time: "isTime"
         })
+
+        this.store.set("secret", "secret")
+
+
     }
 
     listen(port) {

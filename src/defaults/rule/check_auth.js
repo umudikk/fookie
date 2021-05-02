@@ -20,7 +20,7 @@ module.exports = async function (payload) {
             let modifies = []
             try {
                 modifies = payload.model.fookie[payload.method].reject[role]
-            } catch (error) {}
+            } catch (error) { }
             await Promise.all(modifies.map(m => payload.ctx.modifies.get(m)(payload)))
 
         }

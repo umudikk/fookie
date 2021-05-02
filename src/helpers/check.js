@@ -1,8 +1,5 @@
 module.exports = async function (payload) {
-    let rules = []
-    rules.concat(payload.ctx.store.get("default_life_cycle_controls").rules[payload.method]?.before || [])
-    rules.concat(payload.model.fookie[payload.method]?.rule || [])
-    rules.concat(payload.ctx.store.get("default_life_cycle_controls").rules[payload.method]?.after || [])
+    let rules = payload.ctx.helpers.defaultArrayCalc(payload)
 
     rules.push("check_auth")
 

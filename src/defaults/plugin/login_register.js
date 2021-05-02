@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken")
 const { sha512 } = require("js-sha512")
 
-module.exports = async function(ctx) {
+module.exports = async function (ctx) {
     let system_user = ctx.models.get("system_user")
     let system_admin = ctx.models.get("system_admin")
 
@@ -11,7 +11,7 @@ module.exports = async function(ctx) {
         await system_admin.model.create({ system_user: user.id })
     }
 
-    system_user.methods.set("login", async({ body }) => {
+    system_user.methods.set("login", async ({ body }) => {
         let { email, password } = body
         let user = await system_user.model.findOne({ where: { email, password: sha512(password) } })
         if (user instanceof system_user.model) {
@@ -22,7 +22,7 @@ module.exports = async function(ctx) {
         }
     })
 
-    system_user.methods.set("register", async({ body }) => {
+    system_user.methods.set("register", async ({ body }) => {
         let { email, password } = body
         let user = await system_user.model.findOne({ email, password: sha512(password) })
         if (user instanceof system_user.model) {
