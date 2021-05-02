@@ -1,6 +1,6 @@
 {
     "name": "fookie",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "This README would normally document whatever steps are necessary to get your application up and running.",
     "main": "./lib/index.js",
     "scripts": {

@@ -17,7 +17,6 @@ module.exports = {
             required: true,
             type: "string",
             input: "password",
-            default:"normal"
         }
     },
     fookie: {
