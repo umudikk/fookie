@@ -79,6 +79,7 @@ class Fookie {
     }
 
     model(model) {
+        console.log(model.name);
         let Model = this.sequelize.define(model.name, modelParser(model).schema)
         model.methods = new Map()
         model.methods.set("get", async function ({ query }) {
@@ -137,7 +138,7 @@ class Fookie {
             payload.result = null
 
             this.store.get("befores").forEach(async b => {
-                await ctx.modifies.get(b)(payload)
+                await this.modifies.get(b)(payload)
             });
 
             await calcModify(payload)
@@ -149,7 +150,7 @@ class Fookie {
                 }
 
                 this.store.get("afters").forEach(async b => {
-                    await ctx.modifies.get(b)(payload)
+                    await this.modifies.get(b)(payload)
                 });
 
                 return payload.result
@@ -229,11 +230,6 @@ class Fookie {
         await this.model(require('./defaults/model/system_user.js'))
         await this.model(require('./defaults/model/system_admin.js'))
 
-        //SYNC
-        let models = await system_model.findAll()
-        for (let m of models) {
-            await this.model(modelParser(m))
-        }
 
         //RULES
         this.rule('has_fields', require('./defaults/rule/has_fields'))
@@ -279,10 +275,15 @@ class Fookie {
         })
 
         this.store.set("secret", "secret")
-        this.store.set("afters",[])
-        this.store.set("befores",[])
+        this.store.set("afters", [])
+        this.store.set("befores", [])
 
 
+        //SYNC
+        let models = await system_model.findAll()
+        for (let m of models) {
+            await this.model(m)
+        }
     }
 
     listen(port) {

@@ -2,7 +2,7 @@ const Fookie = require("../src/")
 
 let start = async function () {
     const api = new Fookie()
-    await api.connect("postgres://postgres:123@localhost:5432/test")
+    await api.connect("postgres://postgres:123@localhost:5432/roleplay")
     await api.model({
         name: "blog",
         display: "title",
@@ -135,22 +135,29 @@ let start = async function () {
             return user.type == "editor"
         }
     })
-
-
-    setTimeout(async () => {
-        let res = await api.run({
-            user: { system: true },
-            model: "system_user",
-            method: "login",
-            body: {
-                email: "admin",
-                password: "admin"
-            }
+    api.use((ctx) => {
+        ctx.store.get("befores").push("hi")
+        ctx.modifies.set("hi", (payload) => {
+            console.log("hi");
         })
-        console.log(res);
-    }, 3000);
+    })
 
-    await api.listen(7777)
+    setInterval(async () => {
+        console.log(
+            await api.run({
+            user: { system: true },
+            model: "test_model",
+            method: "count",
+            body: {
+                message: Date.now() + "ho"
+            }
+        }));
+    }, 1000); 
+
+
+
+
+        await api.listen(7777)
 
 }
 
