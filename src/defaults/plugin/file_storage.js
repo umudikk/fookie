@@ -1,7 +1,6 @@
 var multer = require('multer')
 
 module.exports = async function (ctx) {
-    console.log(1);
     var storage = multer.diskStorage({
         destination: function (req, file, cb) {
             cb(null, '/uploads')

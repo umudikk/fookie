@@ -130,11 +130,16 @@ class Fookie {
     }
 
     async run(payload) {
-        console.log(payload);
         if (this.models.has(payload.model) && typeof this.models.get(payload.model).methods.get(payload.method) == 'function') {
             let model = this.models.get(payload.model)
             payload.model = model
             payload.ctx = this
+            payload.result = null
+
+            this.store.get("befores").forEach(async b => {
+                await ctx.modifies.get(b)(payload)
+            });
+
             await calcModify(payload)
             if (await check(payload)) {
                 payload.result = await model.methods.get(payload.method)(payload)
@@ -142,6 +147,11 @@ class Fookie {
                     await calcFilter(payload)
                     calcEffects(payload)
                 }
+
+                this.store.get("afters").forEach(async b => {
+                    await ctx.modifies.get(b)(payload)
+                });
+
                 return payload.result
 
             } else {
@@ -269,6 +279,8 @@ class Fookie {
         })
 
         this.store.set("secret", "secret")
+        this.store.set("afters",[])
+        this.store.set("befores",[])
 
 
     }

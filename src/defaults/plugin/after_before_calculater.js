@@ -12,8 +12,6 @@ module.exports = async function (ctx) {
         try {
             arr.concat(payload.ctx.store.get("default_life_cycle_controls").modifies[payload.method].after)
         } catch (error) { }
-        console.log("defaultArrayCalc");
-        console.log(arr);
         return arr
     }
 }
