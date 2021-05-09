@@ -11,6 +11,7 @@ const calcEffects = require('./helpers/calcEffect')
 const calcFilter = require('./helpers/calcFilter')
 const calcModify = require('./helpers/calcModify')
 const client = require('prom-client');
+const lodash = require('lodash')
 
 class Fookie {
     constructor() {
@@ -29,6 +30,7 @@ class Fookie {
             findRequiredRoles,
             clear,
             hasFields,
+            lodash
         }
 
         const collectDefaultMetrics = client.collectDefaultMetrics;
@@ -144,11 +146,8 @@ class Fookie {
             await calcModify(payload)
             if (await check(payload)) {
                 payload.result = await model.methods.get(payload.method)(payload)
-                if (payload.result) {
-                    await calcFilter(payload)
-                    calcEffects(payload)
-                }
-
+                await calcFilter(payload)
+                calcEffects(payload)
                 this.store.get("afters").forEach(async b => {
                     await this.modifies.get(b)(payload)
                 });
@@ -258,11 +257,11 @@ class Fookie {
         this.modify("attributes", require('./defaults/modify/attributes'))
 
         // PLUGINS
-        this.use(require("./defaults/plugin/file_storage"))
-        this.use(require("./defaults/plugin/health_check"))
-        this.use(require("./defaults/plugin/login_register"))
-        this.use(require("./defaults/plugin/default_life_cycle_controls"))
-        this.use(require("./defaults/plugin/after_before_calculater"))
+        await this.use(require("./defaults/plugin/file_storage"))
+        await this.use(require("./defaults/plugin/health_check"))
+        await this.use(require("./defaults/plugin/login_register"))
+        await this.use(require("./defaults/plugin/default_life_cycle_controls"))
+        await this.use(require("./defaults/plugin/after_before_calculater"))
 
         this.store.set("validators", {
             string: "isString",

@@ -1,4 +1,4 @@
-module.exports = function({ user, method, model, result, ctx }) {
+module.exports = function ({ user, method, model, result, ctx }) {
     ctx.models.forEach(model => {
         let tmp = {}
         for (let i in model) {

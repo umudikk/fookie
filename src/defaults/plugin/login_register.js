@@ -24,7 +24,7 @@ module.exports = async function (ctx) {
 
     system_user.methods.set("register", async ({ body }) => {
         let { email, password } = body
-        let user = await system_user.model.findOne({ email, password: sha512(password) })
+        let user = await system_user.model.findOne({ where: { email, password: sha512(password) } })
         if (user instanceof system_user.model) {
             return false
         } else {

@@ -1,5 +1,5 @@
 module.exports = function (payload) {
-    let arr = payload.ctx.helpers.defaultArrayCalc(payload)
+    let arr = payload.ctx.helpers.defaultArrayCalc(payload,"effect")
 
     if (arr.every(e => payload.ctx.effects.has(e))) {
         arr.forEach((eff) => {

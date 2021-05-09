@@ -1,6 +1,6 @@
-module.exports = function ({ model, body }) {
-    if (Array.isArray(options.show) && options.show.every(a => typeof a == "string")) {
-        query.attributes = options.show
+module.exports = function ({ model, body, options, query }) {
+    if (Array.isArray(options.attributes) && options.attributes.every(a => typeof a == "string")) {
+        query.attributes = options.attributes
     } else {
 
     }

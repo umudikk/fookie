@@ -1,9 +1,11 @@
 module.exports = async function (payload) {
-    let roles = ["system"]
+    if (payload.user.system == true) { return true }
+
+    let roles = []   
+
+    roles = roles.concat(payload.ctx.helpers.defaultArrayCalc(payload,"role"))
+
     let keys = Object.keys(payload.body)
-
-    roles = roles.concat(payload.model.fookie[payload.method].role || [])
-
     if (["post", "patch"].includes(payload.method)) {
         roles = roles.concat(...keys.map(key => payload.model.schema[key].write != undefined ? payload.model.schema[key].write : []))
     }

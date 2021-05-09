@@ -3,19 +3,23 @@ module.exports = {
     display: "name",
     schema: {
         name: {
+            input:"text",
             required: true,
             type: "string",
         },
         display: {
+            input:"text",
             required: true,
             type: "string",
             default: "id"
         },
         schema: {
+            input:"json",
             required: true,
             type: "jsonb",
         },
         fookie: {
+            input:"json",
             required: true,
             type: "jsonb",
         },

@@ -142,22 +142,20 @@ let start = async function () {
         })
     })
 
-    setInterval(async () => {
-        console.log(
-            await api.run({
+    setTimeout(async () => {
+        let res = await api.run({
             user: { system: true },
             model: "test_model",
-            method: "count",
+            method: "getAll",
             body: {
                 message: Date.now() + "ho"
             }
-        }));
-    }, 1000); 
+        })
+        console.log(res.length);
+    }, 2000);
 
-
-
-
-        await api.listen(7777)
+    
+    await api.listen(7777)
 
 }
 

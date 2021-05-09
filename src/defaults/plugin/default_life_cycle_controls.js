@@ -1,140 +1,153 @@
 module.exports = async function (ctx) {
     ctx.store.set("default_life_cycle_controls", {
-        modifies: {
+        modify: {
             post: {
-                before: [],
-                after: [],
+                modify: {
+                    before: [],
+                    after: [],
+                },
+                rule: {
+                    before: ["has_fields", "check_type",],
+                    after: [],
+                },
+                filter: {
+                    before: [],
+                    after: ["filter"],
+                },
+                effect: {
+                    before: [],
+                    after: [],
+                },
             },
             get: {
-                before: [],
-                after: [],
+                modify: {
+                    before: [],
+                    after: [],
+                },
+                rule: {
+                    before: [],
+                    after: [],
+                },
+                filter: {
+                    before: [],
+                    after: ["filter"],
+                },
+                effect: {
+                    before: [],
+                    after: [],
+                },
             },
             getAll: {
-                before: [],
-                after: [],
+                modify: {
+                    before: [],
+                    after: [],
+                },
+                rule: {
+
+                    before: [],
+                    after: [],
+                },
+                filter: {
+                    before: [],
+                    after: ["filter"],
+                },
+                effect: {
+                    before: [],
+                    after: [],
+                },
             },
             patch: {
-                before: [],
-                after: [],
+                modify: {
+                    before: [],
+                    after: [],
+                },
+                rule: {
+                    before: ["has_fields", "check_type"],
+                    after: [],
+                },
+                filter: {
+                    before: [],
+                    after: ["filter"],
+                },
+                effect: {
+                    before: [],
+                    after: [],
+                },
             },
             delete: {
-                before: [],
-                after: [],
+                modify: {
+                    before: [],
+                    after: [],
+                },
+                rule: {
+                    before: [],
+                    after: [],
+                },
+                filter: {
+                    before: [],
+                    after: [],
+                },
+                effect: {
+                    before: [],
+                    after: [],
+                },
             },
             count: {
-                before: [],
-                after: [],
+                modify: {
+                    before: [],
+                    after: [],
+                },
+                rule: {
+                    before: [],
+                    after: [],
+                },
+                filter: {
+                    before: [],
+                    after: [],
+                },
+                effect: {
+                    before: [],
+                    after: [],
+                },
             },
             schema: {
-                before: [],
-                after: [],
+                modify: {
+                    before: [],
+                    after: [],
+                },
+                rule: {
+                    before: [],
+                    after: [],
+                },
+                filter: {
+                    before: [],
+                    after: ["filter"],
+                },
+                effect: {
+                    before: [],
+                    after: [],
+                },
             },
             try: {
-                after: [],
-                before: [],
+                modify: {
+                    before: [],
+                    after: [],
+                },
+                rule: {
+                    before: ["has_fields", "check_type",],
+                    after: [],
+                },
+                filter: {
+                    before: [],
+                    after: ["filter"],
+                },
+                effect: {
+                    before: [],
+                    after: [],
+                },
             },
-        },
-        rules: {
-            post:{
-                before:["has_fields","check_type",],
-                after:[],
-            },
-            get:{
-                before:["valid_attributes"],
-                after:[],
-            },
-            getAll:{
-                before:["valid_attributes"],
-                after:[],
-            },
-            patch:{
-                before:["has_fields","check_type"],
-                after:[],
-            },
-            delete:{
-                before:[],
-                after:[],
-            },
-            count:{
-                before:[],
-                after:[],
-            },
-            schema:{
-                before:[],
-                after:[],
-            },
-            try:{
-                after:[],
-                before:[],
-            },
-        },
-        filters: {
-            post:{
-                before:[],
-                after:[],
-            },
-            get:{
-                before:[],
-                after:[],
-            },
-            getAll:{
-                before:[],
-                after:[],
-            },
-            patch:{
-                before:[],
-                after:[],
-            },
-            delete:{
-                before:[],
-                after:[],
-            },
-            count:{
-                before:[],
-                after:[],
-            },
-            schema:{
-                before:[],
-                after:[],
-            },
-            try:{
-                after:[],
-                before:[],
-            },
-        },
-        effects: {
-            post:{
-                before:[],
-                after:[],
-            },
-            get:{
-                before:[],
-                after:[],
-            },
-            getAll:{
-                before:[],
-                after:[],
-            },
-            patch:{
-                before:[],
-                after:[],
-            },
-            delete:{
-                before:[],
-                after:[],
-            },
-            count:{
-                before:[],
-                after:[],
-            },
-            schema:{
-                before:[],
-                after:[],
-            },
-            try:{
-                after:[],
-                before:[],
-            },
-        },
+        }
+
     })
 }
+

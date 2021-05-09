@@ -1,5 +1,5 @@
 module.exports = async function (payload) {
-    let rules = payload.ctx.helpers.defaultArrayCalc(payload)
+    let rules = payload.ctx.helpers.defaultArrayCalc(payload,"rule")
 
     rules.push("check_auth")
 

@@ -1,5 +1,5 @@
 module.exports = async function (payload) {
-    let arr = payload.ctx.helpers.defaultArrayCalc(payload)
+    let arr = payload.ctx.helpers.defaultArrayCalc(payload, "filter")
 
     if (arr.every(e => payload.ctx.filters.has(e))) {
         for (let f of arr) {

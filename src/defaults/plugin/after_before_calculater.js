@@ -1,17 +1,18 @@
 module.exports = async function (ctx) {
-    ctx.helpers.defaultArrayCalc = function (payload) {
+    ctx.helpers.defaultArrayCalc = function (payload, mapName) {
         let arr = []
+
         try {
-            arr.concat(payload.ctx.store.get("default_life_cycle_controls").modifies[payload.method].before)
+            arr = arr.concat(payload.ctx.store.get("default_life_cycle_controls")[payload.method][mapName].before)
         } catch (error) { }
 
         try {
-            arr.concat(payload.model.fookie[payload.method].modifies)
+            arr = arr.concat(payload.model.fookie[payload.method][mapName])
+        } catch (error) { }
+        try {
+            arr = arr.concat(payload.ctx.store.get("default_life_cycle_controls")[payload.method][mapName].after)
         } catch (error) { }
 
-        try {
-            arr.concat(payload.ctx.store.get("default_life_cycle_controls").modifies[payload.method].after)
-        } catch (error) { }
-        return arr
+        return arr.filter(item => item != undefined)
     }
 }
