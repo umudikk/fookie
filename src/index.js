@@ -133,11 +133,17 @@ class Fookie {
     }
 
     async run(payload) {
+        payload.response = {
+            errors: [],
+            status: 200,
+            data: null
+        }
         if (this.models.has(payload.model) && typeof this.models.get(payload.model).methods.get(payload.method) == 'function') {
             let model = this.models.get(payload.model)
             payload.model = model
             payload.ctx = this
             payload.result = null
+
 
             this.store.get("befores").forEach(async b => {
                 await this.modifies.get(b)(payload)
@@ -145,7 +151,7 @@ class Fookie {
 
             await calcModify(payload)
             if (await check(payload)) {
-                payload.result = await model.methods.get(payload.method)(payload)
+                payload.result = await model.methods.get(payload.method)(payload) 
                 await calcFilter(payload)
                 calcEffects(payload)
                 this.store.get("afters").forEach(async b => {
@@ -155,10 +161,10 @@ class Fookie {
                 return payload.result
 
             } else {
-                return "NO AUTH"
+                payload.response.errors.push("No Auth")
             }
         } else {
-            return "Model yok veya Method desteklenmiyor."
+            payload.response.errors.push("No Model or method")
         }
     }
 
