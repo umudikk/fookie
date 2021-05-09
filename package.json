@@ -1,7 +1,7 @@
 {
     "name": "fookie",
-    "version": "0.1.1",
-    "description": "This README would normally document whatever steps are necessary to get your application up and running.",
+    "version": "0.1.2",
+    "description": "API Generator.",
     "main": "./lib/index.js",
     "scripts": {
         "build": "babel src -d lib",
