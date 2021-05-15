@@ -1,12 +1,13 @@
 const filter = require("../../helpers/filter")
-module.exports = async function ({ user, method, model, result, body, ctx }) {
-    if (Array.isArray(result)) {
+module.exports = async function (payload) {
+    return
+    if (Array.isArray(payload.response.data)) {
         let arr = []
-        for (let r of result) {
-            arr.push(await filter({ user, method, model, result: r, body, ctx }))
+        for (let r of payload.response.data) {
+            arr.push(await filter(payload))
         }
-        result = arr
+        payload.response.data = arr
     } else {
-        result = await filter({ user, method, model, result, body, ctx })
+        payload.response.data = await filter(payload)
     }
 }

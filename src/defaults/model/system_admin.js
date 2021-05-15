@@ -4,10 +4,7 @@ module.exports = {
     schema: {
         system_user: {
             type: "integer",
-            relation: {
-                model: "system_user",
-                key: "id"
-            },
+            relation: "system_user",
         },
     },
     fookie: {

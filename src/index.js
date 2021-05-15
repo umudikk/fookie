@@ -47,6 +47,8 @@ class Fookie {
             //req
             let payload = {
                 user: {},
+                res,
+                req,
                 method: req.body.method || "",
                 body: req.body.body || {},
                 model: req.body.model || "",
@@ -61,7 +63,10 @@ class Fookie {
                 if (!err) {
                     payload.user = await User.findOne({ where: { id: parsed.id } })
                 }
-                res.json(await this.run(payload))
+                let { res, req, user, ...log } = payload
+                console.log(log);
+                await this.run(payload)
+                res.status(payload.response.status).json(payload.response.data)
             });
         })
     }
@@ -81,8 +86,10 @@ class Fookie {
     }
 
     model(model) {
-        console.log(model.name);
-        let Model = this.sequelize.define(model.name, modelParser(model).schema)
+        console.log("-----------------------------------------------------------");
+        console.log("model: " + model.name);
+        console.log("display: " + model.display);
+        let Model = this.sequelize.define(model.name, modelParser(model.schema))
         model.methods = new Map()
         model.methods.set("get", async function ({ query }) {
             let res = await Model.findOne(query)
@@ -125,6 +132,8 @@ class Fookie {
         this.sequelize.sync({ alter: true })
         model.model = Model
         this.models.set(model.name, model)
+        console.log("-----------------------------------------------------------");
+        console.log("");
         return model
     }
 
@@ -138,34 +147,37 @@ class Fookie {
             status: 200,
             data: null
         }
+
+        // -------------
+        this.store.get("befores").forEach(async b => {
+            await this.effects.get(b)(payload)
+        });
+        // -------------
         if (this.models.has(payload.model) && typeof this.models.get(payload.model).methods.get(payload.method) == 'function') {
             let model = this.models.get(payload.model)
             payload.model = model
             payload.ctx = this
-            payload.result = null
-
-
-            this.store.get("befores").forEach(async b => {
-                await this.modifies.get(b)(payload)
-            });
-
             await calcModify(payload)
             if (await check(payload)) {
-                payload.result = await model.methods.get(payload.method)(payload) 
+                payload.response.data = await model.methods.get(payload.method)(payload)
                 await calcFilter(payload)
                 calcEffects(payload)
-                this.store.get("afters").forEach(async b => {
-                    await this.modifies.get(b)(payload)
-                });
-
-                return payload.result
-
             } else {
                 payload.response.errors.push("No Auth")
+                payload.response.status = 400
             }
         } else {
             payload.response.errors.push("No Model or method")
+            payload.response.status = 400
         }
+
+        // -------------
+        this.store.get("afters").forEach(async b => {
+            await this.effects.get(b)(payload)
+        });
+        // -------------
+
+        return payload.response
     }
 
     routine(name, time, func) {
@@ -217,7 +229,6 @@ class Fookie {
             await this.prepareDefaults()
             console.log('Connection has been established successfully.');
 
-
         } catch (error) {
             console.error('Unable to connect to the database:', error);
         }
@@ -228,6 +239,11 @@ class Fookie {
     }
 
     async prepareDefaults() {
+        this.store.set("secret", "secret")
+        this.store.set("afters", [])
+        this.store.set("befores", [])
+
+
 
         //MODELS
         let model = await this.model(require('./defaults/model/system_model.js'))
@@ -262,14 +278,10 @@ class Fookie {
         this.modify("set_defaults", require('./defaults/modify/set_defaults'))
         this.modify("attributes", require('./defaults/modify/attributes'))
 
-        // PLUGINS
-        await this.use(require("./defaults/plugin/file_storage"))
-        await this.use(require("./defaults/plugin/health_check"))
-        await this.use(require("./defaults/plugin/login_register"))
-        await this.use(require("./defaults/plugin/default_life_cycle_controls"))
-        await this.use(require("./defaults/plugin/after_before_calculater"))
+
 
         this.store.set("validators", {
+            boolean: "isBoolean",
             string: "isString",
             number: "isNumber",
             integer: "isInteger",
@@ -279,16 +291,21 @@ class Fookie {
             time: "isTime"
         })
 
-        this.store.set("secret", "secret")
-        this.store.set("afters", [])
-        this.store.set("befores", [])
-
-
         //SYNC
         let models = await system_model.findAll()
         for (let m of models) {
             await this.model(m)
         }
+
+
+
+        // PLUGINS
+        await this.use(require("./defaults/plugin/file_storage"))
+        await this.use(require("./defaults/plugin/health_check"))
+        await this.use(require("./defaults/plugin/login_register"))
+        await this.use(require("./defaults/plugin/default_life_cycle_controls"))
+        await this.use(require("./defaults/plugin/after_before_calculater"))
+        return true
     }
 
     listen(port) {

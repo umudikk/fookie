@@ -1,9 +1,8 @@
 module.exports = async function (payload) {
     if (payload.user.system == true) { return true }
+    let roles = []
 
-    let roles = []   
-
-    roles = roles.concat(payload.ctx.helpers.defaultArrayCalc(payload,"role"))
+    roles = roles.concat(payload.ctx.helpers.defaultArrayCalc(payload, "role"))
 
     let keys = Object.keys(payload.body)
     if (["post", "patch"].includes(payload.method)) {
@@ -17,7 +16,7 @@ module.exports = async function (payload) {
             if (res) {
                 return true
             }
-
+            payload.response.errors.push(`You are not: ${role}`)
             let modifies = []
             try {
                 modifies = payload.model.fookie[payload.method].reject[role]

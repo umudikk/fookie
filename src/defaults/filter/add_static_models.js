@@ -1,4 +1,4 @@
-module.exports = function ({ user, method, model, result, ctx }) {
+module.exports = function ({ response, ctx }) {
     ctx.models.forEach(model => {
         let tmp = {}
         for (let i in model) {
@@ -6,7 +6,7 @@ module.exports = function ({ user, method, model, result, ctx }) {
                 tmp[i] = model[i]
             }
         }
-        result.push(tmp)
+        response.data.push(tmp)
     });
-    return result
+    return response.data
 }
