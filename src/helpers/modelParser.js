@@ -1,14 +1,17 @@
 const { DataTypes } = require('sequelize')
 
 //SEQULIZE SCHEMA CONVERTER
-module.exports = function (model) {
-    if (model.name && model.schema && model.fookie) {
-        for (let f in model.schema) {
-            let type = model.schema[f].type ? model.schema[f].type : "integer"
-            model.schema[f].type = DataTypes[type.toUpperCase()]
+module.exports = function (schema) {
+    let ormSchema = JSON.parse(JSON.stringify(schema));
+    for (let f in ormSchema) {
+        let type = "integer"
+        if (ormSchema[f].type) {
+            type = ormSchema[f].type
+        } else {
+            schema[f].type = "integer"
         }
-    } else {
-        console.log('Model yanlış gönüştürme yapılamaz.');
+
+        ormSchema[f].type = DataTypes[type.toUpperCase()]
     }
-    return model
+    return ormSchema
 }
