@@ -85,7 +85,7 @@ class Fookie {
         this.modifies.set(name, before)
     }
 
-    model(model) {
+    async model(model) {
         console.log("-----------------------------------------------------------");
         console.log("model: " + model.name);
         console.log("display: " + model.display);
@@ -150,7 +150,8 @@ class Fookie {
 
         // -------------
         for (let b of this.store.get("befores")) {
-            await this.effects.get(b)(payload)        }
+            await this.effects.get(b)(payload)
+        }
         // -------------
         if (this.models.has(payload.model) && typeof this.models.get(payload.model).methods.get(payload.method) == 'function') {
             let model = this.models.get(payload.model)
@@ -290,14 +291,6 @@ class Fookie {
             date: "isDate",
             time: "isTime"
         })
-
-        //SYNC
-        let models = await system_model.findAll()
-        for (let m of models) {
-            await this.model(m)
-        }
-
-
 
         // PLUGINS
         await this.use(require("./defaults/plugin/file_storage"))
