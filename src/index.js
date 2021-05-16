@@ -282,6 +282,7 @@ class Fookie {
 
 
         this.store.set("validators", {
+            float:"isNumber",
             boolean: "isBoolean",
             string: "isString",
             number: "isNumber",
