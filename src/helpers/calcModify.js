@@ -1,10 +1,13 @@
 module.exports = async function (payload) {
-    let arr = payload.ctx.helpers.defaultArrayCalc(payload, "modifiy")
-    if (arr.every(e => payload.ctx.modifies.has(e))) {
-        arr.forEach(async (m) => {
+    let arr = payload.ctx.helpers.defaultArrayCalc(payload, "modify")
+    if (arr.every(function (e) {
+        return payload.ctx.modifies.has(e)
+    })) {
+        for (let m of arr) {
             await payload.ctx.modifies.get(m)(payload)
-        });
+        }
+
     } else {
-        throw Error('Mssing modify')
+        throw Error('Missing modify')
     }
 }

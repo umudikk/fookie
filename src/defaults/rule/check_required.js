@@ -1,6 +1,6 @@
-module.exports = async function({ user, req, model, query, method, body, ctx }) {
+module.exports = async function ({ model, body }) {
     let search = ["", null, undefined]
-    let keys = Object.keys(model.schema)
+    let keys = Object.keys(body)
     for (let key of keys) {
         if (model.schema[key].required) {
             if (search.includes(body[key])) {

@@ -149,9 +149,8 @@ class Fookie {
         }
 
         // -------------
-        this.store.get("befores").forEach(async b => {
-            await this.effects.get(b)(payload)
-        });
+        for (let b of this.store.get("befores")) {
+            await this.effects.get(b)(payload)        }
         // -------------
         if (this.models.has(payload.model) && typeof this.models.get(payload.model).methods.get(payload.method) == 'function') {
             let model = this.models.get(payload.model)
@@ -172,9 +171,9 @@ class Fookie {
         }
 
         // -------------
-        this.store.get("afters").forEach(async b => {
+        for (let b of this.store.get("afters")) {
             await this.effects.get(b)(payload)
-        });
+        }
         // -------------
 
         return payload.response
@@ -277,6 +276,7 @@ class Fookie {
         this.modify('password', require('./defaults/modify/password'))
         this.modify("set_defaults", require('./defaults/modify/set_defaults'))
         this.modify("attributes", require('./defaults/modify/attributes'))
+        this.modify("get_target", require('./defaults/modify/get_target'))
 
 
 
