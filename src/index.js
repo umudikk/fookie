@@ -59,13 +59,24 @@ class Fookie {
 
             //auth
             jwt.verify(payload.token, this.store.get("secret"), async (err, parsed) => {
-                let User = this.models.get('system_user').model
-                if (!err) {
-                    payload.user = await User.findOne({ where: { id: parsed.id } })
+                console.log(parsed);
+                let userResponse = await this.run({
+                    user: { system: true },
+                    model: "system_user",
+                    method: "get",
+                    query: {
+                        where: {
+                            id: parsed.id
+                        }
+                    }
+                })
+
+                if (userResponse.status == 200) {
+                    payload.user = userResponse.data
                 }
-                let { res, req, user, ...log } = payload
-                console.log(log);
+
                 await this.run(payload)
+                console.log(payload.response);
                 res.status(payload.response.status).json(payload.response.data)
             });
         })
@@ -91,31 +102,30 @@ class Fookie {
         console.log("display: " + model.display);
         let Model = this.sequelize.define(model.name, modelParser(model.schema))
         model.methods = new Map()
-        model.methods.set("get", async function ({ query }) {
+
+        model.methods.set("get", async function ({ query, response }) {
             let res = await Model.findOne(query)
+            if (res) {
+                response.status = 200
+            } else {
+                response.status = 300
+            }
             return res
-        })
-        model.methods.set("post", async function ({ body }) {
-            let document = Model.build(body)
-            return await document.save()
         })
         model.methods.set("getAll", async function ({ query }) {
             return await Model.findAll(query)
         })
-        model.methods.set("delete", async function ({ query }) {
-            let document = await Model.findOne(query)
-            if (document instanceof Model) {
-                return await document.destroy(query)
-            } else {
-                return false
-            }
+        model.methods.set("post", async function ({ body, target }) {
+            return await target.save()
         })
-        model.methods.set("patch", async function ({ query, body }) {
-            let document = await Model.findOne(query)
+        model.methods.set("delete", async function ({ query, target }) {
+            return await target.remove()
+        })
+        model.methods.set("patch", async function ({ query, body, target }) {
             for (let f in body) {
-                document[f] = body[f]
+                target[f] = body[f]
             }
-            return await document.save()
+            return await target.save()
         })
         model.methods.set("schema", async function () {
             return model.schema
@@ -259,6 +269,7 @@ class Fookie {
         this.rule('has_pwemail', require('./defaults/rule/has_pwemail'))
         this.rule('check_type', require('./defaults/rule/check_type'))
         this.rule('valid_attributes', require('./defaults/rule/valid_attributes'))
+        this.rule('need_target', require('./defaults/rule/need_target'))
 
         //ROLES 
         this.role('everybody', require('./defaults/role/everybody'))
@@ -277,12 +288,12 @@ class Fookie {
         this.modify('password', require('./defaults/modify/password'))
         this.modify("set_defaults", require('./defaults/modify/set_defaults'))
         this.modify("attributes", require('./defaults/modify/attributes'))
-        this.modify("get_target", require('./defaults/modify/get_target'))
+        this.modify("set_target", require('./defaults/modify/set_target'))
 
 
 
         this.store.set("validators", {
-            float:"isNumber",
+            float: "isNumber",
             boolean: "isBoolean",
             string: "isString",
             number: "isNumber",

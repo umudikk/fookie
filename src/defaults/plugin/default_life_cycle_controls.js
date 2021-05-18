@@ -1,5 +1,5 @@
 module.exports = async function (ctx) {
-    ctx.store.set("default_life_cycle_controls", {       
+    ctx.store.set("default_life_cycle_controls", {
         get: {
             modify: {
                 before: [],
@@ -38,12 +38,12 @@ module.exports = async function (ctx) {
             },
         },
         post: {
-            modify: {
-                before: [],
+            modify: {                
+                before: ["set_target"],
                 after: [],
             },
             rule: {
-                before: ["has_fields", "check_type","check_required"],
+                before: ["need_target","has_fields", "check_type", "check_required"],
                 after: [],
             },
             filter: {
@@ -57,11 +57,11 @@ module.exports = async function (ctx) {
         },
         patch: {
             modify: {
-                before: ["get_target"],
+                before: ["set_target"],
                 after: [],
             },
             rule: {
-                before: ["has_fields", "check_type","check_required"],
+                before: ["need_target","has_fields", "check_type", "check_required"],
                 after: [],
             },
             filter: {
@@ -75,11 +75,11 @@ module.exports = async function (ctx) {
         },
         delete: {
             modify: {
-                before: [],
+                before: ["set_target"],
                 after: [],
             },
             rule: {
-                before: [],
+                before: ["need_target",],
                 after: [],
             },
             filter: {

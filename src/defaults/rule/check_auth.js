@@ -1,5 +1,5 @@
 module.exports = async function (payload) {
-    if (payload.user.system == true) { return true }
+    if (payload.user.hasOwnProperty("system")) { return payload.user.system }
     let roles = []
 
     roles = roles.concat(payload.ctx.helpers.defaultArrayCalc(payload, "role"))
