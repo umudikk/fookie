@@ -119,7 +119,7 @@ class Fookie {
             return await target.save()
         })
         model.methods.set("delete", async function ({ query, target }) {
-            return await target.remove()
+            return await target.destroy()
         })
         model.methods.set("patch", async function ({ query, body, target }) {
             for (let f in body) {
