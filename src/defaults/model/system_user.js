@@ -14,7 +14,6 @@ module.exports = {
             read: ['nobody'],
         },
         type: {
-            required: true,
             type: "string",
             input: "text",
         }

@@ -16,12 +16,12 @@ module.exports = {
         schema: {
             input:"json",
             required: true,
-            type: "jsonb",
+            type: "object",
         },
         fookie: {
             input:"json",
             required: true,
-            type: "jsonb",
+            type: "object",
         },
     },
     fookie: {

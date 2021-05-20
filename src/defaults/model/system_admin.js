@@ -3,7 +3,6 @@ module.exports = {
     display: "name",
     schema: {
         system_user: {
-            type: "integer",
             relation: "system_user",
         },
     },

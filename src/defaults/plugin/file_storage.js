@@ -27,7 +27,7 @@ module.exports = async function (ctx) {
                 type: "string",
             },
             byte: {
-                type: "integer",
+                type: "number",
             }
         },
         fookie: {

@@ -4,7 +4,8 @@ const jwt = require('jsonwebtoken')
 const bodyParser = require('body-parser')
 const { hasFields, clear } = require('./helpers')
 const cors = require('cors')
-const modelParser = require('./helpers/modelParser')
+const sequlizeModelParser = require('./helpers/sequlizeModelParser')
+const mongooseModelParser = require('./helpers/mongooseModelParser')
 const findRequiredRoles = require('./helpers/requiredRoles');
 const check = require('./helpers/check');
 const calcEffects = require('./helpers/calcEffect')
@@ -12,10 +13,10 @@ const calcFilter = require('./helpers/calcFilter')
 const calcModify = require('./helpers/calcModify')
 const client = require('prom-client');
 const lodash = require('lodash')
-
+var mongoose = require('mongoose')
+var { Schema } = mongoose
 class Fookie {
     constructor() {
-        this.connection = null
         this.models = new Map()
         this.roles = new Map()
         this.rules = new Map()
@@ -52,7 +53,11 @@ class Fookie {
                 method: req.body.method || "",
                 body: req.body.body || {},
                 model: req.body.model || "",
-                query: req.body.query || {},
+                query: req.body.query || {
+                    where: {
+
+                    }
+                },
                 token: req.headers.token || "",
                 options: req.body.options || {},
             }
@@ -80,6 +85,7 @@ class Fookie {
                 res.status(payload.response.status).json(payload.response.data)
             });
         })
+
     }
 
     role(name, role) {
@@ -99,12 +105,12 @@ class Fookie {
     async model(model) {
         console.log("-----------------------------------------------------------");
         console.log("model: " + model.name);
-        console.log("display: " + model.display);
-        let Model = this.sequelize.define(model.name, modelParser(model.schema))
+        let Model = mongoose.model(model.name, new Schema(mongooseModelParser(model)))
+
         model.methods = new Map()
 
         model.methods.set("get", async function ({ query, response }) {
-            let res = await Model.findOne(query)
+            let res = await Model.findOne(query.where)
             if (res) {
                 response.status = 200
             } else {
@@ -113,13 +119,13 @@ class Fookie {
             return res
         })
         model.methods.set("getAll", async function ({ query }) {
-            return await Model.findAll(query)
+            return await Model.find(query.where)
         })
         model.methods.set("post", async function ({ body, target }) {
             return await target.save()
         })
         model.methods.set("delete", async function ({ query, target }) {
-            return await target.destroy()
+            return await target.remove()
         })
         model.methods.set("patch", async function ({ query, body, target }) {
             for (let f in body) {
@@ -131,7 +137,7 @@ class Fookie {
             return model.schema
         })
         model.methods.set("count", async function ({ query }) {
-            return await Model.count(query)
+            return await Model.countDocuments(query.where)
         })
 
         model.methods.set("test", async function (payload) {
@@ -139,7 +145,7 @@ class Fookie {
             return await payload.ctx.helpers.check(payload)
         })
 
-        this.sequelize.sync({ alter: true })
+        // this.sequelize.sync({ alter: true })
         model.model = Model
         this.models.set(model.name, model)
         console.log("-----------------------------------------------------------");
@@ -157,7 +163,6 @@ class Fookie {
             status: 200,
             data: null
         }
-
         // -------------
         for (let b of this.store.get("befores")) {
             await this.effects.get(b)(payload)
@@ -170,8 +175,10 @@ class Fookie {
             await calcModify(payload)
             if (await check(payload)) {
                 payload.response.data = await model.methods.get(payload.method)(payload)
-                await calcFilter(payload)
-                calcEffects(payload)
+                if (payload.response.status == 200) {
+                    await calcFilter(payload)
+                    calcEffects(payload)
+                }
             } else {
                 payload.response.errors.push("No Auth")
                 payload.response.status = 400
@@ -198,7 +205,14 @@ class Fookie {
         this.routines.set(name, routine)
     }
 
-    async connect(url, config = {}) {
+    async connect(url, config) {
+        this.prepareDefaults()
+        await mongoose.connect(url, config).then(() => {
+            console.log("CONNECTED...");
+        })
+
+
+        /*
         this.sequelize = new Sequelize(url, {
             logging: false,
             define: {
@@ -236,12 +250,15 @@ class Fookie {
         })
         try {
             await this.sequelize.authenticate();
-            await this.prepareDefaults()
+            
             console.log('Connection has been established successfully.');
 
         } catch (error) {
             console.error('Unable to connect to the database:', error);
         }
+        */
+
+        return true
     }
 
     async use(cb) {
@@ -256,8 +273,7 @@ class Fookie {
 
 
         //MODELS
-        let model = await this.model(require('./defaults/model/system_model.js'))
-        let system_model = model.model
+        await this.model(require('./defaults/model/system_model.js'))
         await this.model(require('./defaults/model/system_user.js'))
         await this.model(require('./defaults/model/system_admin.js'))
 
@@ -307,9 +323,10 @@ class Fookie {
         // PLUGINS
         await this.use(require("./defaults/plugin/file_storage"))
         await this.use(require("./defaults/plugin/health_check"))
-        await this.use(require("./defaults/plugin/login_register"))
+
         await this.use(require("./defaults/plugin/default_life_cycle_controls"))
         await this.use(require("./defaults/plugin/after_before_calculater"))
+        await this.use(require("./defaults/plugin/login_register"))
         return true
     }
 
