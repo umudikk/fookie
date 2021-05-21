@@ -30,7 +30,7 @@ module.exports = async function (ctx) {
             model: "system_admin",
             method: "post",
             body: {
-                system_user: user.data.id
+                system_user: user.data._id
             }
         })
     }
@@ -50,9 +50,8 @@ module.exports = async function (ctx) {
             }
         })
         let user = res.data
-        console.log(user);
         if (user instanceof model.model) {
-            const token = jwt.sign({ id: user.id }, ctx.store.get("secret"));
+            const token = jwt.sign({ _id: user._id }, ctx.store.get("secret"));
             return token
         } else {
             response.status = 400

@@ -50,38 +50,32 @@ class Fookie {
                 user: {},
                 res,
                 req,
-                method: req.body.method || "",
-                body: req.body.body || {},
-                model: req.body.model || "",
-                query: req.body.query || {
-                    where: {
-
-                    }
-                },
-                token: req.headers.token || "",
-                options: req.body.options || {},
+                method: req.body.hasOwnProperty("method") ? req.body.method : "",
+                body: req.body.hasOwnProperty("body") ? req.body.body : {},
+                model: req.body.hasOwnProperty("model") ? req.body.model : "",
+                query: req.body.hasOwnProperty("query") ? req.body.query : { where: {} },
+                token: req.headers.hasOwnProperty("token") ? req.headers.token : "",
+                options: req.body.hasOwnProperty("options") ? req.body.options : {},
             }
 
             //auth
             jwt.verify(payload.token, this.store.get("secret"), async (err, parsed) => {
-                console.log(parsed);
-                let userResponse = await this.run({
-                    user: { system: true },
-                    model: "system_user",
-                    method: "get",
-                    query: {
-                        where: {
-                            id: parsed.id
+                if (!err) {
+                    let userResponse = await this.run({
+                        user: { system: true },
+                        model: "system_user",
+                        method: "get",
+                        query: {
+                            where: {
+                                _id: parsed._id
+                            }
                         }
+                    })
+                    if (userResponse.status == 200) {
+                        payload.user = userResponse.data
                     }
-                })
-
-                if (userResponse.status == 200) {
-                    payload.user = userResponse.data
                 }
-
                 await this.run(payload)
-                console.log(payload.response);
                 res.status(payload.response.status).json(payload.response.data)
             });
         })
@@ -165,7 +159,7 @@ class Fookie {
         }
         // -------------
         for (let b of this.store.get("befores")) {
-            await this.effects.get(b)(payload)
+            await this.modifies.get(b)(payload)
         }
         // -------------
         if (this.models.has(payload.model) && typeof this.models.get(payload.model).methods.get(payload.method) == 'function') {
@@ -245,14 +239,14 @@ class Fookie {
                 $iRegexp: Op.iRegexp, // ~* '^[h|a|t]' (PG only)
                 $notIRegexp: Op.notIRegexp, // !~* '^[h|a|t]' (PG only)          
                 $any: Op.any, // ANY ARRAY[2, 3]::INTEGER (PG only)
-
+    
             }
         })
         try {
             await this.sequelize.authenticate();
             
             console.log('Connection has been established successfully.');
-
+    
         } catch (error) {
             console.error('Unable to connect to the database:', error);
         }
@@ -268,7 +262,7 @@ class Fookie {
     async prepareDefaults() {
         this.store.set("secret", "secret")
         this.store.set("afters", [])
-        this.store.set("befores", [])
+        this.store.set("befores", ["default_payload"])
 
 
 
@@ -305,20 +299,12 @@ class Fookie {
         this.modify("set_defaults", require('./defaults/modify/set_defaults'))
         this.modify("attributes", require('./defaults/modify/attributes'))
         this.modify("set_target", require('./defaults/modify/set_target'))
+        this.modify("default_payload", require('./defaults/modify/default_payload'))
 
 
 
-        this.store.set("validators", {
-            float: "isNumber",
-            boolean: "isBoolean",
-            string: "isString",
-            number: "isNumber",
-            integer: "isInteger",
-            jsonb: "isObject",
-            json: "isObject",
-            date: "isDate",
-            time: "isTime"
-        })
+
+
 
         // PLUGINS
         await this.use(require("./defaults/plugin/file_storage"))
