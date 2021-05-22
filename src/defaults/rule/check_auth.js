@@ -6,8 +6,12 @@ module.exports = async function (payload) {
 
     let keys = Object.keys(payload.body)
     if (["post", "patch"].includes(payload.method)) {
-        roles = roles.concat(...keys.map(key => payload.model.schema[key].write != undefined ? payload.model.schema[key].write : []))
+        keys.forEach((key) => {
+            roles = roles.concat(payload.model.schema[key].write)
+
+        })
     }
+
     if (roles.length == 0) return true
 
     if (roles.every(e => payload.ctx.roles.has(e))) {

@@ -1,6 +1,5 @@
 const { Sequelize, Op } = require('sequelize');
 const express = require('express')
-const jwt = require('jsonwebtoken')
 const bodyParser = require('body-parser')
 const { hasFields, clear } = require('./helpers')
 const cors = require('cors')
@@ -46,38 +45,15 @@ class Fookie {
 
         this.app.post("/", async (req, res) => {
             //req
-            let payload = {
-                user: {},
-                res,
-                req,
-                method: req.body.hasOwnProperty("method") ? req.body.method : "",
-                body: req.body.hasOwnProperty("body") ? req.body.body : {},
-                model: req.body.hasOwnProperty("model") ? req.body.model : "",
-                query: req.body.hasOwnProperty("query") ? req.body.query : { where: {} },
-                token: req.headers.hasOwnProperty("token") ? req.headers.token : "",
-                options: req.body.hasOwnProperty("options") ? req.body.options : {},
-            }
-
+            let payload = req.body
+            payload.req = req
+            payload.res = res
+            payload.user = {}
+            payload.token = req.headers.token
             //auth
-            jwt.verify(payload.token, this.store.get("secret"), async (err, parsed) => {
-                if (!err) {
-                    let userResponse = await this.run({
-                        user: { system: true },
-                        model: "system_user",
-                        method: "get",
-                        query: {
-                            where: {
-                                _id: parsed._id
-                            }
-                        }
-                    })
-                    if (userResponse.status == 200) {
-                        payload.user = userResponse.data
-                    }
-                }
-                await this.run(payload)
-                res.status(payload.response.status).json(payload.response.data)
-            });
+
+            await this.run(payload)
+            res.status(payload.response.status).json(payload.response.data)
         })
 
     }
@@ -116,12 +92,16 @@ class Fookie {
             return await Model.find(query.where)
         })
         model.methods.set("post", async function ({ body, target }) {
-            return await target.save()
+            for (let f in body) {
+                target[f] = body[f]
+            }
+            let res = await target.save()
+            return res
         })
-        model.methods.set("delete", async function ({ query, target }) {
+        model.methods.set("delete", async function ({ target }) {
             return await target.remove()
         })
-        model.methods.set("patch", async function ({ query, body, target }) {
+        model.methods.set("patch", async function ({ body, target }) {
             for (let f in body) {
                 target[f] = body[f]
             }
@@ -131,7 +111,11 @@ class Fookie {
             return model.schema
         })
         model.methods.set("count", async function ({ query }) {
-            return await Model.countDocuments(query.where)
+            console.log(query);
+
+            let res = await Model.count(query.where)
+            console.log(res);
+            return res
         })
 
         model.methods.set("test", async function (payload) {
@@ -157,6 +141,7 @@ class Fookie {
             status: 200,
             data: null
         }
+        payload.ctx = this
         // -------------
         for (let b of this.store.get("befores")) {
             await this.modifies.get(b)(payload)
@@ -165,21 +150,22 @@ class Fookie {
         if (this.models.has(payload.model) && typeof this.models.get(payload.model).methods.get(payload.method) == 'function') {
             let model = this.models.get(payload.model)
             payload.model = model
-            payload.ctx = this
+
             await calcModify(payload)
             if (await check(payload)) {
                 payload.response.data = await model.methods.get(payload.method)(payload)
+                console.log(payload.response.errors);
                 if (payload.response.status == 200) {
                     await calcFilter(payload)
                     calcEffects(payload)
                 }
             } else {
                 payload.response.errors.push("No Auth")
-                payload.response.status = 400
+                payload.response.status = 300
             }
         } else {
             payload.response.errors.push("No Model or method")
-            payload.response.status = 400
+            payload.response.status = 300
         }
 
         // -------------
@@ -200,7 +186,7 @@ class Fookie {
     }
 
     async connect(url, config) {
-        this.prepareDefaults()
+        await this.prepareDefaults()
         await mongoose.connect(url, config).then(() => {
             console.log("CONNECTED...");
         })
@@ -262,7 +248,7 @@ class Fookie {
     async prepareDefaults() {
         this.store.set("secret", "secret")
         this.store.set("afters", [])
-        this.store.set("befores", ["default_payload"])
+        this.store.set("befores", ["default_payload", "set_user"])
 
 
 
@@ -299,6 +285,7 @@ class Fookie {
         this.modify("set_defaults", require('./defaults/modify/set_defaults'))
         this.modify("attributes", require('./defaults/modify/attributes'))
         this.modify("set_target", require('./defaults/modify/set_target'))
+        this.modify("set_user", require('./defaults/modify/set_user'))
         this.modify("default_payload", require('./defaults/modify/default_payload'))
 
 
@@ -309,10 +296,10 @@ class Fookie {
         // PLUGINS
         await this.use(require("./defaults/plugin/file_storage"))
         await this.use(require("./defaults/plugin/health_check"))
-
         await this.use(require("./defaults/plugin/default_life_cycle_controls"))
         await this.use(require("./defaults/plugin/after_before_calculater"))
         await this.use(require("./defaults/plugin/login_register"))
+
         return true
     }
 

@@ -8,6 +8,7 @@ let validators = {
     integer: "isInteger",
     jsonb: "isObject",
     json: "isObject",
+    object:"isObject",
     date: "isDate",
     time: "isTime"
 }
@@ -17,11 +18,13 @@ module.exports = async function ({ model, response, body, ctx }) {
         if (typeof model.schema[field].relation == "string") {
             isValid = true
         } else {
+            console.log(field);
+            console.log(model.schema[field].type);
             isValid = await validate[validators[model.schema[field].type]](body[field])
         }
         if (!isValid) {
             response.errors.push(`[Check_Type] Invalid type: ${model.schema[field].type}`)
-            response.errors.push(`[Check_Type] Invalid value: ${body[field]}`)         
+            response.errors.push(`[Check_Type] Invalid value: ${body[field]}`)
             return false
         }
 

@@ -1,16 +1,13 @@
 const jwt = require("jsonwebtoken")
 const { sha512 } = require("js-sha512")
-
 module.exports = async function (ctx) {
     let system_user = ctx.models.get("system_user")
-
+    
     let res = await ctx.run({
         user: { system: true },
         model: "system_user",
         method: "count",
-        query: { where: {} }
     })
-
     let count = res.data
 
     if (count == 0) {
@@ -24,7 +21,6 @@ module.exports = async function (ctx) {
                 type: "normal"
             }
         })
-        console.log(user);
         await ctx.run({
             user: { system: true },
             model: "system_admin",
@@ -54,7 +50,7 @@ module.exports = async function (ctx) {
             const token = jwt.sign({ _id: user._id }, ctx.store.get("secret"));
             return token
         } else {
-            response.status = 400
+            response.status = 300
             response.errors.push("login not system_model")
             return false
         }
@@ -76,7 +72,7 @@ module.exports = async function (ctx) {
         let count = res.data
         console.log(res);
         if (count != 0) {
-            response.status = 400
+            response.status = 300
             return false
         } else {
             user = await ctx.run({
