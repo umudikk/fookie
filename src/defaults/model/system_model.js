@@ -3,25 +3,27 @@ module.exports = {
     display: "name",
     schema: {
         name: {
-            input:"text",
+            input: "text",
             required: true,
             type: "string",
         },
         display: {
-            input:"text",
+            input: "text",
             required: true,
             type: "string",
             default: "id"
         },
         schema: {
-            input:"json",
+            input: "json",
             required: true,
             type: "object",
+            read: ["system_admin"]
         },
         fookie: {
-            input:"json",
+            input: "json",
             required: true,
             type: "object",
+            read: ["system_admin"]
         },
     },
     fookie: {

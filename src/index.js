@@ -13,6 +13,7 @@ const calcModify = require('./helpers/calcModify')
 const client = require('prom-client');
 const lodash = require('lodash')
 var mongoose = require('mongoose')
+const deepMerge = require("deepmerge")
 var { Schema } = mongoose
 class Fookie {
     constructor() {
@@ -30,7 +31,8 @@ class Fookie {
             findRequiredRoles,
             clear,
             hasFields,
-            lodash
+            lodash,
+            deepMerge
         }
 
         const collectDefaultMetrics = client.collectDefaultMetrics;
@@ -48,7 +50,6 @@ class Fookie {
             let payload = req.body
             payload.req = req
             payload.res = res
-            payload.user = {}
             payload.token = req.headers.token
             //auth
             await this.run(payload)
