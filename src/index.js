@@ -51,7 +51,6 @@ class Fookie {
             payload.user = {}
             payload.token = req.headers.token
             //auth
-
             await this.run(payload)
             res.status(payload.response.status).json(payload.response.data)
         })
@@ -73,8 +72,6 @@ class Fookie {
     }
 
     async model(model) {
-        console.log("-----------------------------------------------------------");
-        console.log("model: " + model.name);
         let Model = mongoose.model(model.name, new Schema(mongooseModelParser(model)))
 
         model.methods = new Map()
@@ -84,12 +81,17 @@ class Fookie {
             if (res) {
                 response.status = 200
             } else {
-                response.status = 300
+                response.status = 201
             }
             return res
         })
         model.methods.set("getAll", async function ({ query }) {
-            return await Model.find(query.where)
+            let res = await Model.find(query.where)
+            if (res) {
+                return res
+            } else {
+                return []
+            }
         })
         model.methods.set("post", async function ({ body, target }) {
             for (let f in body) {
@@ -111,10 +113,7 @@ class Fookie {
             return model.schema
         })
         model.methods.set("count", async function ({ query }) {
-            console.log(query);
-
-            let res = await Model.count(query.where)
-            console.log(res);
+            let res = await Model.countDocuments(query.where)
             return res
         })
 
@@ -126,8 +125,6 @@ class Fookie {
         // this.sequelize.sync({ alter: true })
         model.model = Model
         this.models.set(model.name, model)
-        console.log("-----------------------------------------------------------");
-        console.log("");
         return model
     }
 
@@ -154,18 +151,18 @@ class Fookie {
             await calcModify(payload)
             if (await check(payload)) {
                 payload.response.data = await model.methods.get(payload.method)(payload)
-                console.log(payload.response.errors);
+
                 if (payload.response.status == 200) {
                     await calcFilter(payload)
                     calcEffects(payload)
                 }
             } else {
                 payload.response.errors.push("No Auth")
-                payload.response.status = 300
+                payload.response.status = 201
             }
         } else {
             payload.response.errors.push("No Model or method")
-            payload.response.status = 300
+            payload.response.status = 201
         }
 
         // -------------
@@ -173,7 +170,7 @@ class Fookie {
             await this.effects.get(b)(payload)
         }
         // -------------
-
+        console.log(payload.method, payload.model, payload.response.errors, payload.response.status);
         return payload.response
     }
 
@@ -186,12 +183,10 @@ class Fookie {
     }
 
     async connect(url, config) {
+
+
+        await mongoose.connect(url, config);
         await this.prepareDefaults()
-        await mongoose.connect(url, config).then(() => {
-            console.log("CONNECTED...");
-        })
-
-
         /*
         this.sequelize = new Sequelize(url, {
             logging: false,
@@ -237,8 +232,6 @@ class Fookie {
             console.error('Unable to connect to the database:', error);
         }
         */
-
-        return true
     }
 
     async use(cb) {
@@ -289,12 +282,8 @@ class Fookie {
         this.modify("default_payload", require('./defaults/modify/default_payload'))
 
 
-
-
-
-
         // PLUGINS
-        await this.use(require("./defaults/plugin/file_storage"))
+        //await this.use(require("./defaults/plugin/file_storage"))
         await this.use(require("./defaults/plugin/health_check"))
         await this.use(require("./defaults/plugin/default_life_cycle_controls"))
         await this.use(require("./defaults/plugin/after_before_calculater"))

@@ -26,11 +26,11 @@ module.exports = {
     },
     fookie: {
         get: {
-            role: ["system_admin"],
+            role: ["everybody"],
         },
         getAll: {
             filter: ["add_static_models"],
-            role: ["system_admin"],
+            role: ["everybody"],
         },
         patch: {
             role: ["system_admin"],
@@ -44,7 +44,7 @@ module.exports = {
             role: ["system_admin"],
         },
         schema: {
-            role: ["system_admin"],
+            role: [],
         },
         count: {
             role: ["system_admin"],

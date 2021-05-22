@@ -18,8 +18,6 @@ module.exports = async function ({ model, response, body, ctx }) {
         if (typeof model.schema[field].relation == "string") {
             isValid = true
         } else {
-            console.log(field);
-            console.log(model.schema[field].type);
             isValid = await validate[validators[model.schema[field].type]](body[field])
         }
         if (!isValid) {
