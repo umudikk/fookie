@@ -143,7 +143,20 @@ class Fookie {
             }
         })
         let target_model = res.data
-        if (target_model) { } else {
+        if (target_model) {
+
+            let res = await this.run({
+                user: { system: true },
+                method: "patch",
+                model: "system_model",
+                body: {
+                    name: model.name,
+                    display: model.display,
+                    schema: model.schema,
+                    fookie: model.fookie,
+                }
+            })            
+        } else {
             await this.run({
                 user: { system: true },
                 method: "post",
@@ -152,13 +165,11 @@ class Fookie {
                     name: model.name,
                     display: model.display,
                     schema: model.schema,
-                    fookie: model.schema,
+                    fookie: model.fookie,
                 }
             })
+            console.log("MODEL YARATILDI: " + model.name, res.status);
         }
-
-
-
 
         return model
     }
