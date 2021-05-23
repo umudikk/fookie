@@ -1,5 +1,5 @@
 module.exports = {
-    name: 'system_model',
+    name: 'system_menu',
     display: "name",
     schema: {
         name: {
@@ -7,37 +7,26 @@ module.exports = {
             required: true,
             type: "string",
         },
-        display: {
+        icon: {
             input: "text",
-            required: true,
             type: "string",
-            default: "id"
-        },
-        schema: {
-            input: "json",
-            required: true,
-            type: "object",
-        },
-        fookie: {
-            input: "json",
-            required: true,
-            type: "object",
         },
     },
     fookie: {
         get: {
             role: ["everybody"],
         },
-        getAll: {   
+        getAll: {
+            filter: [],
             role: ["everybody"],
         },
         patch: {
             role: ["system_admin"],
-            effect: ['sync'],
+            effect: [],
         },
         post: {
             role: ["system_admin"],
-            effect: ['sync'],
+            effect: [],
         },
         delete: {
             role: ["system_admin"],

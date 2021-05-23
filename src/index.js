@@ -13,7 +13,8 @@ const calcModify = require('./helpers/calcModify')
 const client = require('prom-client');
 const lodash = require('lodash')
 var mongoose = require('mongoose')
-const deepMerge = require("deepmerge")
+const deepMerge = require("deepmerge");
+const { display } = require('./defaults/model/system_model.js');
 var { Schema } = mongoose
 class Fookie {
     constructor() {
@@ -74,7 +75,6 @@ class Fookie {
 
     async model(model) {
         let Model = mongoose.model(model.name, new Schema(mongooseModelParser(model)))
-
         model.methods = new Map()
 
         model.methods.set("get", async function ({ query, response }) {
@@ -83,6 +83,7 @@ class Fookie {
                 response.status = 200
             } else {
                 response.status = 201
+                response.errors.push("get error")
             }
             return res
         })
@@ -123,9 +124,42 @@ class Fookie {
             return await payload.ctx.helpers.check(payload)
         })
 
-        // this.sequelize.sync({ alter: true })
+
+
         model.model = Model
         this.models.set(model.name, model)
+
+
+
+
+        let res = await this.run({
+            user: { system: true },
+            method: "get",
+            model: "system_model",
+            query: {
+                where: {
+                    name: model.name
+                }
+            }
+        })
+        let target_model = res.data
+        if (target_model) { } else {
+            await this.run({
+                user: { system: true },
+                method: "post",
+                model: "system_model",
+                body: {
+                    name: model.name,
+                    display: model.display,
+                    schema: model.schema,
+                    fookie: model.schema,
+                }
+            })
+        }
+
+
+
+
         return model
     }
 
@@ -162,7 +196,7 @@ class Fookie {
                 payload.response.status = 201
             }
         } else {
-            payload.response.errors.push("No Model or method")
+            payload.response.errors.push("No Model or method ", payload.model, " ", payload.method)
             payload.response.status = 201
         }
 
@@ -184,8 +218,6 @@ class Fookie {
     }
 
     async connect(url, config) {
-
-
         await mongoose.connect(url, config);
         await this.prepareDefaults()
         /*
@@ -244,13 +276,10 @@ class Fookie {
         this.store.set("afters", [])
         this.store.set("befores", ["default_payload", "set_user"])
 
-
-
-        //MODELS
-        await this.model(require('./defaults/model/system_model.js'))
-        await this.model(require('./defaults/model/system_user.js'))
-        await this.model(require('./defaults/model/system_admin.js'))
-
+        // IMPORTANT PLUGINS
+        await this.use(require("./defaults/plugin/after_before_calculater"))
+        await this.use(require("./defaults/plugin/health_check"))
+        await this.use(require("./defaults/plugin/default_life_cycle_controls"))
 
         //RULES
         this.rule('has_fields', require('./defaults/rule/has_fields'))
@@ -282,12 +311,22 @@ class Fookie {
         this.modify("set_user", require('./defaults/modify/set_user'))
         this.modify("default_payload", require('./defaults/modify/default_payload'))
 
+        //MODELS
+        await this.model(require('./defaults/model/system_model.js'))
+        await this.model(require('./defaults/model/system_menu.js'))
+        await this.model(require('./defaults/model/system_submenu.js'))
+        await this.model(require('./defaults/model/system_user.js'))
+        await this.model(require('./defaults/model/system_admin.js'))
+
+
+
+
+
 
         // PLUGINS
         //await this.use(require("./defaults/plugin/file_storage"))
-        await this.use(require("./defaults/plugin/health_check"))
-        await this.use(require("./defaults/plugin/default_life_cycle_controls"))
-        await this.use(require("./defaults/plugin/after_before_calculater"))
+
+
         await this.use(require("./defaults/plugin/login_register"))
 
         return true

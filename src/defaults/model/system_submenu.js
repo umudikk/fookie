@@ -1,34 +1,26 @@
 module.exports = {
-    name: 'system_model',
-    display: "name",
+    name: 'system_submenu',
+    display: "_id",
     schema: {
-        name: {
+
+        system_model: {
+            relation: "system_model"
+        },
+        system_menu: {
+            relation: "system_menu"
+        },
+        icon: {
             input: "text",
-            required: true,
             type: "string",
         },
-        display: {
-            input: "text",
-            required: true,
-            type: "string",
-            default: "id"
-        },
-        schema: {
-            input: "json",
-            required: true,
-            type: "object",
-        },
-        fookie: {
-            input: "json",
-            required: true,
-            type: "object",
-        },
+
     },
     fookie: {
         get: {
             role: ["everybody"],
         },
-        getAll: {   
+        getAll: {
+            filter: [],
             role: ["everybody"],
         },
         patch: {
