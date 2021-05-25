@@ -25,7 +25,7 @@ function response(status, data) {
 function clear(document) {
     let res = {}
     for (let i in document) {
-        if (i == "id" || i == "updatedAt" || i == "createdAt") {} else {
+        if (i == "_id" || i == "updatedAt" || i == "createdAt") {} else {
             res[i] = document[i]
         }
     }

@@ -11,7 +11,7 @@ module.exports = {
             input: "text",
             required: true,
             type: "string",
-            default: "id"
+            default: "_id"
         },
         schema: {
             input: "json",
