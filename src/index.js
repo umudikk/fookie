@@ -124,14 +124,8 @@ class Fookie {
             return await payload.ctx.helpers.check(payload)
         })
 
-
-
         model.model = Model
         this.models.set(model.name, model)
-
-
-
-
         let res = await this.run({
             user: { system: true },
             method: "get",
@@ -312,7 +306,7 @@ class Fookie {
 
         //FILTERS
         this.filter('filter', require('./defaults/filter/filter'))
-        this.filter('add_static_models', require('./defaults/filter/add_static_models'))
+       // this.filter('add_static_models', require('./defaults/filter/add_static_models'))
 
         //MODIFIES
         this.modify('password', require('./defaults/modify/password'))
