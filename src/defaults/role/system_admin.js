@@ -1,10 +1,15 @@
-module.exports = async function ({ user, req, body, model, query, method, ctx }) {
-    if (user.id == undefined) return false
-    let system_admin = ctx.models.get('system_admin').model
-    let count = await system_admin.count({
-        where: {
-            system_user: user.id
+module.exports = async function ({ user, ctx, model }) {
+    if (user._id == undefined) return false
+    let res = await ctx.run({
+        user: { system: true },
+        model: "system_admin",
+        method: "count",
+        query: {
+            where: {
+                system_user: user._id
+            }
         }
     })
+    let count = res.data
     return count >= 1
 }

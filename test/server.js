@@ -45,10 +45,7 @@ let start = async function () {
             },
             author: {
                 unique: false,
-                realtion: {
-                    model: "system_user",
-                    key: "id"
-                },
+                realtion:  "system_user",
                 required: true,
                 read: [],
                 write: []

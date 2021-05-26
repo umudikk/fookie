@@ -1,10 +1,10 @@
 const { Sequelize, Op } = require('sequelize');
 const express = require('express')
-const jwt = require('jsonwebtoken')
 const bodyParser = require('body-parser')
 const { hasFields, clear } = require('./helpers')
 const cors = require('cors')
-const modelParser = require('./helpers/modelParser')
+const sequlizeModelParser = require('./helpers/sequlizeModelParser')
+const mongooseModelParser = require('./helpers/mongooseModelParser')
 const findRequiredRoles = require('./helpers/requiredRoles');
 const check = require('./helpers/check');
 const calcEffects = require('./helpers/calcEffect')
@@ -12,10 +12,12 @@ const calcFilter = require('./helpers/calcFilter')
 const calcModify = require('./helpers/calcModify')
 const client = require('prom-client');
 const lodash = require('lodash')
-
+var mongoose = require('mongoose')
+const deepMerge = require("deepmerge");
+const { display } = require('./defaults/model/system_model.js');
+var { Schema } = mongoose
 class Fookie {
     constructor() {
-        this.connection = null
         this.models = new Map()
         this.roles = new Map()
         this.rules = new Map()
@@ -30,7 +32,8 @@ class Fookie {
             findRequiredRoles,
             clear,
             hasFields,
-            lodash
+            lodash,
+            deepMerge
         }
 
         const collectDefaultMetrics = client.collectDefaultMetrics;
@@ -45,41 +48,15 @@ class Fookie {
 
         this.app.post("/", async (req, res) => {
             //req
-            let payload = {
-                user: {},
-                res,
-                req,
-                method: req.body.method || "",
-                body: req.body.body || {},
-                model: req.body.model || "",
-                query: req.body.query || {},
-                token: req.headers.token || "",
-                options: req.body.options || {},
-            }
-
+            let payload = req.body
+            payload.req = req
+            payload.res = res
+            payload.token = req.headers.token
             //auth
-            jwt.verify(payload.token, this.store.get("secret"), async (err, parsed) => {
-                console.log(parsed);
-                let userResponse = await this.run({
-                    user: { system: true },
-                    model: "system_user",
-                    method: "get",
-                    query: {
-                        where: {
-                            id: parsed.id
-                        }
-                    }
-                })
-
-                if (userResponse.status == 200) {
-                    payload.user = userResponse.data
-                }
-
-                await this.run(payload)
-                console.log(payload.response);
-                res.status(payload.response.status).json(payload.response.data)
-            });
+            await this.run(payload)
+            res.status(payload.response.status).json(payload.response.data)
         })
+
     }
 
     role(name, role) {
@@ -97,31 +74,38 @@ class Fookie {
     }
 
     async model(model) {
-        console.log("-----------------------------------------------------------");
-        console.log("model: " + model.name);
-        console.log("display: " + model.display);
-        let Model = this.sequelize.define(model.name, modelParser(model.schema))
+        let Model = mongoose.model(model.name, new Schema(mongooseModelParser(model)))
         model.methods = new Map()
 
         model.methods.set("get", async function ({ query, response }) {
-            let res = await Model.findOne(query)
+            let res = await Model.findOne(query.where)
             if (res) {
                 response.status = 200
             } else {
-                response.status = 300
+                response.status = 201
+                response.errors.push("get error")
             }
             return res
         })
         model.methods.set("getAll", async function ({ query }) {
-            return await Model.findAll(query)
+            let res = await Model.find(query.where)
+            if (res) {
+                return res
+            } else {
+                return []
+            }
         })
         model.methods.set("post", async function ({ body, target }) {
-            return await target.save()
+            for (let f in body) {
+                target[f] = body[f]
+            }
+            let res = await target.save()
+            return res
         })
-        model.methods.set("delete", async function ({ query, target }) {
-            return await target.destroy()
+        model.methods.set("delete", async function ({ target }) {
+            return await target.remove()
         })
-        model.methods.set("patch", async function ({ query, body, target }) {
+        model.methods.set("patch", async function ({ body, target }) {
             for (let f in body) {
                 target[f] = body[f]
             }
@@ -131,7 +115,8 @@ class Fookie {
             return model.schema
         })
         model.methods.set("count", async function ({ query }) {
-            return await Model.count(query)
+            let res = await Model.countDocuments(query.where)
+            return res
         })
 
         model.methods.set("test", async function (payload) {
@@ -139,11 +124,47 @@ class Fookie {
             return await payload.ctx.helpers.check(payload)
         })
 
-        this.sequelize.sync({ alter: true })
         model.model = Model
         this.models.set(model.name, model)
-        console.log("-----------------------------------------------------------");
-        console.log("");
+        let res = await this.run({
+            user: { system: true },
+            method: "get",
+            model: "system_model",
+            query: {
+                where: {
+                    name: model.name
+                }
+            }
+        })
+        let target_model = res.data
+        if (target_model) {
+
+            let res = await this.run({
+                user: { system: true },
+                method: "patch",
+                model: "system_model",
+                body: {
+                    name: model.name,
+                    display: model.display,
+                    schema: model.schema,
+                    fookie: model.fookie,
+                }
+            })            
+        } else {
+            await this.run({
+                user: { system: true },
+                method: "post",
+                model: "system_model",
+                body: {
+                    name: model.name,
+                    display: model.display,
+                    schema: model.schema,
+                    fookie: model.fookie,
+                }
+            })
+            console.log("MODEL YARATILDI: " + model.name, res.status);
+        }
+
         return model
     }
 
@@ -157,28 +178,31 @@ class Fookie {
             status: 200,
             data: null
         }
-
+        payload.ctx = this
         // -------------
         for (let b of this.store.get("befores")) {
-            await this.effects.get(b)(payload)
+            await this.modifies.get(b)(payload)
         }
         // -------------
         if (this.models.has(payload.model) && typeof this.models.get(payload.model).methods.get(payload.method) == 'function') {
             let model = this.models.get(payload.model)
             payload.model = model
-            payload.ctx = this
+
             await calcModify(payload)
             if (await check(payload)) {
                 payload.response.data = await model.methods.get(payload.method)(payload)
-                await calcFilter(payload)
-                calcEffects(payload)
+
+                if (payload.response.status == 200) {
+                    await calcFilter(payload)
+                    calcEffects(payload)
+                }
             } else {
                 payload.response.errors.push("No Auth")
-                payload.response.status = 400
+                payload.response.status = 201
             }
         } else {
-            payload.response.errors.push("No Model or method")
-            payload.response.status = 400
+            payload.response.errors.push("No Model or method ", payload.model, " ", payload.method)
+            payload.response.status = 201
         }
 
         // -------------
@@ -186,7 +210,7 @@ class Fookie {
             await this.effects.get(b)(payload)
         }
         // -------------
-
+        console.log(payload.method, payload.model, payload.response.errors, payload.response.status);
         return payload.response
     }
 
@@ -198,7 +222,10 @@ class Fookie {
         this.routines.set(name, routine)
     }
 
-    async connect(url, config = {}) {
+    async connect(url, config) {
+        await mongoose.connect(url, config);
+        await this.prepareDefaults()
+        /*
         this.sequelize = new Sequelize(url, {
             logging: false,
             define: {
@@ -231,17 +258,18 @@ class Fookie {
                 $iRegexp: Op.iRegexp, // ~* '^[h|a|t]' (PG only)
                 $notIRegexp: Op.notIRegexp, // !~* '^[h|a|t]' (PG only)          
                 $any: Op.any, // ANY ARRAY[2, 3]::INTEGER (PG only)
-
+    
             }
         })
         try {
             await this.sequelize.authenticate();
-            await this.prepareDefaults()
+            
             console.log('Connection has been established successfully.');
-
+    
         } catch (error) {
             console.error('Unable to connect to the database:', error);
         }
+        */
     }
 
     async use(cb) {
@@ -251,16 +279,12 @@ class Fookie {
     async prepareDefaults() {
         this.store.set("secret", "secret")
         this.store.set("afters", [])
-        this.store.set("befores", [])
+        this.store.set("befores", ["default_payload", "set_user"])
 
-
-
-        //MODELS
-        let model = await this.model(require('./defaults/model/system_model.js'))
-        let system_model = model.model
-        await this.model(require('./defaults/model/system_user.js'))
-        await this.model(require('./defaults/model/system_admin.js'))
-
+        // IMPORTANT PLUGINS
+        await this.use(require("./defaults/plugin/after_before_calculater"))
+        await this.use(require("./defaults/plugin/health_check"))
+        await this.use(require("./defaults/plugin/default_life_cycle_controls"))
 
         //RULES
         this.rule('has_fields', require('./defaults/rule/has_fields'))
@@ -282,34 +306,34 @@ class Fookie {
 
         //FILTERS
         this.filter('filter', require('./defaults/filter/filter'))
-        this.filter('add_static_models', require('./defaults/filter/add_static_models'))
+       // this.filter('add_static_models', require('./defaults/filter/add_static_models'))
 
         //MODIFIES
         this.modify('password', require('./defaults/modify/password'))
         this.modify("set_defaults", require('./defaults/modify/set_defaults'))
         this.modify("attributes", require('./defaults/modify/attributes'))
         this.modify("set_target", require('./defaults/modify/set_target'))
+        this.modify("set_user", require('./defaults/modify/set_user'))
+        this.modify("default_payload", require('./defaults/modify/default_payload'))
+
+        //MODELS
+        await this.model(require('./defaults/model/system_model.js'))
+        await this.model(require('./defaults/model/system_menu.js'))
+        await this.model(require('./defaults/model/system_submenu.js'))
+        await this.model(require('./defaults/model/system_user.js'))
+        await this.model(require('./defaults/model/system_admin.js'))
 
 
 
-        this.store.set("validators", {
-            float: "isNumber",
-            boolean: "isBoolean",
-            string: "isString",
-            number: "isNumber",
-            integer: "isInteger",
-            jsonb: "isObject",
-            json: "isObject",
-            date: "isDate",
-            time: "isTime"
-        })
+
+
 
         // PLUGINS
-        await this.use(require("./defaults/plugin/file_storage"))
-        await this.use(require("./defaults/plugin/health_check"))
+        //await this.use(require("./defaults/plugin/file_storage"))
+
+
         await this.use(require("./defaults/plugin/login_register"))
-        await this.use(require("./defaults/plugin/default_life_cycle_controls"))
-        await this.use(require("./defaults/plugin/after_before_calculater"))
+
         return true
     }
 
