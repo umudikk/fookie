@@ -1,6 +1,6 @@
 module.exports = {
     name: 'system_admin',
-    display: "name",
+    display: "_id",
     schema: {
         system_user: {
             relation: "system_user",

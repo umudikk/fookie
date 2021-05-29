@@ -14,7 +14,7 @@ const client = require('prom-client');
 const lodash = require('lodash')
 var mongoose = require('mongoose')
 const deepMerge = require("deepmerge");
-const { display } = require('./defaults/model/system_model.js');
+
 var { Schema } = mongoose
 class Fookie {
     constructor() {
@@ -77,8 +77,8 @@ class Fookie {
         let Model = mongoose.model(model.name, new Schema(mongooseModelParser(model)))
         model.methods = new Map()
 
-        model.methods.set("get", async function ({ query, response }) {
-            let res = await Model.findOne(query.where)
+        model.methods.set("get", async function ({ query, response, attributes }) {
+            let res = await Model.findOne(query.where, attributes)
             if (res) {
                 response.status = 200
             } else {
@@ -87,8 +87,8 @@ class Fookie {
             }
             return res
         })
-        model.methods.set("getAll", async function ({ query }) {
-            let res = await Model.find(query.where)
+        model.methods.set("getAll", async function ({ query, attributes }) {
+            let res = await Model.find(query.where, attributes)
             if (res) {
                 return res
             } else {
@@ -149,7 +149,7 @@ class Fookie {
                     schema: model.schema,
                     fookie: model.fookie,
                 }
-            })            
+            })
         } else {
             await this.run({
                 user: { system: true },
@@ -306,12 +306,11 @@ class Fookie {
 
         //FILTERS
         this.filter('filter', require('./defaults/filter/filter'))
-       // this.filter('add_static_models', require('./defaults/filter/add_static_models'))
+        // this.filter('add_static_models', require('./defaults/filter/add_static_models'))
 
         //MODIFIES
         this.modify('password', require('./defaults/modify/password'))
         this.modify("set_defaults", require('./defaults/modify/set_defaults'))
-        this.modify("attributes", require('./defaults/modify/attributes'))
         this.modify("set_target", require('./defaults/modify/set_target'))
         this.modify("set_user", require('./defaults/modify/set_user'))
         this.modify("default_payload", require('./defaults/modify/default_payload'))
