@@ -112,7 +112,7 @@ class Fookie {
             return await target.save()
         })
         model.methods.set("schema", async function () {
-            return model.schema
+            return model
         })
         model.methods.set("count", async function ({ query }) {
             let res = await Model.countDocuments(query.where)
@@ -138,8 +138,7 @@ class Fookie {
         })
         let target_model = res.data
         if (target_model) {
-
-            let res = await this.run({
+            await this.run({
                 user: { system: true },
                 method: "patch",
                 model: "system_model",
