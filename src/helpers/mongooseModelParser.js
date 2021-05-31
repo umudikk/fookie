@@ -10,15 +10,15 @@ let DataTypes = {
     boolean: Schema.Types.Boolean,
     float: Schema.Types.Number,
     object: Schema.Types.Mixed,
-    id: Schema.Types.ObjectId
+    _id: Schema.Types.ObjectId
 }
 //MONGOOSE SCHEMA CONVERTER
 module.exports = function (model) {
     let _model = JSON.parse(JSON.stringify(model))
-    let type = "id"
+    let type = "_id"
     for (let f in _model.schema) {
         if (typeof _model.schema[f].relation == "string")
-            type = "id"
+            type = "_id"
         if (_model.schema[f].type) {
             type = _model.schema[f].type
         }
@@ -40,14 +40,18 @@ module.exports = function (model) {
         filter: [],
     }
 
+    let mixin = []
+
     for (let f of Object.keys(model.schema)) {
         model.schema[f] = deepMerge(model.schema[f], field)
     }
 
     for (let method of methods) {
-
         model.fookie[method] = deepMerge(model.fookie[method], tmp)
     }
+
+    model.mixin = deepMerge(model.mixin, mixin)
+
     return _model.schema
 
 }

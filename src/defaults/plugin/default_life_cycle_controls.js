@@ -7,7 +7,7 @@ module.exports = async function (ctx) {
             },
             rule: {
                 before: [],
-                after: [],
+                after: ["check_auth"],
             },
             filter: {
                 before: [],
@@ -26,7 +26,7 @@ module.exports = async function (ctx) {
             rule: {
 
                 before: [],
-                after: [],
+                after: ["check_auth"],
             },
             filter: {
                 before: [],
@@ -38,13 +38,13 @@ module.exports = async function (ctx) {
             },
         },
         post: {
-            modify: {                
+            modify: {
                 before: ["set_target"],
                 after: [],
             },
             rule: {
-                before: ["need_target","has_fields", "check_type", "check_required"],
-                after: [],
+                before: ["need_target", "has_fields", "check_type", "check_required"],
+                after: ["check_auth"],
             },
             filter: {
                 before: [],
@@ -61,8 +61,8 @@ module.exports = async function (ctx) {
                 after: [],
             },
             rule: {
-                before: ["need_target","has_fields", "check_type", "check_required"],
-                after: [],
+                before: ["need_target", "has_fields", "check_type", "check_required"],
+                after: ["check_auth"],
             },
             filter: {
                 before: [],
@@ -79,8 +79,8 @@ module.exports = async function (ctx) {
                 after: [],
             },
             rule: {
-                before: ["need_target",],
-                after: [],
+                before: ["need_target"],
+                after: ["check_auth"],
             },
             filter: {
                 before: [],
@@ -98,7 +98,7 @@ module.exports = async function (ctx) {
             },
             rule: {
                 before: [],
-                after: [],
+                after: ["check_auth"],
             },
             filter: {
                 before: [],
@@ -116,7 +116,7 @@ module.exports = async function (ctx) {
             },
             rule: {
                 before: [],
-                after: [],
+                after: ["check_auth"],
             },
             filter: {
                 before: [],
@@ -127,14 +127,14 @@ module.exports = async function (ctx) {
                 after: [],
             },
         },
-        try: {
+        test: {
             modify: {
                 before: [],
                 after: [],
             },
             rule: {
                 before: ["has_fields", "check_type",],
-                after: [],
+                after: ["check_auth"],
             },
             filter: {
                 before: [],

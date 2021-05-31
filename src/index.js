@@ -25,7 +25,9 @@ class Fookie {
         this.routines = new Map()
         this.filters = new Map()
         this.modifies = new Map()
+        this.mixins = new Map()
         this.store = new Map()
+
         this.helpers = {
             calcEffects,
             check,
@@ -63,18 +65,31 @@ class Fookie {
         this.roles.set(name, role)
     }
 
+    mixin(name, mixin) {
+        this.mixin.set(name, mixin)
+    }
+
     rule(name, rule) {
         this.rules.set(name, rule)
     }
+
     filter(name, filter) {
         this.filters.set(name, filter)
     }
+
     modify(name, before) {
         this.modifies.set(name, before)
     }
 
     async model(model) {
-        let Model = mongoose.model(model.name, new Schema(mongooseModelParser(model)))
+        let parsedModel = mongooseModelParser(model)
+
+        for (let mixin of model.mixin) {
+            let mxn = this.mixins.get(mixin)
+            parsedModel = deepMerge(mxn, parsedModel)
+        }
+
+        let Model = mongoose.model(model.name, new Schema(parsedModel))
         model.methods = new Map()
 
         model.methods.set("get", async function ({ query, response, attributes }) {
@@ -224,51 +239,6 @@ class Fookie {
     async connect(url, config) {
         await mongoose.connect(url, config);
         await this.prepareDefaults()
-        /*
-        this.sequelize = new Sequelize(url, {
-            logging: false,
-            define: {
-                freezeTableName: true
-            },
-            operatorsAliases: {
-                $eq: Op.eq, // = 3
-                $ne: Op.ne, // != 20
-                $is: Op.is, // IS NULL
-                $not: Op.not, // IS NOT TRUE
-                $or: Op.or, // (someAttribute = 5) OR (someAttribute = 6)      
-                $col: Op.col, // = "user"."organization_id"          
-                $gt: Op.gt, // > 6
-                $gte: Op.gte, // >= 6
-                $lt: Op.lt, // < 10
-                $lte: Op.lte, // <= 10
-                $between: Op.between, // BETWEEN 6 AND 10
-                $notBetween: Op.notBetween, // NOT BETWEEN 11 AND 15          
-                $in: Op.in, // IN [1, 2]
-                $notIn: Op.notIn, // NOT IN [1, 2]          
-                $like: Op.like, // LIKE '%hat'
-                $notLike: Op.notLike, // NOT LIKE '%hat'
-                $startsWith: Op.startsWith, // LIKE 'hat%'
-                $endsWith: Op.endsWith, // LIKE '%hat'
-                $substring: Op.substring, // LIKE '%hat%'
-                $iLike: Op.iLike, // ILIKE '%hat' (case insensitive) (PG only)
-                $notILike: Op.notILike, // NOT ILIKE '%hat'  (PG only)
-                $regexp: Op.regexp, // REGEXP/~ '^[h|a|t]' (MySQL/PG only)
-                $notRegexp: Op.notRegexp, // NOT REGEXP/!~ '^[h|a|t]' (MySQL/PG only)
-                $iRegexp: Op.iRegexp, // ~* '^[h|a|t]' (PG only)
-                $notIRegexp: Op.notIRegexp, // !~* '^[h|a|t]' (PG only)          
-                $any: Op.any, // ANY ARRAY[2, 3]::INTEGER (PG only)
-    
-            }
-        })
-        try {
-            await this.sequelize.authenticate();
-            
-            console.log('Connection has been established successfully.');
-    
-        } catch (error) {
-            console.error('Unable to connect to the database:', error);
-        }
-        */
     }
 
     async use(cb) {

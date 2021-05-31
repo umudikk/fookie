@@ -3,9 +3,10 @@ module.exports = async function (payload) {
     let roles = []
 
     roles = roles.concat(payload.ctx.helpers.defaultArrayCalc(payload, "role"))
-
+  
     let keys = Object.keys(payload.body)
     if (["post", "patch"].includes(payload.method)) {
+
         keys.forEach((key) => {
             roles = roles.concat(payload.model.schema[key].write)
 
