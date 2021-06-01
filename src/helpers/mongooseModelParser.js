@@ -17,8 +17,11 @@ module.exports = function (model) {
     let _model = JSON.parse(JSON.stringify(model))
     let type = "_id"
     for (let f in _model.schema) {
-        if (typeof _model.schema[f].relation == "string")
+        if (typeof _model.schema[f].relation == "string"){
             type = "_id"
+            model.schema[f].type = "_id"
+        }
+          
         if (_model.schema[f].type) {
             type = _model.schema[f].type
         }
