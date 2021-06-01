@@ -48,7 +48,7 @@ const Fookie = require("fookie")
 
 let start = async function() {
     const api = new Fookie()
-    await api.connect("postgres://postgres:123@127.0.0.1:5432/test")
+    await api.connect("mongodb://db/test")
     api.model({
         name: "blog",
         display: "title",
