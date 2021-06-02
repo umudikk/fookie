@@ -66,7 +66,7 @@ class Fookie {
     }
 
     mixin(name, mixin) {
-        this.mixin.set(name, mixin)
+        this.mixins.set(name, mixin)
     }
 
     rule(name, rule) {
@@ -82,12 +82,15 @@ class Fookie {
     }
 
     async model(model) {
-        let parsedModel = mongooseModelParser(model)
 
-        for (let mixin of model.mixin) {
-            let mxn = this.mixins.get(mixin)
-            parsedModel = deepMerge(mxn, parsedModel)
+        if (model.hasOwnProperty('mixin')) {
+            for (let mixin of model.mixin) {
+                let mxn = this.mixins.get(mixin)
+                model = deepMerge(model, mxn)
+            }
         }
+
+        let parsedModel = mongooseModelParser(model)
 
         let Model = mongoose.model(model.name, new Schema(parsedModel))
         model.methods = new Map()
@@ -224,7 +227,7 @@ class Fookie {
             await this.effects.get(b)(payload)
         }
         // -------------
-        console.log(payload.method, payload.model, payload.response.errors, payload.response.status);
+        console.log(`[RESPONSE] ${payload.model} | ${payload.method} | [${payload.response.errors}]`);
         return payload.response
     }
 
