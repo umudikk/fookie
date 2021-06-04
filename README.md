@@ -11,13 +11,14 @@
  - Store your schemas in database.
  - Auto generated methods (post , delete , patch , count , schema, get , getAll) 
  - Supports custom methods.
- - NoSQL and SQL support.(NoSQL is cooming soon)
+ - NoSQL and SQL support.(SQL is coming soon)
  - Trim unauthorized fields.
  - Just take the fields you need. (Like a graphql) 
  - Request Life Cycle
  - Everything is a plugin.
  - Routines
  - Deafult models, rules, roles, filters, effects, modifies and methods.
+ - Mixins (Merge two different schema. Similar to vue mixins)
 
 #### Next Features
 - Default metrics
@@ -154,7 +155,8 @@ let start = async function() {
                 modify: [],
                 rule: []
             }
-        }
+        },
+        mixin:[],
     })
 
 
