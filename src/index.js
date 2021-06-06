@@ -282,7 +282,7 @@ class Fookie {
 
         //MODIFIES
         this.modify('password', require('./defaults/modify/password'))
-        this.modify("set_defaults", require('./defaults/modify/set_defaults'))
+        this.modify("set_default", require('./defaults/modify/set_default'))
         this.modify("set_target", require('./defaults/modify/set_target'))
         this.modify("set_user", require('./defaults/modify/set_user'))
         this.modify("default_payload", require('./defaults/modify/default_payload'))

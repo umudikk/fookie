@@ -3,6 +3,9 @@ module.exports = function (payload) {
     keys = keys.filter(k => payload.model.schema[k].default)
     keys.forEach((k) => {
         let modify = payload.ctx.modifies.get(payload.model.schema[k].default)
-        body[k] = modify(payload)
+        if (body[k] == undefined) {
+            body[k] = modify(payload)
+        }
+
     })
 }
