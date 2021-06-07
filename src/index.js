@@ -9,6 +9,7 @@ const findRequiredRoles = require('./helpers/requiredRoles');
 const check = require('./helpers/check');
 const calcEffects = require('./helpers/calcEffect')
 const calcFilter = require('./helpers/calcFilter')
+const calcPreRequirements = require('./helpers/calcPreRequirements')
 const calcModify = require('./helpers/calcModify')
 const client = require('prom-client');
 const lodash = require('lodash')
@@ -82,7 +83,6 @@ class Fookie {
     }
 
     async model(model) {
-
         if (model.hasOwnProperty('mixin')) {
             for (let mixin of model.mixin) {
                 let mxn = this.mixins.get(mixin)
@@ -205,18 +205,19 @@ class Fookie {
             }
             await calcModify(payload)
             if (await check(payload)) {
-                payload.response.data = await model.methods.get(payload.method)(payload)
+                payload.response.data = await payload.ctx.models.get(payload.model).methods.get(payload.method)(payload)
                 if (payload.response.status == 200) {
                     await calcFilter(payload)
                     calcEffects(payload)
                 }
             }
+
             for (let b of this.store.get("afters")) {
                 await this.effects.get(b)(payload)
             }
         }
 
-        console.log(`[RESPONSE] ${payload.model} | ${payload.method} | [${payload.response.errors}]`);
+        console.log(`[RESPONSE] ${payload.model} | ${payload.method} | [${payload.response.errors}] | ${payload.response.status}`);
         return payload.response
     }
 
@@ -250,11 +251,17 @@ class Fookie {
         //RULES
         this.rule('has_fields', require('./defaults/rule/has_fields'))
         this.rule('check_required', require('./defaults/rule/check_required'))
+        this.rule('only_client', require('./defaults/rule/only_client'))
         this.rule('check_auth', require('./defaults/rule/check_auth'))
         this.rule('has_pwemail', require('./defaults/rule/has_pwemail'))
         this.rule('check_type', require('./defaults/rule/check_type'))
         this.rule('valid_attributes', require('./defaults/rule/valid_attributes'))
         this.rule('need_target', require('./defaults/rule/need_target'))
+
+        //preRule
+        this.rule('has_model', require('./defaults/rule/has_model'))
+        this.rule('has_method', require('./defaults/rule/has_method'))
+        this.rule('has_body', require('./defaults/rule/has_body'))
 
         //ROLES 
         this.role('everybody', require('./defaults/role/everybody'))
@@ -283,15 +290,8 @@ class Fookie {
         await this.model(require('./defaults/model/system_user.js'))
         await this.model(require('./defaults/model/system_admin.js'))
 
-
-
-
-
-
         // PLUGINS
         //await this.use(require("./defaults/plugin/file_storage"))
-
-
         await this.use(require("./defaults/plugin/login_register"))
 
         return true

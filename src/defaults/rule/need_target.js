@@ -1,5 +1,5 @@
 module.exports = async function (payload) {
-    if (payload.target instanceof payload.model.model) {
+    if (payload.target instanceof payload.ctx.models.get(payload.model).model) {
         return true
     } else {
         payload.response.status = 201

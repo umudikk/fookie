@@ -9,6 +9,10 @@ module.exports = async function (ctx) {
                 before: [],
                 after: ["check_auth"],
             },
+            preRule: {
+                before: ["has_model", "has_method"],
+                after: [],
+            },
             filter: {
                 before: [],
                 after: ["filter"],
@@ -27,6 +31,10 @@ module.exports = async function (ctx) {
                 before: [],
                 after: ["check_auth"],
             },
+            preRule: {
+                before: ["has_model", "has_method"],
+                after: [],
+            },
             filter: {
                 before: [],
                 after: ["filter"],
@@ -38,16 +46,16 @@ module.exports = async function (ctx) {
         },
         post: {
             modify: {
-<<<<<<< HEAD
-                before: ["set_target","increase"],
-=======
-                before: ["set_default","set_target"],
->>>>>>> f139b2b423e913c8eedd6dc4b0c7b8830e835de0
+                before: ["set_default", "set_target", "increase"],
                 after: [],
             },
             rule: {
                 before: ["need_target", "has_fields", "check_type", "check_required"],
                 after: ["check_auth"],
+            },
+            preRule: {
+                before: ["has_model", "has_method", "only_client", "has_body"],
+                after: [],
             },
             filter: {
                 before: [],
@@ -67,6 +75,10 @@ module.exports = async function (ctx) {
                 before: ["need_target", "has_fields", "check_type", "check_required"],
                 after: ["check_auth"],
             },
+            preRule: {
+                before: ["has_model", "has_method", "has_body"],
+                after: [],
+            },
             filter: {
                 before: [],
                 after: ["filter"],
@@ -84,6 +96,10 @@ module.exports = async function (ctx) {
             rule: {
                 before: ["need_target"],
                 after: ["check_auth"],
+            },
+            preRule: {
+                before: ["has_model", "has_method"],
+                after: [],
             },
             filter: {
                 before: [],
@@ -103,6 +119,10 @@ module.exports = async function (ctx) {
                 before: [],
                 after: ["check_auth"],
             },
+            preRule: {
+                before: ["has_model", "has_method"],
+                after: [],
+            },
             filter: {
                 before: [],
                 after: [],
@@ -121,6 +141,10 @@ module.exports = async function (ctx) {
                 before: [],
                 after: ["check_auth"],
             },
+            preRule: {
+                before: ["has_model", "has_method"],
+                after: [],
+            },
             filter: {
                 before: [],
                 after: ["filter"],
@@ -138,6 +162,10 @@ module.exports = async function (ctx) {
             rule: {
                 before: ["has_fields", "check_type",],
                 after: ["check_auth"],
+            },
+            preRule: {
+                before: ["has_model", "has_method","need_method_in_options"],
+                after: [],
             },
             filter: {
                 before: [],

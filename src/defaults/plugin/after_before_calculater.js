@@ -7,7 +7,7 @@ module.exports = async function (ctx) {
         } catch (error) { }
 
         try {
-            arr = arr.concat(payload.model.fookie[payload.method][mapName])
+            arr = arr.concat(payload.ctx.models.get(payload.model).fookie[payload.method][mapName])
         } catch (error) { }
         try {
             arr = arr.concat(payload.ctx.store.get("default_life_cycle_controls")[payload.method][mapName].after)

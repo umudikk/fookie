@@ -45,7 +45,7 @@ module.exports = async function (ctx) {
             }
         })
         let user = res.data
-        if (user instanceof model.model) {
+        if (user) {
             const token = jwt.sign({ _id: user._id }, ctx.store.get("secret"));
             return token
         } else {
