@@ -289,11 +289,10 @@ class Fookie {
         await this.model(require('./defaults/model/system_submenu.js'))
         await this.model(require('./defaults/model/system_user.js'))
         await this.model(require('./defaults/model/system_admin.js'))
-
+        
         // PLUGINS
         //await this.use(require("./defaults/plugin/file_storage"))
         await this.use(require("./defaults/plugin/login_register"))
-
         return true
     }
 
