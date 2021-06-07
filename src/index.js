@@ -197,36 +197,25 @@ class Fookie {
         }
         payload.ctx = this
         // -------------
-        for (let b of this.store.get("befores")) {
-            await this.modifies.get(b)(payload)
-        }
-        // -------------
-        if (this.models.has(payload.model) && typeof this.models.get(payload.model).methods.get(payload.method) == 'function') {
-            let model = this.models.get(payload.model)
-            payload.model = model
 
+        // -------------
+        if (await calcPreRequirements(payload)) {
+            for (let b of this.store.get("befores")) {
+                await this.modifies.get(b)(payload)
+            }
             await calcModify(payload)
             if (await check(payload)) {
                 payload.response.data = await model.methods.get(payload.method)(payload)
-
                 if (payload.response.status == 200) {
                     await calcFilter(payload)
                     calcEffects(payload)
                 }
-            } else {
-                payload.response.errors.push("No Auth")
-                payload.response.status = 201
             }
-        } else {
-            payload.response.errors.push("No Model or method ", payload.model, " ", payload.method)
-            payload.response.status = 201
+            for (let b of this.store.get("afters")) {
+                await this.effects.get(b)(payload)
+            }
         }
 
-        // -------------
-        for (let b of this.store.get("afters")) {
-            await this.effects.get(b)(payload)
-        }
-        // -------------
         console.log(`[RESPONSE] ${payload.model} | ${payload.method} | [${payload.response.errors}]`);
         return payload.response
     }
@@ -282,7 +271,7 @@ class Fookie {
 
         //MODIFIES
         this.modify('password', require('./defaults/modify/password'))
-        this.modify("set_defaults", require('./defaults/modify/set_defaults'))
+        this.modify("set_default", require('./defaults/modify/set_default'))
         this.modify("set_target", require('./defaults/modify/set_target'))
         this.modify("set_user", require('./defaults/modify/set_user'))
         this.modify("default_payload", require('./defaults/modify/default_payload'))

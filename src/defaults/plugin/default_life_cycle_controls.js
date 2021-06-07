@@ -24,7 +24,6 @@ module.exports = async function (ctx) {
                 after: [],
             },
             rule: {
-
                 before: [],
                 after: ["check_auth"],
             },
@@ -39,7 +38,11 @@ module.exports = async function (ctx) {
         },
         post: {
             modify: {
+<<<<<<< HEAD
                 before: ["set_target","increase"],
+=======
+                before: ["set_default","set_target"],
+>>>>>>> f139b2b423e913c8eedd6dc4b0c7b8830e835de0
                 after: [],
             },
             rule: {
