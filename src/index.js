@@ -262,6 +262,7 @@ class Fookie {
         this.rule('has_model', require('./defaults/rule/has_model'))
         this.rule('has_method', require('./defaults/rule/has_method'))
         this.rule('has_body', require('./defaults/rule/has_body'))
+        this.rule('need_method_in_options', require('./defaults/rule/need_method_in_options'))
 
         //ROLES 
         this.role('everybody', require('./defaults/role/everybody'))
@@ -289,7 +290,7 @@ class Fookie {
         await this.model(require('./defaults/model/system_submenu.js'))
         await this.model(require('./defaults/model/system_user.js'))
         await this.model(require('./defaults/model/system_admin.js'))
-        
+
         // PLUGINS
         //await this.use(require("./defaults/plugin/file_storage"))
         await this.use(require("./defaults/plugin/login_register"))
