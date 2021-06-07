@@ -39,7 +39,7 @@ module.exports = async function (ctx) {
         },
         post: {
             modify: {
-                before: ["set_target"],
+                before: ["set_target","increase"],
                 after: [],
             },
             rule: {
