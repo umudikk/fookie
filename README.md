@@ -3,6 +3,8 @@
 ### While developing software, I realized that we always do the same work in controllers and routes, and I decided to automate this layer. Fookie JS automatically does whatever is required in an api. You developers only focus on feature development.
 #### Featues
  - Write clean and less code. (%70-%90 less code.I'm not kidding.)
+ - Request body type check
+ - Request body require fields check
  - Low test cost.
  - Default health check and metrics.
  - Store for your global variables.
