@@ -45,6 +45,9 @@ npm install fookie --save
 
 https://github.com/umudikk/fookie/wiki
 
+## Fookie JS Manifest
+ // To do
+
 ## Examples
 ```javascript
 const Fookie = require("fookie")
