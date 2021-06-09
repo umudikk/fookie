@@ -3,6 +3,8 @@
 While developing software, I realized that we always do the same work in controllers and routes, and I decided to automate this layer. Fookie JS automatically does whatever is required in an api. You developers only focus on feature development.
 #### Featues
  - Write clean and less code. (%70-%90 less code.I'm not kidding.)
+ - Develop your application by adding small pieces of code
+ - Auto generated methods (post , delete , patch , count , schema, get , getAll)
  - Request body type check
  - Request body require fields check
  - Low test cost.
@@ -10,8 +12,7 @@ While developing software, I realized that we always do the same work in control
  - Store for your global variables.
  - Password email base authentication.
  - Create, delete or edit your API on runtime.
- - Store your schemas in database.
- - Auto generated methods (post , delete , patch , count , schema, get , getAll) 
+ - Store your schemas in database. 
  - Supports custom methods.
  - NoSQL and SQL support.(SQL is coming soon)
  - Trim unauthorized fields.
