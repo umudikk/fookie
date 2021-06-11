@@ -283,6 +283,7 @@ class Fookie {
         this.modify("set_target", require('./defaults/modify/set_target'))
         this.modify("set_user", require('./defaults/modify/set_user'))
         this.modify("default_payload", require('./defaults/modify/default_payload'))
+        this.modify("increase", require('./defaults/modify/increase'))
 
         //MODELS
         await this.model(require('./defaults/model/system_model.js'))
@@ -302,6 +303,22 @@ class Fookie {
             console.log(`FOOKIE ${port} is listening...`);
 
         })
+    }
+
+    async test(count) {
+        let methods = ["get", "patch", "post", "schema"]
+        let models = ["system_user", "system_model", "system_admin"]
+        for (let i in count) {
+            let payload = {
+                user: { system: true },
+                method: methods[Math.floor(Math.random() * methods.length)],
+                model: models[Math.floor(Math.random() * models.length)],
+            }
+            console.log(payload);
+            let res = await this.run(payload)
+            console.log(res);
+        }
+
     }
 }
 
