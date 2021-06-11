@@ -1,7 +1,6 @@
 module.exports = async function (payload) {
-    let target = null
     if (payload.method == "post") {
-        target = new payload.ctx.models.get(payload.model).model(payload.body)
+        payload.target = payload.ctx.models.get(payload.model).model(payload.body)
     } else {
         let res = await payload.ctx.run({
             user: { system: true },
@@ -9,7 +8,6 @@ module.exports = async function (payload) {
             method: "get",
             query: payload.query
         })
-        target = res.data
+        payload.target = res.data
     }
-    payload.target = target
 }

@@ -1,9 +1,7 @@
-const { Sequelize, Op } = require('sequelize');
 const express = require('express')
 const bodyParser = require('body-parser')
 const { hasFields, clear } = require('./helpers')
 const cors = require('cors')
-const sequlizeModelParser = require('./helpers/sequlizeModelParser')
 const mongooseModelParser = require('./helpers/mongooseModelParser')
 const findRequiredRoles = require('./helpers/requiredRoles');
 const check = require('./helpers/check');
@@ -15,8 +13,8 @@ const client = require('prom-client');
 const lodash = require('lodash')
 var mongoose = require('mongoose')
 const deepMerge = require("deepmerge");
-
 var { Schema } = mongoose
+
 class Fookie {
     constructor() {
         this.models = new Map()
@@ -303,22 +301,6 @@ class Fookie {
             console.log(`FOOKIE ${port} is listening...`);
 
         })
-    }
-
-    async test(count) {
-        let methods = ["get", "patch", "post", "schema"]
-        let models = ["system_user", "system_model", "system_admin"]
-        for (let i in count) {
-            let payload = {
-                user: { system: true },
-                method: methods[Math.floor(Math.random() * methods.length)],
-                model: models[Math.floor(Math.random() * models.length)],
-            }
-            console.log(payload);
-            let res = await this.run(payload)
-            console.log(res);
-        }
-
     }
 }
 

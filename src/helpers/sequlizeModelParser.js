@@ -4,11 +4,11 @@ const { DataTypes } = require('sequelize')
 module.exports = function (schema) {
     let ormSchema = JSON.parse(JSON.stringify(schema));
     for (let f in ormSchema) {
-        let type = "integer"
+        let type = "number"
         if (ormSchema[f].type) {
             type = ormSchema[f].type
         } else {
-            schema[f].type = "integer"
+            schema[f].type = "number"
         }
 
         ormSchema[f].type = DataTypes[type.toUpperCase()]

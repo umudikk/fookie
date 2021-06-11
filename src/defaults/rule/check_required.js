@@ -1,8 +1,9 @@
 module.exports = async function (payload) {
-    let search = [null, undefined]
-    let keys = Object.keys(payload.body)
+    let search = ["", null, undefined]
+    let model = payload.ctx.models.get(payload.model)
+    let keys = Object.keys(model.schema)
     for (let key of keys) {
-        if (payload.ctx.models.get(payload.model).schema[key].required) {
+        if (model.schema[key].required) {
             if (search.includes(payload.body[key])) {
                 return false
             }

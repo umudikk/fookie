@@ -6,7 +6,8 @@
     "scripts": {
         "build": "babel src -d lib",
         "babel-node": "babel-node",
-        "server": "nodemon ./test/server.js"
+        "server": "nodemon ./test/server.js",
+        "test": "mocha"
     },
     "repository": {
         "type": "git",

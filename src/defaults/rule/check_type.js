@@ -1,13 +1,9 @@
 var validate = require("validate.js");
 
 let validators = {
-    float: "isNumber",
     boolean: "isBoolean",
     string: "isString",
     number: "isNumber",
-    integer: "isInteger",
-    jsonb: "isObject",
-    json: "isObject",
     object: "isObject",
     date: "isDate",
     time: "isTime"
