@@ -79,7 +79,7 @@ class Fookie {
     modify(name, before) {
         this.modifies.set(name, before)
     }
-
+    
     async model(model) {
         if (model.hasOwnProperty('mixin')) {
             for (let mixin of model.mixin) {
