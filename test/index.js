@@ -3,6 +3,6 @@ const fookie = new Fookie()
 
 let start = async function () {
     await fookie.connect('mongodb://localhost/fookie')
-    fookie.listen(4545)
+    fookie.listen(77)
 }
 start()
