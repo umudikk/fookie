@@ -87,12 +87,9 @@ class Fookie {
                 model = deepMerge(model, mxn)
             }
         }
-
         let parsedModel = mongooseModelParser(model)
-
         let Model = mongoose.model(model.name, new Schema(parsedModel))
         model.methods = new Map()
-
         model.methods.set("get", async function ({ query, response, attributes }) {
             let res = await Model.findOne(query.where, attributes)
             if (res) {
@@ -223,7 +220,6 @@ class Fookie {
         let routine = setInterval(() => {
             func(this)
         }, time);
-
         this.routines.set(name, routine)
     }
 
@@ -289,6 +285,8 @@ class Fookie {
         await this.model(require('./defaults/model/system_submenu.js'))
         await this.model(require('./defaults/model/system_user.js'))
         await this.model(require('./defaults/model/system_admin.js'))
+        await this.model(require('./defaults/model/system_function.js'))
+        await this.model(require('./defaults/model/system_function_type.js'))
 
         // PLUGINS
         //await this.use(require("./defaults/plugin/file_storage"))
