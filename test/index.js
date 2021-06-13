@@ -1,4 +1,4 @@
-const Fookie = require('../src')
+const Fookie = require('../src/index')
 const fookie = new Fookie()
 
 let start = async function () {

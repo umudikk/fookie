@@ -1,4 +1,4 @@
-module.exports = async (user, req, model, response, body, method, ctx) => {
+module.exports = async (payload)=> {
    
    /* let parsedModel = ctx.helpers.mongooseModelParser(body)
     await ctx.model(parsedModel)*/
