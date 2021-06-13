@@ -1,6 +1,6 @@
 {
     "name": "fookie",
-    "version": "0.4.1",
+    "version": "0.2.2",
     "description": "API Generator.",
     "main": "./src/index.js",
     "scripts": {
@@ -19,7 +19,7 @@
     "dependencies": {
         "body-parser": "^1.19.0",
         "cors": "^2.8.5",
-        "deepmerge": "^4.2.2",
+        "deepmerge": "^4.2.3",
         "express": "^4.17.1",
         "js-sha512": "^0.8.0",
         "jsonwebtoken": "^8.5.1",
