@@ -1,13 +1,13 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const { hasFields, clear } = require("./helpers");
 const cors = require("cors");
 const mongooseModelParser = require("./helpers/mongooseModelParser");
-const rule = require("./life-cycle/rule");
-const effect = require("./life-cycle/effect");
-const filter = require("./life-cycle/filter");
-const preRule = require("./life-cycle/preRules");
-const modify = require("./life-cycle/modify");
+const schemaFixer = require("./helpers/schema_fixer.js");
+const rule = require("./life-cycle/rule.js");
+const effect = require("./life-cycle/effect.js");
+const filter = require("./life-cycle/filter.js");
+const preRule = require("./life-cycle/preRule.js");
+const modify = require("./life-cycle/modify.js");
 const client = require("prom-client");
 const lodash = require("lodash");
 const core = require("./core/index.js");
@@ -18,8 +18,8 @@ var { Schema } = mongoose;
 class Fookie {
    constructor() {
       this.models = new Map();
-      this.roles = new Map();
       this.rules = new Map();
+      this.roles = new Map();
       this.effects = new Map();
       this.routines = new Map();
       this.filters = new Map();
@@ -28,18 +28,14 @@ class Fookie {
       this.store = new Map();
 
       this.helpers = {
-         calcEffects,
-         check,
-         clear,
-         hasFields,
+         rule,
+         effect,
+         filter,
+         preRule,
+         modify,
          lodash,
          deepMerge,
       };
-
-      const collectDefaultMetrics = client.collectDefaultMetrics;
-      const Registry = client.Registry;
-      const register = new Registry();
-      collectDefaultMetrics({ register });
 
       this.app = express();
       this.app.use(cors());
@@ -50,16 +46,13 @@ class Fookie {
          let payload = req.body;
          payload.req = req;
          payload.res = res;
-         payload.token = req.headers.token;
+         if (payload.user || payload.system) return false;
+         if (!payload.token && req.headers.token) payload.token = req.headers.token;
          await this.run(payload);
          res.status(payload.response.status).json(payload.response.data);
       });
 
       this.use(core);
-   }
-
-   role(name, role) {
-      this.roles.set(name, role);
    }
 
    mixin(name, mixin) {
@@ -68,6 +61,10 @@ class Fookie {
 
    rule(name, rule) {
       this.rules.set(name, rule);
+   }
+
+   role(name, role) {
+      this.roles.set(name, role);
    }
 
    filter(name, filter) {
@@ -79,26 +76,31 @@ class Fookie {
    }
 
    async model(model) {
-      let parsedModel = mongooseModelParser(model);
-      let Model = mongoose.model(model.name, new Schema(parsedModel));
+      schemaFixer(model);
+      let parsedSchema = mongooseModelParser(model);
+
+      let Model = mongoose.model(model.name, new Schema(parsedSchema));
       model.methods = new Map();
-      model.methods.set("get", async function ({ query, response, attributes }) {
-         let res = await Model.findOne(query.where, attributes);
+      model.methods.set("get", async function (payload) {
+         console.log(payload.query);
+         let res = await Model.findOne(payload.query, payload.attributes);
+         if (res) {
+            payload.response.status = 200;
+         } else {
+            payload.response.status = 201;
+            payload.response.warnings.push("get error");
+         }
+         return res;
+      });
+      model.methods.set("getAll", async function ({ query, response, attributes }) {
+         let res = await Model.find(query, attributes);
          if (res) {
             response.status = 200;
          } else {
             response.status = 201;
-            response.errors.push("get error");
+            response.warnings.push("getAll error");
          }
          return res;
-      });
-      model.methods.set("getAll", async function ({ query, attributes }) {
-         let res = await Model.find(query.where, attributes);
-         if (res) {
-            return res;
-         } else {
-            return [];
-         }
       });
       model.methods.set("post", async function ({ body, target }) {
          for (let f in body) {
@@ -116,11 +118,11 @@ class Fookie {
          }
          return await target.save();
       });
-      model.methods.set("schema", async function () {
+      model.methods.set("model", async function () {
          return model;
       });
       model.methods.set("count", async function ({ query }) {
-         let res = await Model.countDocuments(query.where);
+         let res = await Model.countDocuments(query);
          return res;
       });
 
@@ -140,34 +142,32 @@ class Fookie {
 
    async run(payload) {
       payload.response = {
-         errors: [],
+         warnings: [],
          status: 200,
          data: null,
       };
       payload.ctx = this;
-      // -------------
 
-      // -------------
-      if (await calcPreRequirements(payload)) {
-         for (let b of this.store.get("befores")) {
+      if (await preRule(payload)) {
+         for await (let b of this.store.get("befores")) {
             await this.modifies.get(b)(payload);
          }
-         await calcModify(payload);
-         if (await check(payload)) {
+         await modify(payload);
+         if (await rule(payload)) {
+            console.log(payload.model, payload.method, 31);
             payload.response.data = await payload.ctx.models.get(payload.model).methods.get(payload.method)(payload);
             if (payload.response.status == 200) {
-               await calcFilter(payload);
-               calcEffects(payload);
+               await filter(payload);
+               effect(payload);
             }
          }
-
-         for (let b of this.store.get("afters")) {
+         for await (let b of this.store.get("afters")) {
             await this.effects.get(b)(payload);
          }
       }
 
       console.log(
-         `[RESPONSE] ${payload.model} | ${payload.method} | [${payload.response.errors}] | ${payload.response.status}`
+         `[RESPONSE] ${payload.model} | ${payload.method} | [${payload.response.warnings}] | ${payload.response.status}`
       );
       return payload.response;
    }
@@ -181,7 +181,6 @@ class Fookie {
 
    async connect(url, config) {
       await mongoose.connect(url, config);
-      await this.prepareDefaults();
    }
 
    async use(cb) {

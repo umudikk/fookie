@@ -1,4 +1,4 @@
-module.exports = function (ctx) {
+module.exports = async function (ctx) {
    ctx.store.set("secret", "secret");
    ctx.store.set("afters", []);
    ctx.store.set("befores", ["default_payload", "set_user"]);
@@ -12,13 +12,11 @@ module.exports = function (ctx) {
    ctx.rule("has_fields", require("./rule/has_fields"));
    ctx.rule("check_required", require("./rule/check_required"));
    ctx.rule("only_client", require("./rule/only_client"));
-   ctx.rule("check_auth", require("./rule/check_auth"));
    ctx.rule("has_pwemail", require("./rule/has_pwemail"));
    ctx.rule("check_type", require("./rule/check_type"));
+   ctx.rule("check_auth", require("./rule/check_auth"));
    ctx.rule("valid_attributes", require("./rule/valid_attributes"));
    ctx.rule("need_target", require("./rule/need_target"));
-
-   //preRule
    ctx.rule("has_model", require("./rule/has_model"));
    ctx.rule("has_method", require("./rule/has_method"));
    ctx.rule("has_body", require("./rule/has_body"));
@@ -50,8 +48,6 @@ module.exports = function (ctx) {
    ctx.model(require("./model/system_submenu.js"));
    ctx.model(require("./model/system_user.js"));
    ctx.model(require("./model/system_admin.js"));
-   ctx.model(require("./model/system_function.js"));
-   ctx.model(require("./model/system_function_type.js"));
 
    // PLUGINS
    //await ctx.use(require("./defaults/plugin/file_storage"))
