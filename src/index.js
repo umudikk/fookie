@@ -147,7 +147,6 @@ class Fookie {
          data: null,
       };
       payload.ctx = this;
-
       if (await preRule(payload)) {
          for await (let b of this.store.get("befores")) {
             await this.modifies.get(b)(payload);
