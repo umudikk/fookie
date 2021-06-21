@@ -147,14 +147,12 @@ class Fookie {
          data: null,
       };
       payload.ctx = this;
-
       if (await preRule(payload)) {
-         for await (let b of this.store.get("befores")) {
+         for (let b of this.store.get("befores")) {
             await this.modifies.get(b)(payload);
          }
          await modify(payload);
          if (await rule(payload)) {
-            console.log(payload.model, payload.method, 31);
             payload.response.data = await payload.ctx.models.get(payload.model).methods.get(payload.method)(payload);
             if (payload.response.status == 200) {
                await filter(payload);
