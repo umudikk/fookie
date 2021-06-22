@@ -1,5 +1,5 @@
 module.exports = async function (payload) {
-   let arr = payload.ctx.helpers.defaultArrayCalc(payload, "modify");
+   let arr = await payload.ctx.helpers.defaultArrayCalc(payload, "modify");
    if (
       arr.every(function (e) {
          return payload.ctx.modifies.has(e);

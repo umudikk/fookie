@@ -3,6 +3,13 @@ module.exports = async function (ctx) {
    ctx.store.set("afters", []);
    ctx.store.set("befores", ["default_payload", "set_user"]);
 
+   //MODELS
+   ctx.model(require("./model/system_model.js"));
+   ctx.model(require("./model/system_menu.js"));
+   ctx.model(require("./model/system_submenu.js"));
+   ctx.model(require("./model/system_user.js"));
+   ctx.model(require("./model/system_admin.js"));
+
    // IMPORTANT PLUGINS
    await ctx.use(require("./plugin/after_before_calculater"));
    await ctx.use(require("./plugin/health_check"));
@@ -41,13 +48,6 @@ module.exports = async function (ctx) {
    ctx.modify("set_user", require("./modify/set_user"));
    ctx.modify("default_payload", require("./modify/default_payload"));
    ctx.modify("increase", require("./modify/increase"));
-
-   //MODELS
-   ctx.model(require("./model/system_model.js"));
-   ctx.model(require("./model/system_menu.js"));
-   ctx.model(require("./model/system_submenu.js"));
-   ctx.model(require("./model/system_user.js"));
-   ctx.model(require("./model/system_admin.js"));
 
    // PLUGINS
    //await ctx.use(require("./defaults/plugin/file_storage"))

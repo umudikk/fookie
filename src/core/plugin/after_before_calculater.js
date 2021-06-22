@@ -1,16 +1,13 @@
-module.exports = async function (ctx) {
-   ctx.helpers.defaultArrayCalc = function (payload, mapName) {
+module.exports = function (ctx) {
+   let lodash = ctx.helpers.lodash;
+   ctx.helpers.defaultArrayCalc = async function (payload, mapName) {
       let arr = [];
-      try {
-         arr = arr.concat(payload.ctx.store.get("default_life_cycle_controls")[payload.method][mapName].before);
-      } catch (error) {}
 
-      try {
-         arr = arr.concat(payload.ctx.models.get(payload.model).fookie[payload.method][mapName]);
-      } catch (error) {}
-      try {
-         arr = arr.concat(payload.ctx.store.get("default_life_cycle_controls")[payload.method][mapName].after);
-      } catch (error) {}
+      if (lodash.has(payload.ctx.store.get("default_life_cycle_controls"), payload.method)) {
+         arr = lodash.concat(arr, payload.ctx.store.get("default_life_cycle_controls")[payload.method][mapName].before);
+         arr = lodash.concat(arr, payload.ctx.models.get(payload.model).fookie[payload.method][mapName]);
+         arr = lodash.concat(arr, payload.ctx.store.get("default_life_cycle_controls")[payload.method][mapName].after);
+      }
 
       return arr.filter((item) => item != undefined);
    };

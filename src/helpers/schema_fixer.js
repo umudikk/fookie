@@ -1,6 +1,6 @@
 const deepMerge = require("deepmerge");
 module.exports = function (model) {
-   let methods = ["post", "get", "getAll", "patch", "delete", "schema", "test"];
+   let methods = ["post", "get", "getAll", "patch", "delete", "model", "count", "test"];
 
    for (let f of Object.keys(model.schema)) {
       model.schema[f] = deepMerge(model.schema[f], {
@@ -14,6 +14,7 @@ module.exports = function (model) {
          modify: [],
          effect: [],
          rule: [],
+         preRule: [],
          role: [],
          filter: [],
       });

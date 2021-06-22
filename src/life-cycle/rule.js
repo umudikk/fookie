@@ -1,5 +1,5 @@
 module.exports = async function (payload) {
-   let rules = payload.ctx.helpers.defaultArrayCalc(payload, "rule");
+   let rules = await payload.ctx.helpers.defaultArrayCalc(payload, "rule");
    if (rules.every((i) => payload.ctx.rules.has(i))) {
       for (let i of rules) {
          let res = await payload.ctx.rules.get(i)(payload);
