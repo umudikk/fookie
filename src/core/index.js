@@ -40,6 +40,7 @@ module.exports = async function (ctx) {
 
    //FILTERS
    ctx.filter("filter", require("./filter/filter"));
+   ctx.filter("simplified", require("./filter/simplified"));
 
    //MODIFIES
    ctx.modify("password", require("./modify/password"));
