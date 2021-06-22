@@ -14,6 +14,7 @@ module.exports = async function (ctx) {
    await ctx.use(require("./plugin/after_before_calculater"));
    await ctx.use(require("./plugin/health_check"));
    await ctx.use(require("./plugin/default_life_cycle_controls"));
+   await ctx.use(require("./plugin/first_of_all"));
 
    //RULES
    ctx.rule("has_fields", require("./rule/has_fields"));
@@ -28,6 +29,7 @@ module.exports = async function (ctx) {
    ctx.rule("has_method", require("./rule/has_method"));
    ctx.rule("has_body", require("./rule/has_body"));
    ctx.rule("need_method_in_options", require("./rule/need_method_in_options"));
+   ctx.rule("valid_payload", require("./rule/valid_payload"));
 
    //ROLES
    ctx.role("everybody", require("./role/everybody"));

@@ -15,7 +15,7 @@ module.exports = async function (ctx) {
          },
          filter: {
             before: [],
-            after: ["simplified"],
+            after: ["filter", "simplified"],
          },
          effect: {
             before: [],
@@ -37,7 +37,7 @@ module.exports = async function (ctx) {
          },
          filter: {
             before: [],
-            after: ["simplified"],
+            after: ["filter", "simplified"],
          },
          effect: {
             before: [],
@@ -59,7 +59,7 @@ module.exports = async function (ctx) {
          },
          filter: {
             before: [],
-            after: ["simplified"],
+            after: ["filter", "simplified"],
          },
          effect: {
             before: [],
@@ -81,7 +81,7 @@ module.exports = async function (ctx) {
          },
          filter: {
             before: [],
-            after: ["simplified"],
+            after: ["filter", "simplified"],
          },
          effect: {
             before: [],
@@ -103,7 +103,7 @@ module.exports = async function (ctx) {
          },
          filter: {
             before: [],
-            after: ["simplified"],
+            after: ["filter", "simplified"],
          },
          effect: {
             before: [],
@@ -125,7 +125,7 @@ module.exports = async function (ctx) {
          },
          filter: {
             before: [],
-            after: ["simplified"],
+            after: ["filter", "simplified"],
          },
          effect: {
             before: [],
@@ -147,7 +147,7 @@ module.exports = async function (ctx) {
          },
          filter: {
             before: [],
-            after: ["simplified"],
+            after: ["filter", "simplified"],
          },
          effect: {
             before: [],
@@ -169,7 +169,7 @@ module.exports = async function (ctx) {
          },
          filter: {
             before: [],
-            after: ["simplified"],
+            after: ["filter", "simplified"],
          },
          effect: {
             before: [],
