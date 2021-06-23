@@ -125,14 +125,14 @@ module.exports = async function (ctx) {
          },
          filter: {
             before: [],
-            after: ["filter", "simplified"],
+            after: [],
          },
          effect: {
             before: [],
             after: [],
          },
       },
-      schema: {
+      model: {
          modify: {
             before: [],
             after: [],
@@ -147,7 +147,7 @@ module.exports = async function (ctx) {
          },
          filter: {
             before: [],
-            after: ["filter", "simplified"],
+            after: ["filter",],
          },
          effect: {
             before: [],
@@ -169,7 +169,7 @@ module.exports = async function (ctx) {
          },
          filter: {
             before: [],
-            after: ["filter", "simplified"],
+            after: [ ],
          },
          effect: {
             before: [],

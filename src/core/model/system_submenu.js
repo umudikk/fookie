@@ -33,7 +33,7 @@ module.exports = {
          role: ["system_admin"],
       },
       model: {
-         role: [],
+         role: ["everybody"],
       },
       count: {
          role: ["system_admin"],
