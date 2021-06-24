@@ -1,16 +1,16 @@
-module.exports = async function (payload) {
-   for (let rule of payload.ctx.store.get("first_of_all")) {
-      let res = await payload.ctx.rules.get(rule)(payload);
+module.exports = async function (payload, ctx) {
+   for (let rule of ctx.store.get("first_of_all")) {
+      let res = await ctx.rules.get(rule)(payload, ctx);
       if (!res) {
          payload.response.warnings.push(`false first of all: ${rule}`);
          return false;
       }
    }
 
-   let rules = await payload.ctx.helpers.defaultArrayCalc(payload, "preRule");
-   if (rules.every((rule) => payload.ctx.rules.has(rule))) {
+   let rules = await ctx.helpers.defaultArrayCalc(payload, "preRule");
+   if (rules.every((rule) => ctx.rules.has(rule))) {
       for (let rule of rules) {
-         let res = payload.ctx.rules.get(rule)(payload);
+         let res = ctx.rules.get(rule)(payload, ctx);
          if (res == false) {
             payload.response.warnings.push(`false preRule: ${rule}`);
             return false;

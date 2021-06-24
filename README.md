@@ -298,9 +298,9 @@ await axios.post("http://localhost:80808",
 
 api.use((ctx)=>{
     let model = ctx.models.get("system_model")
-    model.methods.set("test",function(payload)){ // payload {user,method,body,options,query,ctx}
-       await payload.ctx.helpers.calcModify(payload)
-            return await payload.ctx.helpers.check(payload)
+    model.methods.set("test",function(payload,ctx)){ // payload {user,method,body,options,query,ctx}
+       await this.helpers.calcModify(payload,ctx)
+            return await this.helpers.check(payload,ctx)
     })
 })
 

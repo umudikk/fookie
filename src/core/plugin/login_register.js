@@ -30,7 +30,7 @@ module.exports = async function (ctx) {
       });
    }
 
-   system_user.methods.set("login", async ({ body, response, model, ctx }) => {
+   system_user.methods.set("login", async ({ body, response }, ctx) => {
       let { email, password } = body;
       let res = await ctx.run({
          user: { system: true },
@@ -42,6 +42,7 @@ module.exports = async function (ctx) {
          },
       });
       let user = res.data;
+      console.log(res);
       if (user) {
          const token = jwt.sign({ _id: user._id }, ctx.store.get("secret"));
          return token;
@@ -52,7 +53,7 @@ module.exports = async function (ctx) {
       }
    });
 
-   system_user.methods.set("register", async ({ body, response, ctx }) => {
+   system_user.methods.set("register", async ({ body, response }, ctx) => {
       let { email, password } = body;
       let res = await ctx.run({
          user: { system: true },

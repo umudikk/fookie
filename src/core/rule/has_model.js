@@ -1,6 +1,6 @@
-module.exports = async function (payload) {
+module.exports = async function (payload, ctx) {
    if (payload.hasOwnProperty("model") && typeof payload.model == "string") {
-      if (payload.ctx.models.has(payload.model)) {
+      if (ctx.models.has(payload.model)) {
          return true;
       } else {
          payload.response.warnings.push("Missing model" + payload.model);

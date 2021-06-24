@@ -1,3 +1,3 @@
-module.exports = function (payload) {
-    return payload.hasOwnProperty("body")
-}
+module.exports = function (payload, ctx) {
+   return payload.hasOwnProperty("body");
+};

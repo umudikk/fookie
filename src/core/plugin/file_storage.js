@@ -55,8 +55,8 @@ module.exports = async function (ctx) {
       },
    });
 
-   ctx.effect("form_data", function (payload) {
-      payload.ctx.upload(payload.req, null, async function (err) {
+   ctx.effect("form_data", function (payload, ctx) {
+      ctx.upload(payload.req, null, async function (err) {
          console.log(err);
       });
    });

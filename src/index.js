@@ -44,11 +44,9 @@ class Fookie {
 
       this.app.post("/", async (req, res) => {
          let payload = req.body;
-         payload.req = req;
-         payload.res = res;
          if (payload.user || payload.system) return false;
          if (!payload.token && req.headers.token) payload.token = req.headers.token;
-         await this.run(payload);
+         await this.run(payload, this);
          res.status(payload.response.status).json(payload.response.data);
       });
 
@@ -81,8 +79,7 @@ class Fookie {
 
       let Model = mongoose.model(model.name, new Schema(parsedSchema));
       model.methods = new Map();
-      model.methods.set("get", async function (payload) {
-         console.log(payload.query);
+      model.methods.set("get", async function (payload, ctx) {
          let res = await Model.findOne(payload.query, payload.attributes);
          if (res) {
             payload.response.status = 200;
@@ -126,9 +123,10 @@ class Fookie {
          return res;
       });
 
-      model.methods.set("test", async function (payload) {
-         await payload.ctx.helpers.calcModify(payload);
-         return await payload.ctx.helpers.check(payload);
+      model.methods.set("test", async function (payload, ctx) {
+         //todo fix here
+         await modify(payload, ctx);
+         return await rule(payload, ctx);
       });
 
       model.model = Model;
@@ -146,21 +144,21 @@ class Fookie {
          status: 200,
          data: null,
       };
-      payload.ctx = this;
-      if (await preRule(payload)) {
+      let ctx = this;
+      if (await preRule(payload, ctx)) {
          for (let b of this.store.get("befores")) {
-            await this.modifies.get(b)(payload);
+            await this.modifies.get(b)(payload, ctx);
          }
-         await modify(payload);
-         if (await rule(payload)) {
-            payload.response.data = await payload.ctx.models.get(payload.model).methods.get(payload.method)(payload);
+         await modify(payload, ctx);
+         if (await rule(payload, ctx)) {
+            payload.response.data = await this.models.get(payload.model).methods.get(payload.method)(payload, ctx);
             if (payload.response.status == 200) {
-               await filter(payload);
-               effect(payload);
+               await filter(payload, ctx);
+               effect(payload, ctx);
             }
          }
          for await (let b of this.store.get("afters")) {
-            await this.effects.get(b)(payload);
+            await this.effects.get(b)(payload, ctx);
          }
       }
 

@@ -1,18 +1,19 @@
-module.exports = async function (payload) {
-   payload = payload.ctx.helpers.deepMerge(payload,{
-      options:{
-         simplified:false,
-         deep:false,
-         attributes:"",
+const deepMerge = require("deepmerge");
+const lodash = require("lodash");
+module.exports = async function (payload, ctx) {
+   payload = deepMerge(payload, {
+      options: {
+         simplified: false,
+         deep: false,
+         attributes: null,
       },
-      body:{},
-      query:{},
-      method:"get",
-      model:"system_user",
-      token:"",
-      user:{},
-
-   })
+      body: {},
+      query: {},
+      method: null,
+      model: null,
+      token: null,
+      user: {},
+   });
    /*
    payload.method = payload.hasOwnProperty("method") ? payload.method : "";
    payload.body = payload.hasOwnProperty("body") ? payload.body : {};

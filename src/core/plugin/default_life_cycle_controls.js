@@ -147,7 +147,7 @@ module.exports = async function (ctx) {
          },
          filter: {
             before: [],
-            after: ["filter",],
+            after: ["filter"],
          },
          effect: {
             before: [],
@@ -169,7 +169,7 @@ module.exports = async function (ctx) {
          },
          filter: {
             before: [],
-            after: [ ],
+            after: [],
          },
          effect: {
             before: [],

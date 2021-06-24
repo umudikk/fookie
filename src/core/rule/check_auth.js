@@ -1,32 +1,32 @@
-module.exports = async function (payload) {
+module.exports = async function (payload, ctx) {
    if (payload.user.hasOwnProperty("system")) {
       return payload.user.system;
    }
    let roles = [];
 
-   roles = roles.concat(payload.ctx.helpers.defaultArrayCalc(payload, "role"));
+   roles = roles.concat(ctx.helpers.defaultArrayCalc(payload, "role"));
 
    let keys = Object.keys(payload.body);
    if (["post", "patch"].includes(payload.method)) {
       keys.forEach((key) => {
-         roles = roles.concat(payload.ctx.models.get(payload.model).schema[key].write);
+         roles = roles.concat(ctx.models.get(payload.model).schema[key].write);
       });
    }
 
    if (roles.length == 0) return true;
-
-   if (roles.every((e) => payload.ctx.roles.has(e))) {
+   console.log(roles);
+   if (roles.every((e) => ctx.roles.has(e))) {
       for (let role of roles) {
-         let res = await payload.ctx.roles.get(role)(payload);
+         let res = await ctx.roles.get(role)(payload, ctx);
          if (res) {
             return true;
          }
          payload.response.warnings.push(`You are not: ${role}`);
          let modifies = [];
          try {
-            modifies = payload.ctx.models.get(payload.model).fookie[payload.method].reject[role];
+            modifies = ctx.models.get(payload.model).fookie[payload.method].reject[role];
          } catch (error) {}
-         await Promise.all(modifies.map((m) => payload.ctx.modifies.get(m)(payload)));
+         await Promise.all(modifies.map((m) => ctx.modifies.get(m)(payload, ctx)));
       }
       return false;
    } else {
