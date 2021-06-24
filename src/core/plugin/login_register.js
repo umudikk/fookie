@@ -42,7 +42,6 @@ module.exports = async function (ctx) {
          },
       });
       let user = res.data;
-      console.log(res);
       if (user) {
          const token = jwt.sign({ _id: user._id }, ctx.store.get("secret"));
          return token;

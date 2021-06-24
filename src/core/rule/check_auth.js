@@ -14,7 +14,6 @@ module.exports = async function (payload, ctx) {
    }
 
    if (roles.length == 0) return true;
-   console.log(roles);
    if (roles.every((e) => ctx.roles.has(e))) {
       for (let role of roles) {
          let res = await ctx.roles.get(role)(payload, ctx);
