@@ -13,6 +13,7 @@ const lodash = require("lodash");
 const core = require("./core/index.js");
 var mongoose = require("mongoose");
 const deepMerge = require("deepmerge");
+const axios = {}//require('axios')
 var { Schema } = mongoose;
 
 class Fookie {
@@ -26,7 +27,8 @@ class Fookie {
       this.modifies = new Map();
       this.mixins = new Map();
       this.store = new Map();
-
+      this.lodash = lodash
+      this.axios = axios
       this.helpers = {
          rule,
          effect,
@@ -187,6 +189,20 @@ class Fookie {
       this.app.listen(port, () => {
          console.log(`FOOKIE ${port} is listening...`);
       });
+   }
+
+   fuzzer(test) {
+      let models = this.models.keys()
+      console.log(models);
+      let methods = models.map(m => this.models.get(m).methods.keys())
+
+      for (let i in test.amount) {
+         this.run({
+            token:test.token,
+            model: lodash.sample(models),
+            method: lodash.sample(methods),
+         })
+      }
    }
 }
 

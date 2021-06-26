@@ -1,7 +1,7 @@
 module.exports = async function (payload, ctx) {
    let search = ["", null, undefined];
    let model = ctx.models.get(payload.model);
-   let keys = Object.keys(model.schema);
+   let keys = ctx.lodash.keys(model.schema);
    for (let key of keys) {
       if (model.schema[key].required) {
          if (search.includes(payload.body[key])) {

@@ -1,5 +1,5 @@
 let mongoose = require("mongoose");
-
+const lodash = require('lodash')
 const { Schema } = mongoose;
 
 let DataTypes = {
@@ -17,7 +17,7 @@ module.exports = function (model) {
    for (let f in model.schema) {
       schema[f] = {};
       if (typeof model.schema[f].relation == "string") model.schema[f].type = "_id";
-      if (!Object.keys(DataTypes).includes(model.schema[f].type))
+      if (!lodash.keys(DataTypes).includes(model.schema[f].type))
          throw Error(`Invalid Type: ${model.schema[f].type} Model: ${model.name}`);
 
       schema[f].type = DataTypes[model.schema[f].type];

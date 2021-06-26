@@ -1,6 +1,6 @@
 async function filter(payload, data, type, ctx) {
    let model = ctx.models.get(payload.model);
-   for (let key of Object.keys(model.schema)) {
+   for (let key of ctx.lodash.keys(model.schema)) {
       let requiredRoles = model.schema[key][type];
       if (requiredRoles.every((i) => ctx.roles.has(i))) {
          for (let i of requiredRoles) {

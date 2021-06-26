@@ -29,7 +29,7 @@ module.exports = async function (ctx) {
          },
       });
    }
-
+  
    system_user.methods.set("login", async ({ body, response }, ctx) => {
       let { email, password } = body;
       let res = await ctx.run({

@@ -1,3 +1,5 @@
+
+const lodash = require('lodash')
 module.exports = async function (payload, ctx) {
    if (payload.user.hasOwnProperty("system")) {
       return payload.user.system;
@@ -6,7 +8,7 @@ module.exports = async function (payload, ctx) {
 
    roles = roles.concat(ctx.helpers.defaultArrayCalc(payload, "role"));
 
-   let keys = Object.keys(payload.body);
+   let keys = lodash.keys(payload.body)
    if (["post", "patch"].includes(payload.method)) {
       keys.forEach((key) => {
          roles = roles.concat(ctx.models.get(payload.model).schema[key].write);

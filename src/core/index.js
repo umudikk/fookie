@@ -9,6 +9,7 @@ module.exports = async function (ctx) {
    ctx.model(require("./model/system_submenu.js"));
    ctx.model(require("./model/system_user.js"));
    ctx.model(require("./model/system_admin.js"));
+   ctx.model(require("./model/webhook.js"));
 
    // IMPORTANT PLUGINS
    await ctx.use(require("./plugin/after_before_calculater"));
@@ -39,6 +40,7 @@ module.exports = async function (ctx) {
 
    //EFFECT
    ctx.effect("sync", require("./effect/sync"));
+   ctx.effect("webhook", require("./effect/webhook"));
 
    //FILTERS
    ctx.filter("filter", require("./filter/filter"));

@@ -9,7 +9,7 @@ let validators = {
    time: "isTime",
 };
 module.exports = async function (payload, ctx) {
-   for (field of Object.keys(payload.body)) {
+   for (field of ctx.lodash.keys(payload.body)) {
       let isValid = false;
       if (typeof ctx.models.get(payload.model).schema[field].relation == "string") {
          isValid = true;
