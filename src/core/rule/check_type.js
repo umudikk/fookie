@@ -1,5 +1,5 @@
 var validate = require("validate.js");
-
+//todo lodash 
 let validators = {
    boolean: "isBoolean",
    string: "isString",

@@ -1,6 +1,6 @@
 module.exports = async function (ctx) {
    ctx.store.set("secret", "secret");
-   ctx.store.set("afters", []);
+   ctx.store.set("afters", ["log"]);
    ctx.store.set("befores", ["default_payload", "set_user"]);
 
    //MODELS
@@ -41,6 +41,7 @@ module.exports = async function (ctx) {
    //EFFECT
    ctx.effect("sync", require("./effect/sync"));
    ctx.effect("webhook", require("./effect/webhook"));
+   ctx.effect("log", require("./effect/log"));
 
    //FILTERS
    ctx.filter("filter", require("./filter/filter"));

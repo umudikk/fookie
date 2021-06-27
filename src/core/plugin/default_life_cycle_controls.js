@@ -46,11 +46,11 @@ module.exports = async function (ctx) {
       },
       post: {
          modify: {
-            before: ["set_default", "set_target", "increase"],
+            before: ["set_default", "increase"],
             after: [],
          },
          rule: {
-            before: ["need_target", "has_fields", "check_type", "check_required"],
+            before: ["has_fields", "check_type", "check_required"],
             after: ["check_auth"],
          },
          preRule: {

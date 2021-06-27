@@ -1,4 +1,4 @@
-module.exports = async function ({ model, body, ctx }) {
+module.exports = async function ({ model, body}, ctx ) {
     let search = [null, undefined]
     let keys = ctx.lodash.keys(body)
     for (let key of keys) {

@@ -16,10 +16,12 @@
     "license": "MIT",
     "homepage": "https://github.com/umudikk/fookie.git#readme",
     "dependencies": {
+        "axios": "^0.21.1",
         "body-parser": "^1.19.0",
         "cors": "^2.8.5",
         "deepmerge": "^4.2.2",
         "express": "^4.17.1",
+        "faker": "^5.5.3",
         "js-sha512": "^0.8.0",
         "jsonwebtoken": "^8.5.1",
         "mongoose": "^5.12.10",

@@ -4,7 +4,6 @@ const Fookie = require("../src/index.js");
    await fookie.connect("mongodb://localhost/fookie");
    await fookie.listen(3000);
 
-
    setTimeout(async () => {
     fookie.fuzzer({
        amount:10,
@@ -12,5 +11,4 @@ const Fookie = require("../src/index.js");
     })
 
    }, 3333);
-
 })();

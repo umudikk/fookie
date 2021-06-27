@@ -13,7 +13,8 @@ const lodash = require("lodash");
 const core = require("./core/index.js");
 var mongoose = require("mongoose");
 const deepMerge = require("deepmerge");
-const axios = {}//require('axios')
+const axios = require('axios')
+const faker = require('faker')
 var { Schema } = mongoose;
 
 class Fookie {
@@ -29,6 +30,7 @@ class Fookie {
       this.store = new Map();
       this.lodash = lodash
       this.axios = axios
+      this.faker = faker
       this.helpers = {
          rule,
          effect,
@@ -83,52 +85,43 @@ class Fookie {
       model.methods = new Map();
       model.methods.set("get", async function (payload, ctx) {
          let res = await Model.findOne(payload.query, payload.attributes);
-         if (res) {
-            payload.response.status = 200;
-         } else {
-            payload.response.status = 201;
-            payload.response.warnings.push("get error");
-         }
          return res;
       });
-      model.methods.set("getAll", async function ({ query, response, attributes }) {
+      model.methods.set("getAll", async function ({ query, attributes }) {
          let res = await Model.find(query, attributes);
-         if (res) {
-            response.status = 200;
-         } else {
-            response.status = 201;
-            response.warnings.push("getAll error");
-         }
          return res;
       });
-      model.methods.set("post", async function ({ body, target }) {
-         for (let f in body) {
-            target[f] = body[f];
-         }
-         let res = await target.save();
+      model.methods.set("post", async function (payload) {
+         let res = await Model.create(payload.body)
          return res;
       });
-      model.methods.set("delete", async function ({ target }) {
-         return await target.remove();
+      model.methods.set("delete", async function (payload) {
+         let res = await Model.remove(payload.query)
+         return res
       });
-      model.methods.set("patch", async function ({ body, target }) {
-         for (let f in body) {
-            target[f] = body[f];
-         }
-         return await target.save();
+      model.methods.set("patch", async function (payload) {
+         return await Model.updateMany(payload.query, payload.body)
       });
       model.methods.set("model", async function () {
          return model;
       });
-      model.methods.set("count", async function ({ query }) {
-         let res = await Model.countDocuments(query);
+      model.methods.set("count", async function (payload) {
+         let res = await Model.countDocuments(payload.query);
          return res;
       });
 
       model.methods.set("test", async function (payload, ctx) {
-         //todo fix here
-         await modify(payload, ctx);
-         return await rule(payload, ctx);
+         //todo options methodu nereden alıyor düşün.
+         if (await preRule(payload, this)) {
+            for (let b of this.store.get("befores")) {
+               await this.modifies.get(b)(payload, this);
+            }
+            await modify(payload, this);
+            if (await rule(payload, this)) { 
+               return true
+            }
+         }
+         return false
       });
 
       model.model = Model;
@@ -141,11 +134,6 @@ class Fookie {
    }
 
    async run(payload) {
-      payload.response = {
-         warnings: [],
-         status: 200,
-         data: null,
-      };
       let ctx = this;
       if (await preRule(payload, ctx)) {
          for (let b of this.store.get("befores")) {
@@ -163,10 +151,6 @@ class Fookie {
             await this.effects.get(b)(payload, ctx);
          }
       }
-
-      console.log(
-         `[RESPONSE] ${payload.model} | ${payload.method} | [${payload.response.warnings}] | ${payload.response.status}`
-      );
       return payload.response;
    }
 
@@ -192,17 +176,7 @@ class Fookie {
    }
 
    fuzzer(test) {
-      let models = this.models.keys()
-      console.log(models);
-      let methods = models.map(m => this.models.get(m).methods.keys())
-
-      for (let i in test.amount) {
-         this.run({
-            token:test.token,
-            model: lodash.sample(models),
-            method: lodash.sample(methods),
-         })
-      }
+      
    }
 }
 

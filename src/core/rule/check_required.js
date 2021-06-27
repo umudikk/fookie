@@ -1,4 +1,5 @@
 module.exports = async function (payload, ctx) {
+   //todo lodash ile kontrol et bu yöntem çöp
    let search = ["", null, undefined];
    let model = ctx.models.get(payload.model);
    let keys = ctx.lodash.keys(model.schema);

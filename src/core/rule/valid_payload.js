@@ -1,4 +1,3 @@
-const lodash = require("lodash");
 module.exports = async function (payload, ctx) {
-   return !lodash.has(payload, "user") && !lodash.has(payload, "response" && !lodash.has(payload, "target"));
+   return !ctx.lodash.has(payload, "user") && !ctx.lodash.has(payload, "response" && !ctx.lodash.has(payload, "target"));
 };

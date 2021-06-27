@@ -1,17 +1,20 @@
-const deepMerge = require("deepmerge");
-const lodash = require("lodash");
 module.exports = async function (payload, ctx) {
-   payload = deepMerge(payload, {
+   payload = ctx.lodash.merge(payload, {
       options: {
          simplified: false,
          deep: false,
-         attributes: null,
+         attributes: undefined,
+      },
+      response: {
+         data: undefined,
+         warnings: [],
+         status: 200
       },
       body: {},
       query: {},
-      method: null,
-      model: null,
-      token: null,
+      method: undefined,
+      model: undefined,
+      token: undefined,
       user: {},
    });
    /*
