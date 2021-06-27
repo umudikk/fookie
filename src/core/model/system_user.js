@@ -3,11 +3,13 @@ module.exports = {
    display: "email",
    schema: {
       email: {
+         onlyClient:true,
          required: true,
          type: "string",
          input: "text",
       },
       password: {
+         onlyClient:true,
          required: true,
          type: "string",
          input: "password",

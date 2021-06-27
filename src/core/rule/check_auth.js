@@ -1,7 +1,8 @@
 
 const lodash = require('lodash')
 module.exports = async function (payload, ctx) {
-   if (lodash.has(payload), 'system') {
+   console.log();
+   if (lodash.has(payload.user, 'system')) {
       return payload.user.system;
    }
    let roles = [];

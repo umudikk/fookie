@@ -111,7 +111,7 @@ class Fookie {
       });
 
       model.methods.set("test", async function (payload, ctx) {
-         //todo options methodu nereden alıyor düşün.
+         payload.method= payload.options.method
          if (await preRule(payload, this)) {
             for (let b of this.store.get("befores")) {
                await this.modifies.get(b)(payload, this);
@@ -135,10 +135,10 @@ class Fookie {
 
    async run(payload) {
       let ctx = this;
+      for (let b of this.store.get("befores")) {
+         await this.modifies.get(b)(payload, ctx);
+      }
       if (await preRule(payload, ctx)) {
-         for (let b of this.store.get("befores")) {
-            await this.modifies.get(b)(payload, ctx);
-         }
          await modify(payload, ctx);
          if (await rule(payload, ctx)) {
             payload.response.data = await this.models.get(payload.model).methods.get(payload.method)(payload, ctx);
