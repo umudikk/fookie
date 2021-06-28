@@ -17,8 +17,8 @@ module.exports = async function (payload, ctx) {
          isValid = await validate[validators[ctx.models.get(payload.model).schema[field].type]](payload.body[field]);
       }
       if (!isValid) {
-         response.warnings.push(`[Check_Type] Invalid type: ${ctx.models.get(payload.model).schema[field].type}`);
-         response.warnings.push(`[Check_Type] Invalid value: ${payload.body[field]}`);
+         payload.response.warnings.push(`[Check_Type] Invalid type: ${ctx.models.get(payload.model).schema[field].type}`);
+         payload.response.warnings.push(`[Check_Type] Invalid value: ${payload.body[field]}`);
          return false;
       }
    }
