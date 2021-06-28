@@ -55,6 +55,10 @@ module.exports = async function (ctx) {
    ctx.modify("default_payload", require("./modify/default_payload"));
    ctx.modify("increase", require("./modify/increase"));
 
+   ctx.modify("test",()=> {
+      console.log("tttest");
+   })
+
    // PLUGINS
    //await ctx.use(require("./defaults/plugin/file_storage"))
    await ctx.use(require("./plugin/login_register"));

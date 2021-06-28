@@ -26,6 +26,9 @@ module.exports = {
       },
       getAll: {
          role: ["system_admin"],
+         reject:{
+            system_admin:["test"]
+         }
       },
       patch: {
          role: ["system_admin"],
@@ -33,6 +36,9 @@ module.exports = {
       post: {
          role: ["system_admin"],
          modify: ["password"],
+         reject:{
+            system_admin:["test"]
+         }
       },
       delete: {
          role: ["system_admin"],

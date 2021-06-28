@@ -17,9 +17,7 @@ module.exports = async function (payload, ctx) {
       },
    });
 
-   if (userResponse.status == 200) {
+   if (userResponse.data) {
       payload.user = userResponse.data;
-   } else {
-      payload.user = {};
    }
 };

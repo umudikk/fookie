@@ -12,10 +12,6 @@ module.exports = async function (payload, ctx) {
       },
       body: {},
       query: {},
-      method: undefined,
-      model: undefined,
-      token: undefined,
-      user: {},
    });
    /*
    payload.method = payload.hasOwnProperty("method") ? payload.method : "";
