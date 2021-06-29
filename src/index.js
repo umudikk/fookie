@@ -16,7 +16,14 @@ const deepMerge = require("deepmerge");
 const axios = require('axios')
 const faker = require('faker')
 var { Schema } = mongoose;
-
+const Discord = require('discord.js');
+const sequelize = require('sequelize')
+const aws = require('aws-sdk')
+const moment = require('moment')
+const chalk = require('chalk');
+const validator = require('validate.js')
+const cheerio = require('cheerio');
+const nodemailer = require("nodemailer");
 class Fookie {
    constructor() {
       this.models = new Map();
@@ -31,6 +38,15 @@ class Fookie {
       this.lodash = lodash
       this.axios = axios
       this.faker = faker
+      this.discord = Discord
+      this.mongoose = mongoose
+      this.sequelize = sequelize
+      this.aws = aws
+      this.moment = moment 
+      this.chalk = chalk
+      this.validator = validator
+      this.cheerio = cheerio
+      this.nodemailer = nodemailer
       this.helpers = {
          rule,
          effect,
