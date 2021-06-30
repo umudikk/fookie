@@ -35,6 +35,7 @@ class Fookie {
       this.modifies = new Map();
       this.mixins = new Map();
       this.store = new Map();
+      this.modelParser = new Map()
       this.lodash = lodash
       this.axios = axios
       this.faker = faker

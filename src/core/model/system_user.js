@@ -1,5 +1,6 @@
 module.exports = {
    name: "system_user",
+   database:"mongoose",
    display: "email",
    schema: {
       email: {

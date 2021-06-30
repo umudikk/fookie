@@ -8,9 +8,10 @@ While developing software, I realized that we always do the same work in control
 
 -  Write clean and less code. (%70-%90 less code.I'm not kidding.)
 -  Develop your application by adding small pieces of code
--  Auto generated methods (post , delete , patch , count , schema, get , getAll)
--  Request body type check
--  Request body require fields check
+-  Auto generated methods (post , delete , patch , count , schema, get , getAll , test)
+-  Huge default library like Autocode (mongoose,sequelize,aws-sdk,validatorjs,lodash etc.)
+-  Auto validate request body
+-  Check required,onlyClient fields in request body
 -  Low test cost.
 -  Default health check and metrics.
 -  Store for your global variables.

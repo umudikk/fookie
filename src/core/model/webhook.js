@@ -1,5 +1,6 @@
 module.exports = {
     name: "webhook",
+    database:"mongoose",
     display: "name",
     schema: {
         name: {

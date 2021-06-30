@@ -1,5 +1,6 @@
 module.exports = {
    name: "system_submenu",
+   database:"mongoose",
    display: "_id",
    schema: {
       system_model: {

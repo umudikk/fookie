@@ -31,8 +31,10 @@ module.exports = async function (ctx) {
    ctx.rule("has_body", require("./rule/has_body"));
    ctx.rule("need_method_in_options", require("./rule/need_method_in_options"));
    ctx.rule("valid_payload", require("./rule/valid_payload"));
+   
 
    //ROLES
+   ctx.role("loggedin", require("./role/loggedin"));
    ctx.role("everybody", require("./role/everybody"));
    ctx.role("nobody", require("./role/nobody"));
    ctx.role("system_admin", require("./role/system_admin"));
