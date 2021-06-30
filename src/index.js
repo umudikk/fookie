@@ -13,16 +13,16 @@ const lodash = require("lodash");
 const core = require("./core/index.js");
 var mongoose = require("mongoose");
 const deepMerge = require("deepmerge");
-const axios = require('axios')
-const faker = require('faker')
+const axios = require("axios");
+const faker = require("faker");
 var { Schema } = mongoose;
-const Discord = require('discord.js');
-const sequelize = require('sequelize')
-const aws = require('aws-sdk')
-const moment = require('moment')
-const chalk = require('chalk');
-const validator = require('validate.js')
-const cheerio = require('cheerio');
+const Discord = require("discord.js");
+const sequelize = require("sequelize");
+const aws = require("aws-sdk");
+const moment = require("moment");
+const chalk = require("chalk");
+const validator = require("validate.js");
+const cheerio = require("cheerio");
 const nodemailer = require("nodemailer");
 class Fookie {
    constructor() {
@@ -35,19 +35,19 @@ class Fookie {
       this.modifies = new Map();
       this.mixins = new Map();
       this.store = new Map();
-      this.modelParser = new Map()
-      this.lodash = lodash
-      this.axios = axios
-      this.faker = faker
-      this.discord = Discord
-      this.mongoose = mongoose
-      this.sequelize = sequelize
-      this.aws = aws
-      this.moment = moment 
-      this.chalk = chalk
-      this.validator = validator
-      this.cheerio = cheerio
-      this.nodemailer = nodemailer
+      this.modelParser = new Map();
+      this.lodash = lodash;
+      this.axios = axios;
+      this.faker = faker;
+      this.discord = Discord;
+      this.mongoose = mongoose;
+      this.sequelize = sequelize;
+      this.aws = aws;
+      this.moment = moment;
+      this.chalk = chalk;
+      this.validator = validator;
+      this.cheerio = cheerio;
+      this.nodemailer = nodemailer;
       this.helpers = {
          rule,
          effect,
@@ -95,6 +95,7 @@ class Fookie {
    }
 
    async model(model) {
+      //todo: mongoosu parametrik yap sequlize falan da yazabielim.
       schemaFixer(model);
       let parsedSchema = mongooseModelParser(model);
 
@@ -109,15 +110,15 @@ class Fookie {
          return res;
       });
       model.methods.set("post", async function (payload) {
-         let res = await Model.create(payload.body)
+         let res = await Model.create(payload.body);
          return res;
       });
       model.methods.set("delete", async function (payload) {
-         let res = await Model.remove(payload.query)
-         return res
+         let res = await Model.remove(payload.query);
+         return res;
       });
       model.methods.set("patch", async function (payload) {
-         return await Model.updateMany(payload.query, payload.body)
+         return await Model.updateMany(payload.query, payload.body);
       });
       model.methods.set("model", async function () {
          return model;
@@ -128,17 +129,17 @@ class Fookie {
       });
 
       model.methods.set("test", async function (payload, ctx) {
-         payload.method= payload.options.method
+         payload.method = payload.options.method;
          if (await preRule(payload, this)) {
             for (let b of this.store.get("befores")) {
                await this.modifies.get(b)(payload, this);
             }
             await modify(payload, this);
-            if (await rule(payload, this)) { 
-               return true
+            if (await rule(payload, this)) {
+               return true;
             }
          }
-         return false
+         return false;
       });
 
       model.model = Model;
@@ -192,9 +193,7 @@ class Fookie {
       });
    }
 
-   fuzzer(test) {
-      
-   }
+   fuzzer(test) {}
 }
 
 module.exports = Fookie;
