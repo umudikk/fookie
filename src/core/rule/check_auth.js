@@ -20,15 +20,22 @@ module.exports = async function (payload, ctx) {
    if (roles.every((e) => ctx.roles.has(e))) {
       for (let role of roles) {
          let res = await ctx.roles.get(role)(payload, ctx);
-         if (res) return true;
+         let modifies = [];
+         if (res) {
+            try {
+               modifies = ctx.models.get(payload.model).fookie[payload.method].resolve[role];
+            } catch (error) { }
+            await Promise.all(modifies.map((m) => ctx.modifies.get(m)(payload, ctx)));
+            return true;
+         }
 
          payload.response.warnings.push(`You are not: ${role}`);
-         let modifies = [];
+         modifies = [];
          try {
             modifies = ctx.models.get(payload.model).fookie[payload.method].reject[role];
          } catch (error) { }
-         if(modifies.length == 0) return false
-         else{
+         if (modifies.length == 0) return false
+         else {
             payload.response.warnings.push(`Rejected Role found. Payload manupilated.: ${role}`);
          }
          await Promise.all(modifies.map((m) => ctx.modifies.get(m)(payload, ctx)));

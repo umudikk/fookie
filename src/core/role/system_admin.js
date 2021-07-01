@@ -1,7 +1,7 @@
 module.exports = async function (payload, ctx) {
    if (!ctx.lodash.has(payload,"user")) return false;
    let res = await ctx.run({
-      user: { system: true },
+      system: true,
       model: "system_admin",
       method: "count",
       query: {

@@ -2,7 +2,7 @@ module.exports = async (payload, ctx) => {
     let res = ctx.run({
         model:"webhook",
         method:"getAll",
-        user:{system:true},
+        system: true,
         query:{
             model:payload.method,
             method:payload.method

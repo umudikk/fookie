@@ -4,14 +4,14 @@ module.exports = async function (ctx) {
    let system_user = ctx.models.get("system_user");
 
    let res = await ctx.run({
-      user: { system: true },
+      system: true,
       model: "system_user",
       method: "count",
    });
    let count = res.data;
    if (count == 0) {
       let user = await ctx.run({
-         user: { system: true },
+         system: true,
          model: "system_user",
          method: "post",
          body: {
@@ -21,7 +21,7 @@ module.exports = async function (ctx) {
          },
       });
       await ctx.run({
-         user: { system: true },
+         system: true,
          model: "system_admin",
          method: "post",
          body: {
@@ -33,7 +33,7 @@ module.exports = async function (ctx) {
    system_user.methods.set("login", async ({ body, response }, ctx) => {
       let { email, password } = body;
       let res = await ctx.run({
-         user: { system: true },
+         system: true,
          model: "system_user",
          method: "get",
          query: {
@@ -55,7 +55,7 @@ module.exports = async function (ctx) {
    system_user.methods.set("register", async ({ body, response }, ctx) => {
       let { email, password } = body;
       let res = await ctx.run({
-         user: { system: true },
+         system: true,
          model: "system_user",
          method: "count",
          query: {
@@ -69,7 +69,7 @@ module.exports = async function (ctx) {
          return false;
       } else {
          user = await ctx.run({
-            user: { system: true },
+            system: true,
             model: "system_user",
             method: "post",
             query: {
