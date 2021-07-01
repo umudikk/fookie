@@ -31,7 +31,6 @@ module.exports = async function (ctx) {
    ctx.rule("has_body", require("./rule/has_body"));
    ctx.rule("need_method_in_options", require("./rule/need_method_in_options"));
    ctx.rule("valid_payload", require("./rule/valid_payload"));
-   
 
    //ROLES
    ctx.role("loggedin", require("./role/loggedin"));
@@ -56,10 +55,11 @@ module.exports = async function (ctx) {
    ctx.modify("set_user", require("./modify/set_user"));
    ctx.modify("default_payload", require("./modify/default_payload"));
    ctx.modify("increase", require("./modify/increase"));
+   ctx.modify("attributes", require("./modify/attributes"));
 
-   ctx.modify("test",()=> {
+   ctx.modify("test", () => {
       console.log("tttest");
-   })
+   });
 
    // PLUGINS
    //await ctx.use(require("./defaults/plugin/file_storage"))

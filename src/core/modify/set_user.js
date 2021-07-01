@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 module.exports = async function (payload, ctx) {
-   if (payload.hasOwnProperty("user")) if (payload.user.hasOwnProperty("system")) return payload.user.system;
+   if (ctx.lodash.has(payload, "system")) return payload.system;
 
    let parsed = false;
    try {
@@ -9,7 +9,7 @@ module.exports = async function (payload, ctx) {
       payload.response.warnings.push("invalid token");
    }
    let userResponse = await ctx.run({
-      user: { system: true },
+      system: true,
       model: "system_user",
       method: "get",
       query: {

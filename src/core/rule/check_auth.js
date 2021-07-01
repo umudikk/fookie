@@ -1,22 +1,11 @@
-
-const lodash = require('lodash')
 module.exports = async function (payload, ctx) {
-   console.log();
-   if (lodash.has(payload.user, 'system')) {
-      return payload.user.system;
+   if (ctx.lodash.has(payload, "system")) {
+      return payload.system;
    }
-   let roles = [];
-
-   roles = roles.concat(ctx.helpers.defaultArrayCalc(payload, "role"));
-
-   let keys = lodash.keys(payload.body)
-   if (["post", "patch"].includes(payload.method)) {
-      keys.forEach((key) => {
-         roles = roles.concat(ctx.models.get(payload.model).schema[key].write);
-      });
-   }
+   let roles = ctx.helpers.defaultArrayCalc(payload, "role");
 
    if (roles.length == 0) return true;
+
    if (roles.every((e) => ctx.roles.has(e))) {
       for (let role of roles) {
          let res = await ctx.roles.get(role)(payload, ctx);
@@ -24,7 +13,7 @@ module.exports = async function (payload, ctx) {
          if (res) {
             try {
                modifies = ctx.models.get(payload.model).fookie[payload.method].resolve[role];
-            } catch (error) { }
+            } catch (error) {}
             await Promise.all(modifies.map((m) => ctx.modifies.get(m)(payload, ctx)));
             return true;
          }
@@ -33,8 +22,8 @@ module.exports = async function (payload, ctx) {
          modifies = [];
          try {
             modifies = ctx.models.get(payload.model).fookie[payload.method].reject[role];
-         } catch (error) { }
-         if (modifies.length == 0) return false
+         } catch (error) {}
+         if (modifies.length == 0) return false;
          else {
             payload.response.warnings.push(`Rejected Role found. Payload manupilated.: ${role}`);
          }

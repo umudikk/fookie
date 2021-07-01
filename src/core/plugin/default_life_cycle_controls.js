@@ -3,7 +3,7 @@ module.exports = async function (ctx) {
       get: {
          modify: {
             before: [],
-            after: [],
+            after: ["attributes"],
          },
          rule: {
             before: [],
@@ -25,7 +25,7 @@ module.exports = async function (ctx) {
       getAll: {
          modify: {
             before: [],
-            after: [],
+            after: ["attributes"],
          },
          rule: {
             before: [],
@@ -47,14 +47,14 @@ module.exports = async function (ctx) {
       post: {
          modify: {
             before: ["set_default", "increase"],
-            after: [],
+            after: ["attributes"],
          },
          rule: {
             before: ["has_fields", "check_type", "check_required"],
             after: ["check_auth"],
          },
          preRule: {
-            before: ["has_model", "has_method","has_fields", "only_client", "has_body"],
+            before: ["has_model", "has_method", "has_fields", "only_client", "has_body"],
             after: [],
          },
          filter: {
@@ -69,7 +69,7 @@ module.exports = async function (ctx) {
       patch: {
          modify: {
             before: ["set_target"],
-            after: [],
+            after: ["attributes"],
          },
          rule: {
             before: ["need_target", "has_fields", "check_type", "check_required"],
