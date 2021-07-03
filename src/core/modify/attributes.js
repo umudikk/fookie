@@ -9,7 +9,6 @@ module.exports = async function (payload, ctx) {
          show = show && (await ctx.roles.get(role)(payload));
       }
       if (!show) {
-         console.log(field, 1);
          payload.attributes = ctx.lodash.remove(payload.attributes, (f) => f != field);
       }
    }

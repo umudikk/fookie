@@ -1,4 +1,4 @@
-module.exports = async function ({ model, body }, ctx) {
+module.exports = async function (payload, ctx) {
    console.log("unique");
    let model = ctx.models.get(payload.model);
    let fields = ctx.lodash.keys(payload.body);
@@ -16,5 +16,4 @@ module.exports = async function ({ model, body }, ctx) {
          return res.data == 0;
       }
    }
-   return false;
 };

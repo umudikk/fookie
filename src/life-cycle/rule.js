@@ -8,6 +8,7 @@ module.exports = async function (payload, ctx) {
             return false;
          }
       }
+
       return true;
    } else {
       payload.response.warnings.push("invalid rule", rules);

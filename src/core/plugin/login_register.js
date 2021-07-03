@@ -54,7 +54,7 @@ module.exports = async function (ctx) {
 
    system_user.methods.set("register", async ({ body, response }, ctx) => {
       let { email, password } = body;
-      user = await ctx.run({
+      let res = await ctx.run({
          system: true,
          model: "system_user",
          method: "post",
@@ -63,6 +63,7 @@ module.exports = async function (ctx) {
             password: sha512(password),
          },
       });
+
       return res.status == 200;
    });
 };

@@ -24,6 +24,9 @@ const chalk = require("chalk");
 const validator = require("validate.js");
 const cheerio = require("cheerio");
 const nodemailer = require("nodemailer");
+const multer = require("multer");
+var CryptoJS = require("crypto-js");
+
 class Fookie {
    constructor() {
       this.models = new Map();
@@ -48,6 +51,8 @@ class Fookie {
       this.validator = validator;
       this.cheerio = cheerio;
       this.nodemailer = nodemailer;
+      this.multer = multer;
+      this.CryptoJS = CryptoJS;
       this.helpers = {
          rule,
          effect,
@@ -164,10 +169,14 @@ class Fookie {
                await filter(payload, ctx);
                effect(payload, ctx);
             }
+         } else {
+            payload.response.status = 400;
          }
          for await (let b of this.store.get("afters")) {
             await this.effects.get(b)(payload, ctx);
          }
+      } else {
+         payload.response.status = 400;
       }
       return payload.response;
    }
