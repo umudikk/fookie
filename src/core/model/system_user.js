@@ -1,16 +1,17 @@
 module.exports = {
    name: "system_user",
-   database:"mongoose",
+   database: "mongoose",
    display: "email",
    schema: {
       email: {
-         onlyClient:true,
+         unique: true,
+         onlyClient: true,
          required: true,
          type: "string",
          input: "text",
       },
       password: {
-         onlyClient:true,
+         onlyClient: true,
          required: true,
          type: "string",
          input: "password",
@@ -27,9 +28,9 @@ module.exports = {
       },
       getAll: {
          role: ["system_admin"],
-         reject:{
-            system_admin:["test"]
-         }
+         reject: {
+            system_admin: ["test"],
+         },
       },
       patch: {
          role: ["system_admin"],
@@ -37,9 +38,9 @@ module.exports = {
       post: {
          role: ["system_admin"],
          modify: ["password"],
-         reject:{
-            system_admin:["test"]
-         }
+         reject: {
+            system_admin: ["test"],
+         },
       },
       delete: {
          role: ["system_admin"],

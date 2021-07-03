@@ -29,7 +29,7 @@ module.exports = async function (ctx) {
          },
       });
    }
-  
+
    system_user.methods.set("login", async ({ body, response }, ctx) => {
       let { email, password } = body;
       let res = await ctx.run({
@@ -54,30 +54,15 @@ module.exports = async function (ctx) {
 
    system_user.methods.set("register", async ({ body, response }, ctx) => {
       let { email, password } = body;
-      let res = await ctx.run({
+      user = await ctx.run({
          system: true,
          model: "system_user",
-         method: "count",
-         query: {
+         method: "post",
+         body: {
             email,
             password: sha512(password),
          },
       });
-      let count = res.data;
-      if (count != 0) {
-         response.status = 201;
-         return false;
-      } else {
-         user = await ctx.run({
-            system: true,
-            model: "system_user",
-            method: "post",
-            query: {
-               email,
-               password: sha512(password),
-            },
-         });
-         return true;
-      }
+      return res.status == 200;
    });
 };

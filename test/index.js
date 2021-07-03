@@ -43,7 +43,7 @@ const Fookie = require("../src/index.js");
       },
    });
 
-   fookie.listen(8080);
+   fookie.listen(3000);
    setTimeout(async () => {
       // We need set time because.Fookie didnt set all plugins.1 sec is enought.
       let res = await fookie.run({

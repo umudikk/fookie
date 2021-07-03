@@ -10,6 +10,6 @@ module.exports = async function (payload, ctx) {
       }
       return true;
    } else {
-      throw Error("Invalid Rule");
+      payload.response.warnings.push("invalid rule", rules);
    }
 };
