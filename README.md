@@ -17,7 +17,6 @@ While developing software, I realized that we always do the same work in control
 -  Store for your global variables.
 -  Password email base authentication.
 -  Create, delete or edit your API on runtime.
--  Store your schemas in database.
 -  Supports custom methods.
 -  NoSQL and SQL support.(SQL is coming soon)
 -  Trim unauthorized fields.
@@ -35,11 +34,9 @@ While developing software, I realized that we always do the same work in control
 -  Auto tests
 -  Client for Vue.Auto generated post forms, tables, kanbans, admin-panel like strapi.
 -  Media Library and ready to use streaming service.
--  Optional socket support.
 -  Auto generated documentation.
 -  Querystring support.
--  Advance and editable Request Life Cycle.
--  TypeORM and TS Support.
+-  More database support.
 
 ## Installation
 
@@ -57,6 +54,8 @@ https://github.com/umudikk/fookie/wiki
 
 ## Examples
 
+### Blog
+
 ```javascript
 const Fookie = require("fookie");
 
@@ -73,8 +72,6 @@ let start = async function () {
             type: "string",
             required: true,
             default: "A Title",
-            read: [],
-            write: [],
          },
          content: {
             unique: true,
@@ -82,35 +79,24 @@ let start = async function () {
             type: "string",
             required: true,
             default: "Content here...",
-            read: [],
-            write: [],
          },
          slug: {
             unique: true,
             input: "text",
             type: "string",
             required: false,
-            read: [],
-            write: [],
          },
          date: {
             unique: false,
             type: "string",
             required: true,
             input: "date",
-            read: [],
-            write: [],
          },
          author: {
             unique: false,
-            relation: {
-               model: "system_user",
-               key: "id",
-            },
+            relation: "system_user",
             default: 1,
             required: true,
-            read: [],
-            write: [],
          },
          published: {
             unique: false,
@@ -118,55 +104,32 @@ let start = async function () {
             required: true,
             input: "date",
             default: false,
-            read: [],
+            read: ["system_admin"],
             write: ["system_admin"],
          },
       },
       fookie: {
          get: {
-            effect: [],
-            filter: [],
             role: ["everybody"],
-            modify: [],
-            rule: [],
          },
          getAll: {
-            effect: [],
-            filter: [],
             role: ["system_admin", "everybody"],
             reject: {
                system_admin: ["paginate", "published"],
             },
-            modify: [],
             rule: ["has_page"],
          },
          patch: {
-            effect: [],
-            filter: [],
             role: ["system_admin", "editor"],
-            modify: [],
-            rule: [],
          },
          post: {
-            effect: [],
-            filter: [],
             role: ["system_admin", "editor"],
-            modify: [],
-            rule: [],
          },
          delete: {
-            effect: [],
-            filter: [],
             role: ["system_admin"],
-            modify: [],
-            rule: [],
          },
          schema: {
-            effect: [],
-            filter: [],
             role: ["everybody"],
-            modify: [],
-            rule: [],
          },
       },
       mixin: [],
@@ -176,17 +139,17 @@ let start = async function () {
       ctx.store.set("per_page_count", 12);
    });
 
-   api.rule("has_page", async ({ user, req, body, options, model, query, method, ctx }) => {
-      return typeof body.page == "number";
+   api.rule("has_page", async ({ user, req, body, options, model, query, method }, ctx) => {
+      return typeof options.page == "number";
    });
 
-   api.modify("paginate", async ({ user, req, body, options, model, query, method, ctx }) => {
+   api.modify("paginate", async ({ user, req, body, options, model, query, method }, ctx) => {
       let count = ctx.store.get("per_page_count");
-      query.offset = count * body.page;
+      query.offset = count * options.page;
       query.limit = count;
    });
 
-   api.modify("published", async ({ user, req, body, model, options, query, method, ctx }) => {
+   api.modify("published", async ({ user, req, body, model, options, query, method }, ctx) => {
       query.published = true;
    });
 
@@ -194,7 +157,7 @@ let start = async function () {
       console.log("hello");
    });
 
-   api.role("editor", async (user, method) => {
+   api.role("editor", async (payload, ctx) => {
       if (user.type) {
          return user.type == "editor";
       }
@@ -210,8 +173,208 @@ let start = async function () {
 start();
 ```
 
+## TODO App
+
+```javascript
+const Fookie = require("fookie");
+(async () => {
+   const fookie = new Fookie();
+   await fookie.connect("mongodb://localhost/fookie");
+
+   fookie.model({
+      name: "todo",
+      display: "title",
+      schema: {
+         title: {
+            type: "string",
+         },
+         content: {
+            type: "string",
+         },
+         assignee: {
+            relation: "system_user",
+         },
+         checked: {
+            type: "boolean",
+            default: false,
+         },
+      },
+      fookie: {
+         get: {
+            role: ["loggedin"],
+         },
+         getAll: {
+            role: ["loggedin"],
+         },
+         patch: {
+            role: ["system_admin"],
+         },
+         post: {
+            role: ["system_admin"],
+         },
+         delete: {
+            role: ["system_admin"],
+         },
+         model: {
+            role: ["everybody"],
+         },
+      },
+   });
+
+   fookie.listen(8080);
+   setTimeout(async () => {
+      // We need set time because.Fookie didnt set all plugins.1 sec is enought.
+      let res = await fookie.run({
+         system: true,
+         model: "system_user",
+         method: "login",
+         body: {
+            email: "admin",
+            password: "admin",
+         },
+      });
+      let token = res.data; // You are system_admin now. (email:admin,password:admin default system_admin)
+      res = await fookie.run({
+         token,
+         model: "todo",
+         method: "getAll",
+         query: {
+            checked: false,
+         },
+      });
+
+      console.log(res); // {warnings:[],data:[....],status:200}
+   }, 1000);
+})();
+```
+
+# Basics
+
+## Model
+
+database -> system_model
+
+```javascript
+{
+    name:"blog_post", // this is your model name.Similar with Table name.
+    display:"title", // this is useless for fookiejs, for client
+    schema:{...},
+    mixin:["model2"],
+}
+```
+
+##### Field
+
+Orm schema.You can add some extra custom keys here.
+
+```javascript
+{//model def
+    ...
+    ...
+    schema:{
+        field1:{
+            type:"number" , // "string" , "number" , "object" , "boolean",
+            onlyClient:true, // same with required but data must be in request body.
+            min:0 // only number
+            max:12, // only number
+            equal:5, //
+            includes:"asd", // for string and array
+            write:[], // Role array. for patch post defalut:[]
+            read:["nobody"],// Role array. Who can read this field ? Nobody.FookieJS trim this field when you want to read(get getALl etc.). defalut:[]
+            input:"color",//this is useless for fookie backend but You can use on client-side
+            },
+            relation:"system_user"// same with referance
+    }
+}
+```
+
+##### fookie
+
+what your app does is determined here.You can think of this as a request gateway.All of the rules must return true to continue. Otherwise, the request return warnings. But if only one role is correct, you will continue to do the operation. Let's say you wrote a reject function for a role. If the user is not in this role. It works as if it were true, but the reject functions written for that role are executed and the process continues.
+
+```javascript
+{
+name:".."
+...
+fookie:{
+    post:{
+        preRule:[]
+        role:["loggedin"]// Who can make this?Loggedin.
+        reject:{//
+            loggedin:["add_something_to_query_modify"] // If requester is not loggedin Make this MODIFY.
+        }
+    }
+}
+
+}
+```
+
+# PLUGIN
+
+```javascript
+fookie.use(async (ctx)=>{ // ctx = fookie
+    ctx.model({
+        name:"bar",
+        ...
+        schema:{...}
+    }),
+    ctx.routine('hi',1000,()=>{
+    console.log("hi")
+
+    })
+    ctx.rule("nobody",async ()=>{
+       return false
+    })
+     ctx.modify("version_safe",async (payload,ctx)=>{
+       payload.query.__v = ctx.version // mongoose schema version __v
+    })
+    ctx.filter("foo",(payload,ctx)=>{...})
+    let model = ctx.models.get("store")
+    model.methods.set("set",(payload,ctx)=>{
+        ctx.store.set(payload.options.key,payload.body)
+    })
+    model.methods.set("get",(payload,ctx)=>{
+        return xtx.store.get(payload.options.key)
+    })
+})
+```
+
+# Payload
+
+Payload is very important because.All fucntions( like rule role filter etc. etc. but not model) get this parameter
+
 ```javascript
 
+payload = {
+    token:"...",
+    system:true //admin. YOu cant add this field http request :).
+    user:{_id:"somemongooseID",email:"example@example.com"},
+    req:req, // ExpressJS request. If you are using fookie.listen(port)
+    method:"patch",
+    model:"system_user",
+    query:{
+        $eq:{
+            _id:"...someid",
+        }
+    },
+    body:{
+        password:"123",
+    },
+    options:{
+        simplified:false // like grpc simplified gives very small data but you need to use fookie-client-sdk return an array
+    }
+}
+fookie.run(payload)
+
+
+// Usage
+
+fookie.effect('send_email',async function(payload,ctx){
+    mockMailer(payload.body)
+})
+```
+
+```javascript
 //Example Request
 
 await axios.post("http://localhost:80808",
