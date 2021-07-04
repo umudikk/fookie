@@ -11,11 +11,11 @@ const modify = require("./life-cycle/modify.js");
 const client = require("prom-client");
 const lodash = require("lodash");
 const core = require("./core/index.js");
-var mongoose = require("mongoose");
+const mongoose = require("mongoose");
 const deepMerge = require("deepmerge");
 const axios = require("axios");
 const faker = require("faker");
-var { Schema } = mongoose;
+const { Schema } = mongoose;
 const Discord = require("discord.js");
 const sequelize = require("sequelize");
 const aws = require("aws-sdk");
@@ -25,7 +25,8 @@ const validator = require("validate.js");
 const cheerio = require("cheerio");
 const nodemailer = require("nodemailer");
 const multer = require("multer");
-var CryptoJS = require("crypto-js");
+const CryptoJS = require("crypto-js");
+const pckg = require("../package.json");
 
 class Fookie {
    constructor() {
@@ -53,6 +54,7 @@ class Fookie {
       this.nodemailer = nodemailer;
       this.multer = multer;
       this.CryptoJS = CryptoJS;
+      this.package = pckg;
       this.helpers = {
          rule,
          effect,

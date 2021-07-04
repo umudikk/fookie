@@ -1,5 +1,4 @@
 module.exports = async function (payload, ctx) {
-   console.log("unique");
    let model = ctx.models.get(payload.model);
    let fields = ctx.lodash.keys(payload.body);
    for (let field of fields) {

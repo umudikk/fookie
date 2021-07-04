@@ -1,6 +1,7 @@
 module.exports = async function (ctx) {
    ctx.store.set("secret", "secret");
    ctx.store.set("afters", ["log"]);
+   ctx.store.set("afters", ["log"]);
    ctx.store.set("befores", ["default_payload", "set_user"]);
 
    //MODELS
@@ -58,6 +59,7 @@ module.exports = async function (ctx) {
    ctx.modify("default_payload", require("./modify/default_payload"));
    ctx.modify("increase", require("./modify/increase"));
    ctx.modify("attributes", require("./modify/attributes"));
+   ctx.modify("version", require("./modify/version"));
 
    ctx.modify("test", () => {
       console.log("tttest");

@@ -22,6 +22,7 @@
         "chalk": "^4.1.1",
         "cheerio": "^1.0.0-rc.10",
         "cors": "^2.8.5",
+        "crypto-js": "^4.0.0",
         "deepmerge": "^4.2.2",
         "discord.js": "^12.5.3",
         "express": "^4.17.1",
