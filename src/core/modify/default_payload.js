@@ -4,7 +4,6 @@ module.exports = async function (payload, ctx) {
          simplified: false,
          deep: false,
       },
-      attributes: [],
       response: {
          data: undefined,
          warnings: [],

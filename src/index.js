@@ -112,25 +112,26 @@ class Fookie {
          let res = await Model.findOne(payload.query, payload.attributes);
          return res;
       });
-      model.methods.set("getAll", async function ({ query, attributes }) {
+      model.methods.set("getAll", async function ({ query, attributes }, ctx) {
          let res = await Model.find(query, attributes);
          return res;
       });
-      model.methods.set("post", async function (payload) {
+      model.methods.set("post", async function (payload, ctx) {
          let res = await Model.create(payload.body);
          return res;
       });
-      model.methods.set("delete", async function (payload) {
+      model.methods.set("delete", async function (payload, ctx) {
          let res = await Model.remove(payload.query);
          return res;
       });
-      model.methods.set("patch", async function (payload) {
+      model.methods.set("patch", async function (payload, ctx) {
          return await Model.updateMany(payload.query, payload.body);
       });
-      model.methods.set("model", async function () {
+      model.methods.set("model", async function (payload,ctx) {
+         console.log(payload.attributes);
          return model;
       });
-      model.methods.set("count", async function (payload) {
+      model.methods.set("count", async function (payload, ctx) {
          let res = await Model.countDocuments(payload.query);
          return res;
       });

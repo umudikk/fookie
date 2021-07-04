@@ -15,7 +15,7 @@ module.exports = async function (ctx) {
          },
          filter: {
             before: [],
-            after: ["filter", "simplified"],
+            after: ["simplified"],
          },
          effect: {
             before: [],
@@ -37,7 +37,7 @@ module.exports = async function (ctx) {
          },
          filter: {
             before: [],
-            after: ["filter", "simplified"],
+            after: [ "simplified"],
          },
          effect: {
             before: [],
@@ -59,7 +59,7 @@ module.exports = async function (ctx) {
          },
          filter: {
             before: [],
-            after: ["filter", "simplified"],
+            after: ["simplified"],
          },
          effect: {
             before: [],
@@ -81,7 +81,7 @@ module.exports = async function (ctx) {
          },
          filter: {
             before: [],
-            after: ["filter", "simplified"],
+            after: [ "simplified"],
          },
          effect: {
             before: [],
@@ -135,7 +135,7 @@ module.exports = async function (ctx) {
       model: {
          modify: {
             before: [],
-            after: [],
+            after: ["attributes"],
          },
          rule: {
             before: [],

@@ -1,4 +1,4 @@
-const Fookie = require("../src/index.js");
+const Fookie = require("../src");
 (async () => {
    const fookie = new Fookie();
    await fookie.connect("mongodb://localhost/fookie");
