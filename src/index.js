@@ -128,8 +128,7 @@ class Fookie {
          return await Model.updateMany(payload.query, payload.body);
       });
       model.methods.set("model", async function (payload,ctx) {
-         console.log(payload.attributes);
-         return model;
+         return JSON.parse(JSON.stringify(model))
       });
       model.methods.set("count", async function (payload, ctx) {
          let res = await Model.countDocuments(payload.query);
