@@ -3,12 +3,11 @@ module.exports = async function (payload, ctx) {
    if (["patch", "post"].includes(payload.options.method)) {
       type = "write"
    }
-
+      console.log(payload);
    let model = ctx.models.get(payload.model);
-   console.log(model.schema);
    for (let field of ctx.lodash.keys(model.schema)) {
 
-      let roles = model.schema[field][type]//.concat(model.fookie[payload.options.method].role);
+      let roles = model.schema[field][type]
       let show = true;
 
       for (let role of roles) {
@@ -19,5 +18,4 @@ module.exports = async function (payload, ctx) {
 
       }
    }
-   console.log(payload.response.data.schema, 1);
 };

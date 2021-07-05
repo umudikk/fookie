@@ -1,7 +1,7 @@
 module.exports = async function (payload, ctx) {
    for (let rule of ctx.store.get("first_of_all")) {
       let res = await ctx.rules.get(rule)(payload, ctx);
-      if (!res) {
+      if (res ==false) {
          payload.response.warnings.push(`false first of all: ${rule}`);
          return false;
       }

@@ -3,7 +3,7 @@ module.exports = async function (payload, ctx) {
    if (rules.every((i) => ctx.rules.has(i))) {
       for (let i of rules) {
          let res = await ctx.rules.get(i)(payload, ctx);
-         if (!res) {
+         if (res == false) {
             payload.response.warnings.push(`false rule: ${i}`);
             return false;
          }

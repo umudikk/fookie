@@ -61,10 +61,6 @@ module.exports = async function (ctx) {
    ctx.modify("attributes", require("./modify/attributes"));
    ctx.modify("version", require("./modify/version"));
 
-   ctx.modify("test", () => {
-      console.log("tttest");
-   });
-
    // PLUGINS
    //await ctx.use(require("./defaults/plugin/file_storage"))
    await ctx.use(require("./plugin/login_register"));
