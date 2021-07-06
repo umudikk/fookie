@@ -15,5 +15,4 @@ module.exports = async function (payload, ctx) {
          payload.attributes = ctx.lodash.remove(payload.attributes, (f) => f != field);
       }
    }
-   payload.attributes.push("__v");
 };

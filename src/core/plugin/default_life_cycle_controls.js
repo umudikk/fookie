@@ -47,7 +47,7 @@ module.exports = async function (ctx) {
       post: {
          modify: {
             before: ["set_default", "increase"],
-            after: ["attributes"],
+            after: ["attributes","version"],
          },
          rule: {
             before: ["has_fields", "check_type", "check_required", "field_control", "unique"],
@@ -103,7 +103,7 @@ module.exports = async function (ctx) {
          },
          filter: {
             before: [],
-            after: ["filter", "simplified"],
+            after: [],
          },
          effect: {
             before: [],

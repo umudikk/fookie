@@ -103,17 +103,22 @@ class Fookie {
 
    async model(model) {
       //todo: mongoosu parametrik yap sequlize falan da yazabielim.
+ 
+      schemaFixer(model);
+      for(let i of model.mixin){
+         model = deepMerge(model,this.mixins.get(i))
+      }
       schemaFixer(model);
       let parsedSchema = mongooseModelParser(model);
 
-      let Model = mongoose.model(model.name, new Schema(parsedSchema));
+      let Model = mongoose.model(model.name, new Schema(parsedSchema,{ versionKey: false }));
       model.methods = new Map();
       model.methods.set("get", async function (payload, ctx) {
-         let res = await Model.findOne(payload.query, payload.attributes);
+         let res = await Model.findOne(payload.query, payload.attributes,payload.projection);
          return res;
       });
-      model.methods.set("getAll", async function ({ query, attributes }, ctx) {
-         let res = await Model.find(query, attributes);
+      model.methods.set("getAll", async function (payload, ctx) {
+         let res = await Model.find(payload.query, payload.attributes,payload.projection);
          return res;
       });
       model.methods.set("post", async function (payload, ctx) {
@@ -121,7 +126,7 @@ class Fookie {
          return res;
       });
       model.methods.set("delete", async function (payload, ctx) {
-         let res = await Model.remove(payload.query);
+         let res = await Model.deleteMany(payload.query);
          return res;
       });
       model.methods.set("patch", async function (payload, ctx) {

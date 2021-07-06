@@ -4,6 +4,9 @@ module.exports = async function (ctx) {
    ctx.store.set("afters", ["log"]);
    ctx.store.set("befores", ["default_payload", "set_user"]);
 
+   // MIXIN
+   ctx.mixin("default_mixin",require("./mixin/default_mixin"))
+
    //MODELS
    ctx.model(require("./model/system_model.js"));
    ctx.model(require("./model/system_menu.js"));
@@ -60,6 +63,8 @@ module.exports = async function (ctx) {
    ctx.modify("increase", require("./modify/increase"));
    ctx.modify("attributes", require("./modify/attributes"));
    ctx.modify("version", require("./modify/version"));
+
+
 
    // PLUGINS
    //await ctx.use(require("./defaults/plugin/file_storage"))

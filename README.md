@@ -145,8 +145,8 @@ let start = async function () {
 
    api.modify("paginate", async ({ user, req, body, options, model, query, method }, ctx) => {
       let count = ctx.store.get("per_page_count");
-      query.offset = count * options.page;
-      query.limit = count;
+      projection.skip = count * options.page;
+      projection.limit = count;
    });
 
    api.modify("published", async ({ user, req, body, model, options, query, method }, ctx) => {
