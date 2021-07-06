@@ -4,7 +4,7 @@ module.exports = function (ctx) {
       let a1 = [];
       let a2 = [];
       let a3 = [];
-
+//todo test methodunda sıçıyor neden buraya giriyor araştır.
       if (lodash.has(ctx.store.get("default_life_cycle_controls")[payload.method], mapName)) {
          a1 = ctx.store.get("default_life_cycle_controls")[payload.method][mapName].before;
          a3 = ctx.store.get("default_life_cycle_controls")[payload.method][mapName].after;

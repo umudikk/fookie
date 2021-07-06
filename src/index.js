@@ -141,13 +141,16 @@ class Fookie {
       });
 
       model.methods.set("test", async function (payload, ctx) {
+         for (let b of ctx.store.get("befores")) {
+            await ctx.modifies.get(b)(payload, ctx);
+         }
          payload.method = payload.options.method;
-         if (await preRule(payload, this)) {
-            for (let b of this.store.get("befores")) {
-               await this.modifies.get(b)(payload, this);
+         if (await preRule(payload, ctx)) {
+            for (let b of ctx.store.get("befores")) {
+               await ctx.modifies.get(b)(payload, ctx);
             }
-            await modify(payload, this);
-            if (await rule(payload, this)) {
+            await modify(payload, ctx);
+            if (await rule(payload, ctx)) {
                return true;
             }
          }
