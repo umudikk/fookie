@@ -7,7 +7,7 @@ module.exports = {
          relation: "system_user",
       },
    },
-   fookie: {
+   gateway: {
       get: {
          role: ["system_admin"],
       },

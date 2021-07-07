@@ -1,5 +1,5 @@
 module.exports = async function (payload, ctx) {
-   payload = ctx.lodash.merge(payload, {
+   payload = ctx.lodash.merge(payload,{
       options: {
       
       },
@@ -10,5 +10,6 @@ module.exports = async function (payload, ctx) {
       },
       body: {},
       query: {},
-   });
+      projection:{}
+   } );
 };

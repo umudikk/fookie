@@ -14,7 +14,7 @@ module.exports = {
          type: "string",
       },
    },
-   fookie: {
+   gateway: {
       get: {
          role: ["everybody"],
       },

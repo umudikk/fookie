@@ -21,7 +21,7 @@ const Fookie = require("../src");
             default: false,
          },
       },
-      fookie: {
+      gateway: {
          get: {
             role: ["loggedin"],
          },
@@ -45,6 +45,6 @@ const Fookie = require("../src");
 
    fookie.listen(3000);
    setTimeout(async () => {
-
-   }, 1000);
+      fookie.fuzzer(10)
+   }, 1200);
 })();

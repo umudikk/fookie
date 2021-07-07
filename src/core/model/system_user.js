@@ -5,13 +5,11 @@ module.exports = {
    schema: {
       email: {
          unique: true,
-         onlyClient: true,
          required: true,
          type: "string",
          input: "text",
       },
       password: {
-         onlyClient: true,
          required: true,
          type: "string",
          input: "password",
@@ -22,7 +20,7 @@ module.exports = {
          input: "text",
       },
    },
-   fookie: {
+   gateway: {
       get: {
          role: ["system_admin"],
       },
