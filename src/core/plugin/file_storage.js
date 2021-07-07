@@ -30,7 +30,7 @@ module.exports = async function (ctx) {
             type: "number",
          },
       },
-      fookie: {
+      gateway: {
          get: {
             rule: ["system_admin"],
          },

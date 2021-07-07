@@ -19,13 +19,13 @@ module.exports = {
          required: true,
          type: "object",
       },
-      fookie: {
+      gateway: {
          input: "json",
          required: true,
          type: "object",
       },
    },
-   fookie: {
+   gateway: {
       get: {
          role: ["everybody"],
       },

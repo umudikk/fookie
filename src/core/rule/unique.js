@@ -11,7 +11,6 @@ module.exports = async function (payload, ctx) {
                [field]: payload.body[field],
             },
          });
-         console.log(res);
          if (res.data > 0) payload.response.warnings.push("not unique: " + field);
          return res.data == 0;
       }

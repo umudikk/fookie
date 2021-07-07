@@ -2,7 +2,7 @@ const deepMerge = require("deepmerge");
 const lodash = require('lodash')
 module.exports = function (model) {
    let methods = ["post", "get", "getAll", "patch", "delete", "model", "count", "test"];
-   methods = methods.concat(lodash.keys(model.fookie))
+   methods = methods.concat(lodash.keys(model.gateway))
    methods = lodash.uniq(methods)
 
    for (let f of lodash.keys(model.schema)) {
@@ -13,7 +13,7 @@ module.exports = function (model) {
    }
 
    for (let method of methods) {
-      model.fookie[method] = deepMerge(model.fookie[method], {
+      model.gateway[method] = deepMerge(model.gateway[method], {
          modify: [],
          effect: [],
          rule: [],

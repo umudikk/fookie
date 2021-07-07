@@ -27,7 +27,7 @@ module.exports = {
             input: "text",
         }
     },
-    fookie: {
+    gateway: {
         get: {
             role: ["system_admin"],
         },

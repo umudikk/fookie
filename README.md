@@ -108,7 +108,7 @@ let start = async function () {
             write: ["system_admin"],
          },
       },
-      fookie: {
+      gateway: {
          get: {
             role: ["everybody"],
          },
@@ -199,7 +199,7 @@ const Fookie = require("fookie");
             default: false,
          },
       },
-      fookie: {
+      gateway: {
          get: {
             role: ["loggedin"],
          },
@@ -288,7 +288,7 @@ Orm schema.You can add some extra custom keys here.
 }
 ```
 
-##### fookie
+##### gateway
 
 what your app does is determined here.You can think of this as a request gateway.All of the rules must return true to continue. Otherwise, the request return warnings. But if only one role is correct, you will continue to do the operation. Let's say you wrote a reject function for a role. If the user is not in this role. It works as if it were true, but the reject functions written for that role are executed and the process continues.
 
@@ -296,7 +296,7 @@ what your app does is determined here.You can think of this as a request gateway
 {
 name:".."
 ...
-fookie:{
+gateway:{
     post:{
         preRule:[]
         role:["loggedin"]// Who can make this?Loggedin.

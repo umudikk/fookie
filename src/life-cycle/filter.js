@@ -5,6 +5,6 @@ module.exports = async function (payload, ctx) {
          await ctx.filters.get(i)(payload, ctx);
       }
    } else {
-      throw Error("Invalid Rule");
+     payload.response.warnings.push("Missing Filter")
    }
 };

@@ -103,22 +103,22 @@ class Fookie {
 
    async model(model) {
       //todo: mongoosu parametrik yap sequlize falan da yazabielim.
- 
+
       schemaFixer(model);
-      for(let i of model.mixin){
-         model = deepMerge(model,this.mixins.get(i))
+      for (let i of model.mixin) {
+         model = deepMerge(model, this.mixins.get(i))
       }
       schemaFixer(model);
       let parsedSchema = mongooseModelParser(model);
 
-      let Model = mongoose.model(model.name, new Schema(parsedSchema,{ versionKey: false }));
+      let Model = mongoose.model(model.name, new Schema(parsedSchema, { versionKey: false }));
       model.methods = new Map();
       model.methods.set("get", async function (payload, ctx) {
-         let res = await Model.findOne(payload.query, payload.attributes,payload.projection);
+         let res = await Model.findOne(payload.query, payload.attributes, payload.projection);
          return res;
       });
       model.methods.set("getAll", async function (payload, ctx) {
-         let res = await Model.find(payload.query, payload.attributes,payload.projection);
+         let res = await Model.find(payload.query, payload.attributes, payload.projection);
          return res;
       });
       model.methods.set("post", async function (payload, ctx) {
@@ -132,7 +132,7 @@ class Fookie {
       model.methods.set("patch", async function (payload, ctx) {
          return await Model.updateMany(payload.query, payload.body);
       });
-      model.methods.set("model", async function (payload,ctx) {
+      model.methods.set("model", async function (payload, ctx) {
          return JSON.parse(JSON.stringify(model))
       });
       model.methods.set("count", async function (payload, ctx) {
@@ -141,10 +141,11 @@ class Fookie {
       });
 
       model.methods.set("test", async function (payload, ctx) {
+         payload.method = payload.options.method+'';
          for (let b of ctx.store.get("befores")) {
             await ctx.modifies.get(b)(payload, ctx);
          }
-         payload.method = payload.options.method;
+        
          if (await preRule(payload, ctx)) {
             for (let b of ctx.store.get("befores")) {
                await ctx.modifies.get(b)(payload, ctx);
@@ -212,7 +213,32 @@ class Fookie {
       });
    }
 
-   fuzzer(test) {}
+   async fuzzer(times) {
+      let version = this.package.version
+      this.package.version = "test"
+      for (let i = 0; i < times; i++) {
+
+         let sample_model = this.lodash.sample(Array.from(this.models).map(i => i[1]))
+         let sample_model2 = this.lodash.sample(Array.from(this.models).map(i => i[1]))
+         let sample_method = this.lodash.sample(this.lodash.keys(
+            this.lodash.sample(Array.from(this.models).map(i => i[1])).gateway
+         )
+         )
+         let res = await this.run({
+            options: {
+               method:sample_model2,
+               version:true
+            },
+            system: true,
+            body: {},
+            query: {},
+            projection: {},
+            method: sample_method,
+            model: sample_model.name,
+         })
+      }
+      this.package.version = version
+   }
 }
 
 module.exports = Fookie;
