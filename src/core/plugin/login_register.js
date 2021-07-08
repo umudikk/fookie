@@ -66,4 +66,13 @@ module.exports = async function (ctx) {
 
       return res.status == 200;
    });
+   ctx.rule("is_last_admin",async function (payload,ctx){
+      let res = await ctx.run({
+         system:true,
+         method:"count",
+         model:"system_admin"
+      })
+
+      return res.data != 1
+   })
 };

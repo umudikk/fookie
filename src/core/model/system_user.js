@@ -4,12 +4,14 @@ module.exports = {
    display: "email",
    schema: {
       email: {
+         onlyClient:true,
          unique: true,
          required: true,
          type: "string",
          input: "text",
       },
       password: {
+         onlyClient:true,
          required: true,
          type: "string",
          input: "password",
@@ -35,6 +37,7 @@ module.exports = {
          modify: ["password"],
       },
       delete: {
+         rule:["is_last_admin"], //todo: eğer admin tek kaldıysa izin verme silmesine
          role: ["system_admin"],
       },
       model: {

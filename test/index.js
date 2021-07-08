@@ -45,6 +45,6 @@ const Fookie = require("../src");
 
    fookie.listen(3000);
    setTimeout(async () => {
-      fookie.fuzzer(10)
+      fookie.fuzzer(1000)
    }, 1200);
 })();
