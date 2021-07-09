@@ -5,6 +5,7 @@ const Fookie = require("../src");
 
    fookie.model({
       name: "todo",
+      storage:"mongodb",
       display: "title",
       schema: {
          title: {
