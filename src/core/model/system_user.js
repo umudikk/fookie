@@ -37,7 +37,7 @@ module.exports = {
          modify: ["password"],
       },
       delete: {
-         rule:["is_last_admin"], //todo: eğer admin tek kaldıysa izin verme silmesine
+         rule:["is_last_admin"], //TODO: eğer admin tek kaldıysa izin verme silmesine
          role: ["system_admin"],
       },
       model: {

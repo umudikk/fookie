@@ -1,6 +1,6 @@
 module.exports = {
    name: "system_model",
-   database:"mongoose",
+   database:"store",
    display: "name",
    schema: {
       name: {
