@@ -145,11 +145,7 @@ class Fookie {
          for (let b of ctx.store.get("befores")) {
             await ctx.modifies.get(b)(payload, ctx);
          }
-        
          if (await preRule(payload, ctx)) {
-            for (let b of ctx.store.get("befores")) {
-               await ctx.modifies.get(b)(payload, ctx);
-            }
             await modify(payload, ctx);
             if (await rule(payload, ctx)) {
                return true;
