@@ -8,7 +8,7 @@ const effect = require("./life-cycle/effect.js");
 const filter = require("./life-cycle/filter.js");
 const preRule = require("./life-cycle/preRule.js");
 const modify = require("./life-cycle/modify.js");
-const client = require("prom-client");
+const prometheus = require("prom-client");
 const lodash = require("lodash");
 const core = require("./core/index.js");
 const mongoose = require("mongoose");
@@ -54,15 +54,15 @@ class Fookie {
       this.nodemailer = nodemailer;
       this.multer = multer;
       this.CryptoJS = CryptoJS;
+      this.prometheus = prometheus
       this.package = pckg;
+      this.deepMerge = deepMerge
       this.helpers = {
          rule,
          effect,
          filter,
          preRule,
          modify,
-         lodash,
-         deepMerge,
       };
 
       this.app = express();

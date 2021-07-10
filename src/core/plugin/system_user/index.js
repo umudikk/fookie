@@ -1,7 +1,9 @@
 const jwt = require("jsonwebtoken");
 const { sha512 } = require("js-sha512");
+const sustem_user = require("./model/system_user")
 module.exports = async function (ctx) {
-   let system_user = ctx.models.get("system_user");
+   await ctx.model(sustem_user)
+   let sys_user = ctx.models.get("system_user")
 
    let res = await ctx.run({
       system: true,
@@ -30,7 +32,7 @@ module.exports = async function (ctx) {
       });
    }
 
-   system_user.methods.set("login", async ({ body, response }, ctx) => {
+   sys_user.methods.set("login", async ({ body, response }, ctx) => {
       let { email, password } = body;
       let res = await ctx.run({
          system: true,
@@ -52,7 +54,7 @@ module.exports = async function (ctx) {
       }
    });
 
-   system_user.methods.set("register", async ({ body, response }, ctx) => {
+   sys_user.methods.set("register", async ({ body, response }, ctx) => {
       let { email, password } = body;
       let res = await ctx.run({
          system: true,

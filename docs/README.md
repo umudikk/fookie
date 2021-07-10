@@ -1,11 +1,8 @@
 # Introduction
 
-### FookieJS creates an API using JSON schema in seconds.
+Fookie JS is a lifecycle-based web application development method. It does most things automatically for your APIs. In this way, it allows you to easily make our application with small code pieces.
 
-While developing software, I realized that we always do the same work in controllers and routes, and I decided to automate this layer. Fookie JS automatically does whatever is required in an api. You developers only focus on feature development.
-
-#### Featues
-
+## Core Features
 -  Write clean and less code. (%70-%90 less code.I'm not kidding.)
 -  Develop your application by adding small pieces of code
 -  Auto generated methods (post , delete , patch , count , schema, get , getAll , test)
@@ -13,40 +10,85 @@ While developing software, I realized that we always do the same work in control
 -  Auto validate request body
 -  Check required,onlyClient fields in request body
 -  Low test cost.
--  Default health check and metrics.
 -  Store for your global variables.
--  Password email base authentication.
 -  Create, delete or edit your API on runtime.
 -  Supports custom methods.
--  NoSQL and SQL support.(SQL is coming soon)
+-  NoSQL(MongoDB) and SQL support.(SQL is coming soon)
 -  Trim unauthorized fields.
--  Just take the fields you need. (Like a graphql)
+-  Just take the fields you need.
 -  Request Life Cycle
 -  Everything is a plugin.
--  Routines
+-  Routines (SetInterval)
 -  Deafult models, rules, roles, filters, effects, modifies and methods.
 -  Mixins (Merge two different schema. Similar to vue mixins)
 
-#### Next Features
+## Core Plugins
+- Default health check and Prometheus metric.
+- Password & Email base authentication.
 
--  Default metrics
+#### Next Features
+-  More metric
 -  Dockerizing
 -  Auto tests
--  Client for Vue.Auto generated post forms, tables, kanbans, admin-panel like strapi.
+-  Client for Vue JS. Auto generated post forms, tables, kanbans, admin-panel like strapi.
 -  Media Library and ready to use streaming service.
 -  Auto generated documentation.
 -  Querystring support.
 -  More database support.
 
+# Get Started
+
 ## Installation
 
 ```
 npm install fookie --save
+
+```
+```javascript
+
+const fookie = new Fookie({
+   corePlugins:["system_user","metric","system_file"]
+});
+await fookie.connect("mongodb://db/test");
+fookie.model({
+   name:"message",// collection name
+   display:"text", // for client
+   schema:{
+      text:{
+         unique:false,
+         type:"string",
+         required:true
+      }
+   },
+   lifecycle:{
+      post:{
+         role:["system_admin"]
+      },
+      patch:{
+         role:["system_admin"]
+      },
+      delete:{
+         role:["nobody"]
+      },
+   },
+   mixin:[]
+      })
+await fookie.listen(8080)
 ```
 
-## Documentation
+# Life Cycle
 
-https://github.com/umudikk/fookie/wiki
+# Basics
+# Health Check
+# Metric
+# Test
+# Examples
+### FookieJS creates an API using JSON schema in seconds.
+
+
+
+
+
 
 ## Fookie JS Manifest
 

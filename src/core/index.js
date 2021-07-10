@@ -1,7 +1,7 @@
 module.exports = async function (ctx) {
    ctx.store.set("secret", "secret");
-   ctx.store.set("afters", ["log"]);
-   ctx.store.set("befores", ["default_payload", "set_user"]);
+   ctx.store.set("afters", ["metric","log"]);
+   ctx.store.set("befores", ["metric","default_payload", "set_user"]);
 
    // MIXIN
    ctx.mixin("default_mixin",require("./mixin/default_mixin"))
@@ -10,14 +10,13 @@ module.exports = async function (ctx) {
    ctx.model(require("./model/system_model.js"));
    ctx.model(require("./model/system_menu.js"));
    ctx.model(require("./model/system_submenu.js"));
-   ctx.model(require("./model/system_user.js"));
    ctx.model(require("./model/system_admin.js"));
    ctx.model(require("./model/webhook.js"));
 
    // IMPORTANT PLUGINS
-   await ctx.use(require("./plugin/after_before_calculater"));
+   await ctx.use(require("../helpers/after_before_calculater"));
    await ctx.use(require("./plugin/health_check"));
-   await ctx.use(require("./plugin/default_life_cycle_controls"));
+   await ctx.use(require("../helpers/default_life_cycle_controls"));
    await ctx.use(require("./plugin/first_of_all"));
 
    //RULES
@@ -48,6 +47,7 @@ module.exports = async function (ctx) {
    ctx.effect("sync", require("./effect/sync"));
    ctx.effect("webhook", require("./effect/webhook"));
    ctx.effect("log", require("./effect/log"));
+   ctx.effect("metric", require("./effect/metric"));
 
    //FILTERS
    ctx.filter("filter", require("./filter/filter"));
@@ -62,10 +62,12 @@ module.exports = async function (ctx) {
    ctx.modify("increase", require("./modify/increase"));
    ctx.modify("attributes", require("./modify/attributes"));
    ctx.modify("version", require("./modify/version"));
+   ctx.modify("metric", require("./modify/metric"));
 
 
 
    // PLUGINS
    //await ctx.use(require("./defaults/plugin/file_storage"))
-   await ctx.use(require("./plugin/login_register"));
+   await ctx.use(require("./plugin/metric/index"));
+   await ctx.use(require("./plugin/system_user"));
 };
