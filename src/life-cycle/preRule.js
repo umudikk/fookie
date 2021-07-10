@@ -18,8 +18,7 @@ module.exports = async function (payload, ctx) {
       }
       return true;
    } else {
-      payload.response.warnings.push(`Missing preRule`);
-      return false
-     
+      payload.response.warnings.push(`Missing preRule`,rules);
+      return false     
    }
 };
