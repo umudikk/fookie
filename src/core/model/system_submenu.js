@@ -14,7 +14,7 @@ module.exports = {
          type: "string",
       },
    },
-   gateway: {
+   lifecycle: {
       get: {
          role: ["everybody"],
       },

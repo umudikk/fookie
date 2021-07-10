@@ -221,7 +221,7 @@ class Fookie {
          let sample_model = this.lodash.sample(Array.from(this.models).map(i => i[1]))
          let sample_model2 = this.lodash.sample(Array.from(this.models).map(i => i[1]))
          let sample_method = this.lodash.sample(this.lodash.keys(
-            this.lodash.sample(Array.from(this.models).map(i => i[1])).gateway
+            this.lodash.sample(Array.from(this.models).map(i => i[1])).lifecycle
          )
          )
          let res = await this.run({

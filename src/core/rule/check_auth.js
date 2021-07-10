@@ -12,7 +12,7 @@ module.exports = async function (payload, ctx) {
          let modifies = [];
          if (res) {
             try {
-               modifies = ctx.models.get(payload.model).gateway[payload.method].resolve[role];
+               modifies = ctx.models.get(payload.model).lifecycle[payload.method].resolve[role];
             } catch (error) {}
             await Promise.all(modifies.map((m) => ctx.modifies.get(m)(payload, ctx)));
             return true;
@@ -21,7 +21,7 @@ module.exports = async function (payload, ctx) {
          payload.response.warnings.push(`You are not: ${role}`);
          modifies = [];
          try {
-            modifies = ctx.models.get(payload.model).gateway[payload.method].reject[role];
+            modifies = ctx.models.get(payload.model).lifecycle[payload.method].reject[role];
          } catch (error) {}
          if (modifies.length == 0) return false;
          else {
