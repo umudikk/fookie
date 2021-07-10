@@ -26,7 +26,7 @@ Fookie JS is a lifecycle-based web application development method. It does most 
 - Default health check and Prometheus metric.
 - Password & Email base authentication.
 
-#### Next Features
+## Next Features
 -  More metric
 -  Dockerizing
 -  Auto tests
@@ -78,25 +78,128 @@ await fookie.listen(8080)
 
 # Life Cycle
 
-# Basics
+![image info](https://raw.githubusercontent.com/umudikk/fookie/main/docs/images/lifecycle.png)
+
+
+This thing, which seems complicated, is actually very simple. I liken it to belts in factories. Many functions work in order and they change the payload little by little. The rules test the accuracy of this payload. Now let's examine all the steps one by one.
+
+## preRule
+preRules have to return boolean
+
+```javascript
+
+//is Email
+fookie.rule("is_email",async function(payload,ctx){
+/*
+payload:{
+token:"asd.asd.asd",
+model:"system_user",
+method:"post",
+body:{
+   email:"mockmail@mocksite.com",
+   password:"rawPassword"
+   }
+}
+*/
+return ctx.validator.isEmail(payload.body.email) // validatorjs is in default library. 
+})
+
+```
+## Modify
+
+Modifiers are functions that manipulate payload. They work by reference.
+
+```javascript
+//set_version
+fookie.modify("set_version",async function(payload,ctx){
+/*
+payload:{
+token:"asd.asd.asd",
+model:"system_user",
+method:"patch",
+query:{ 
+},
+body:{
+   email:"newEmail@mocksite.com",
+   }
+}
+*/
+payload.body.__v = ctx.package.version // package.json
+})
+
+
+
+
+```
+## Role
+
+role have to return boolean. when returned false a role, modifies run and manipulate the paylod. This is necessary for security. For example, if a user is not an admin, you do not want to give all the data and you make paging.
+
+```javascript
+
+//is user a admin?
+fookie.role("system_admin",async function(payload,ctx){
+   let res = await ctx.run({
+      system:true,
+      method:"count",
+      model:"system_admin",
+      query:{
+         _id:payload.user._id
+      }
+   })
+   return res.data > 0
+})
+
+
+```javascript
+
+
+
+```
+## Rule
+same with preRule but works after modifies
+
+```javascript
+
+fookie.role("everybody",async function(payload,ctx){
+  return true
+})
+
+fookie.role("nobody",async function(payload,ctx){
+  return false
+})
+
+```
+## Filter
+
+Same with modifies but works after database processing. It is used to change the information that will be returned to response.
+
+```javascript
+
+fookie.filter("change_id",async function(payload,ctx){
+  payload.response.data.id =  payload.response.data._id
+   payload.response.data._id = undefined
+})
+
+```
+## Effect
+
+Once the data reaches the user, it works asynchronously. It is used for tasks such as sending e-mails and calculating metrics.
+
+```javascript
+
+fookie.effect("log",async function(payload,ctx){
+  console.log(payload.response.status , payload.response.warnings)
+})
+
+```
+
 # Health Check
 # Metric
 # Test
 # Examples
-### FookieJS creates an API using JSON schema in seconds.
 
-
-
-
-
-
-## Fookie JS Manifest
-
-// To do
-
-## Examples
-
-### Blog
+## Blog
 
 ```javascript
 const Fookie = require("fookie");
@@ -289,23 +392,64 @@ const Fookie = require("fookie");
    }, 1000);
 })();
 ```
+### FookieJS creates an API using JSON schema in seconds.
+
+
+
+
+
+
+## Fookie JS Manifest
+
+// To do
 
 # Basics
 
 ## Model
 
-database -> system_model
-
 ```javascript
 {
     name:"blog_post", // this is your model name.Similar with Table name.
+    database:"mongodb",
     display:"title", // this is useless for fookiejs, for client
     schema:{...},
+    lifecycle:{...},
     mixin:["model2"],
 }
 ```
 
-##### Field
+## lifecycle
+
+The most important part in Fookie JS. How the application will work is defined here.
+
+```javascript
+{
+    name:"blog_post", // this is your model name.Similar with Table name.
+    database:"mongodb",
+    display:"title", // this is useless for fookiejs, for client
+    schema:{...},
+    lifecycle:{
+       methodName:{         
+         preRule:[],
+         modify:[],
+         role:["system_admin","everybody"],
+         reject:{
+            system_admin:["add_pagination","modify2"]
+         },
+         resolve:{
+            everybody:["modify3"]       
+         },
+          rule:[],
+          filter:[],
+          effect:[],
+       },
+       modelName2:{...}, 
+      modelName3:{...}, 
+    },
+    mixin:["schema2"],
+}
+```
+## Field
 
 Orm schema.You can add some extra custom keys here.
 
@@ -317,7 +461,9 @@ Orm schema.You can add some extra custom keys here.
         field1:{
             type:"number" , // "string" , "number" , "object" , "boolean",
             onlyClient:true, // same with required but data must be in request body.
-            min:0 // only number
+            required:true,
+            unique:false,
+            min:0, // only number
             max:12, // only number
             equal:5, //
             includes:"asd", // for string and array
@@ -325,29 +471,7 @@ Orm schema.You can add some extra custom keys here.
             read:["nobody"],// Role array. Who can read this field ? Nobody.FookieJS trim this field when you want to read(get getALl etc.). defalut:[]
             input:"color",//this is useless for fookie backend but You can use on client-side
             },
-            relation:"system_user"// same with referance
     }
-}
-```
-
-##### lifecycle
-
-what your app does is determined here.You can think of this as a request lifecycle.All of the rules must return true to continue. Otherwise, the request return warnings. But if only one role is correct, you will continue to do the operation. Let's say you wrote a reject function for a role. If the user is not in this role. It works as if it were true, but the reject functions written for that role are executed and the process continues.
-
-```javascript
-{
-name:".."
-...
-lifecycle:{
-    post:{
-        preRule:[]
-        role:["loggedin"]// Who can make this?Loggedin.
-        reject:{//
-            loggedin:["add_something_to_query_modify"] // If requester is not loggedin Make this MODIFY.
-        }
-    }
-}
-
 }
 ```
 
@@ -391,7 +515,6 @@ payload = {
     token:"...",
     system:true //admin. YOu cant add this field http request :).
     user:{_id:"somemongooseID",email:"example@example.com"},
-    req:req, // ExpressJS request. If you are using fookie.listen(port)
     method:"patch",
     model:"system_user",
     query:{
