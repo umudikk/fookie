@@ -1,3 +1,3 @@
 module.exports = function (payload, ctx) {
-   return payload.hasOwnProperty("body");
+   return ctx.lodash.has(payload,"body");
 };

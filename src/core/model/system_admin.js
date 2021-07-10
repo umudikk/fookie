@@ -7,7 +7,7 @@ module.exports = {
          relation: "system_user",
       },
    },
-   gateway: {
+   lifecycle: {
       get: {
          role: ["system_admin"],
       },

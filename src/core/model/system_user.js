@@ -22,7 +22,7 @@ module.exports = {
          input: "text",
       },
    },
-   gateway: {
+   lifecycle: {
       get: {
          role: ["system_admin"],
       },

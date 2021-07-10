@@ -22,7 +22,7 @@ const Fookie = require("../src");
             default: false,
          },
       },
-      gateway: {
+      lifecycle: {
          get: {
             role: ["loggedin"],
          },

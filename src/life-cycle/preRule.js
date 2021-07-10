@@ -10,7 +10,7 @@ module.exports = async function (payload, ctx) {
    let rules = ctx.helpers.defaultArrayCalc(payload, "preRule");
    if (rules.every((rule) => ctx.rules.has(rule))) {
       for (let rule of rules) {
-         let res = ctx.rules.get(rule)(payload, ctx);
+         let res = await ctx.rules.get(rule)(payload, ctx);
          if (res == false) {
             payload.response.warnings.push(`false preRule: ${rule}`);
             return false;

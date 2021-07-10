@@ -19,13 +19,13 @@ module.exports = {
          required: true,
          type: "object",
       },
-      gateway: {
+      lifecycle: {
          input: "json",
          required: true,
          type: "object",
       },
    },
-   gateway: {
+   lifecycle: {
       get: {
          role: ["everybody"],
       },
