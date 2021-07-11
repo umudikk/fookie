@@ -37,6 +37,9 @@ Fookie JS is a lifecycle-based web application development method. It does most 
 
 # Get Started
 
+## Github Pages
+https://umudikk.github.io/fookie/#/
+
 ## Installation
 
 ```

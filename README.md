@@ -1,60 +1,497 @@
 # Introduction
 
-### FookieJS creates an API using JSON schema in seconds.
+Fookie JS is a lifecycle-based web application development method. It does most things automatically for your APIs. In this way, it allows you to easily make our application with small code pieces.
 
-While developing software, I realized that we always do the same work in controllers and routes, and I decided to automate this layer. Fookie JS automatically does whatever is required in an api. You developers only focus on feature development.
-
-#### Featues
-
+## Core Features
 -  Write clean and less code. (%70-%90 less code.I'm not kidding.)
 -  Develop your application by adding small pieces of code
--  Auto generated methods (post , delete , patch , count , schema, get , getAll , test)
+-  Default health check
+-  Prometheus metric.
+-  Password & Email base authentication.
+-  Auto generated methods for every model (post , delete , patch , count , model, get , getAll , test)
 -  Huge default library like Autocode (mongoose,sequelize,aws-sdk,validatorjs,lodash etc.)
 -  Auto validate request body
 -  Check required,onlyClient fields in request body
 -  Low test cost.
--  Default health check and metrics.
 -  Store for your global variables.
--  Password email base authentication.
 -  Create, delete or edit your API on runtime.
 -  Supports custom methods.
--  NoSQL and SQL support.(SQL is coming soon)
+-  NoSQL(MongoDB) and SQL support.(SQL is coming soon)
 -  Trim unauthorized fields.
--  Just take the fields you need. (Like a graphql)
+-  Just take the fields you need.
 -  Request Life Cycle
 -  Everything is a plugin.
--  Routines
+-  Routines (SetInterval)
 -  Deafult models, rules, roles, filters, effects, modifies and methods.
 -  Mixins (Merge two different schema. Similar to vue mixins)
 
-#### Next Features
-
--  Default metrics
+## Next Features
+-  More metric
 -  Dockerizing
 -  Auto tests
--  Client for Vue.Auto generated post forms, tables, kanbans, admin-panel like strapi.
+-  Client for Vue JS. Auto generated post forms, tables, kanbans, admin-panel like strapi.
 -  Media Library and ready to use streaming service.
 -  Auto generated documentation.
 -  Querystring support.
 -  More database support.
 
+# Get Started
+
+## Github Pages
+https://umudikk.github.io/fookie/#/
+
 ## Installation
 
 ```
 npm install fookie --save
+
+```
+```javascript
+const Fookie = require("fookie")
+const fookie = new Fookie({
+   corePlugins:["system_user","metrics","system_file"]
+});
+
+await fookie.connect("mongodb://db/test");
+fookie.model({
+   name:"message",// collection name
+   display:"text", // for client
+   schema:{
+      text:{
+         unique:false,
+         type:"string",
+         required:true
+      }
+   },
+   lifecycle:{
+      post:{
+         role:["system_admin"]
+      },
+      patch:{
+         role:["system_admin"]
+      },
+      delete:{
+         role:["nobody"]
+      },
+   },
+   mixin:[]
+      })
+await fookie.listen(8080)
 ```
 
-## Documentation
+# Life Cycle
 
-https://github.com/umudikk/fookie/wiki
+![image info](https://raw.githubusercontent.com/umudikk/fookie/main/docs/images/lifecycle.png)
 
-## Fookie JS Manifest
 
-// To do
+This thing, which seems complicated, is actually very simple. I liken it to belts in factories. Many functions work in order and they change the payload little by little. The rules test the accuracy of this payload. Now let's examine all the steps one by one.
 
-## Examples
+## preRule
+It is an array of asynchronous functions. If all of them return true, the next step is passed. Here, some of the functions are added by fookiejs. Others are determinete in your the model.lifecycle.
 
-### Blog
+```javascript
+
+//is Email
+fookie.rule("is_email",async function(payload,ctx){
+/*
+payload:{
+token:"asd.asd.asd",
+model:"system_user",
+method:"post",
+body:{
+   email:"mockmail@mocksite.com",
+   password:"rawPassword"
+   }
+}
+*/ 
+return ctx.validator.isEmail(payload.body.email) // validatorjs is in default library. 
+})
+
+```
+## Modify
+
+Modifiers are functions that manipulate payload. There is no need to return anything. They work by reference.
+
+```javascript
+//set_version
+fookie.modify("set_version",async function(payload,ctx){
+/*
+payload:{
+token:"asd.asd.asd",
+model:"system_user",
+method:"patch",
+query:{ 
+},
+body:{
+   email:"newEmail@mocksite.com",
+   }
+}
+*/
+payload.body.__v = ctx.package.version // package.json
+})
+
+```
+## Role
+
+role have to return boolean. when returned false a role, modifies run and manipulate the paylod. This is necessary for security. For example, if a user is not an admin, you do not want to give all the data and you make pagination.
+
+```javascript
+
+fookie.model({
+   name:"blog_post",
+   schema:{
+      title:{
+         type:"string"
+      },
+      context:{
+         type:"string"
+      },
+      published:{
+         type:"boolean"
+      },
+   },
+   lifecycle:{
+      getAll:{
+         role:["system_admin","everybody"],
+         reject:{
+            system_admin:["pagination"]
+         }
+      }
+   }
+})
+fookie.modify("pagination",async function(payload,ctx){
+   payload.projection.limit = 16 
+   payload.projection.skip = payload.options.page 
+   payload.query.published = true
+})
+
+//is user a admin?
+fookie.role("system_admin",async function(payload,ctx){
+   let res = await ctx.run({
+      system:true,
+      method:"count",
+      model:"system_admin",
+      query:{
+         _id:payload.user._id
+      }
+   })
+   return res.data > 0
+})
+
+fookie.role("everybody",async function(payload,ctx){
+  return true
+})
+
+fookie.role("nobody",async function(payload,ctx){
+  return false
+})
+
+```
+
+## Rule
+It is an array of asynchronous functions. If all of them return true, the next step is passed. Here, some of the functions are added by fookiejs. Others are determinete in your the model.lifecycle.
+
+```javascript
+fookie.store.set("register",false)
+fookie.store.set("login",true)
+
+fookie.rule("allow_register",async function(payload,ctx){
+  return ctx.store.get("register")
+})
+
+fookie.rule("allow_login",async function(payload,ctx){
+  return ctx.store.get("login")
+})
+
+```
+## Filter
+
+Same with modifies but works after database processing. It is used to change the information that will be returned to response.
+
+```javascript
+
+fookie.filter("change_id",async function(payload,ctx){
+  payload.response.data.id =  payload.response.data._id
+   payload.response.data._id = undefined
+})
+
+```
+## Effect
+
+Once the data reaches the user, it works asynchronously. It is used for tasks such as sending e-mails and calculating metrics.
+
+```javascript
+
+fookie.effect("log",async function(payload,ctx){
+  console.log(payload.response.status , payload.response.warnings)
+})
+
+fookie.effect("send_email",async function(payload,ctx){
+   let transporter = ctx.nodemailer.createTransport({
+      host: "smtp.ethereal.email",
+      port: 587,
+      secure: false,
+      auth: {
+         user: testAccount.user, 
+         pass: testAccount.pass, 
+      },
+  });
+
+  let info = await transporter.sendMail({
+      from: '"Fred Foo 👻" <foo@example.com>', 
+      to: "bar@example.com, baz@example.com", 
+      subject: "Created ✔", 
+      text: payload.body._id + "is created", 
+      html: "<b>Hello world?</b>", 
+  });
+
+  console.log(info)
+})
+
+```
+# Basics
+
+## Model
+
+```javascript
+{
+    name:"blog_post", // this is your model name.Similar with Table name.
+    database:"mongodb",
+    display:"title", // this is useless for fookiejs, for client
+    schema:{...},
+    lifecycle:{...},
+    mixin:["model2"],
+}
+```
+
+
+### Field
+
+Orm schema.You can add some extra custom keys here.
+
+```javascript
+{//model def
+    ...
+    ...
+    schema:{
+        field1:{
+            type:"number" , // "string" , "number" , "object" , "boolean",
+            onlyClient:true, // same with required but data must be in request body.
+            required:true,
+            unique:false,
+            min:0, // only number
+            max:12, // only number
+            equal:5, //
+            includes:"asd", // for string and array
+            write:[], // Role array. for patch post defalut:[]
+            read:["nobody"],// Role array. Who can read this field ? Nobody.FookieJS trim this field when you want to read(get getALl etc.). defalut:[]
+            input:"color",//this is useless for fookie backend but You can use on client-side
+            },
+    }
+}
+```
+
+### Payload
+
+Payload is very important because.All fucntions( like rule role filter etc. etc. but not model) get this parameter
+
+```javascript
+
+payload = {
+    token:"...",
+    system:true //admin. YOu cant add this field http request :).
+    user:{_id:"somemongooseID",email:"example@example.com"},
+    method:"patch",
+    model:"system_user",
+    query:{
+        $eq:{
+            _id:"...someid",
+        }
+    },
+    body:{
+        password:"123",
+    },
+    options:{
+        simplified:false // gives very small data but you need to use fookie-client-sdk return an array
+    }
+}
+fookie.run(payload)
+
+
+// Usage
+
+fookie.effect('send_email',async function(payload,ctx){
+    mockMailer(payload.body)
+})
+```
+### Mixin
+
+Merges two different model.
+```javascript
+
+fookie.mixin({
+   schema:{
+      position:{
+         type:"object"
+         required:true,
+      },
+      dimension:{
+         type:"number",
+         required:true,
+      }
+   }
+})
+
+```
+
+### Ctx
+Ctx referances fookie instance.
+
+```javascript
+fookie.use(async (ctx)=>{
+   ...
+})
+
+fookie.role(async function(payload,ctx){
+   ...
+})
+```
+
+Fookie js comes with default libraries
+
+- ctx.models :Map
+- ctx.rules :Map
+- ctx.roles :Map
+- ctx.store :Map
+- ctx.effects :Map
+- ctx.routines :Map
+- ctx.filters :Map
+- ctx.modifies :Map
+- ctx.mixins :Map
+- ctx.modelParser :Map
+- ctx.lodash
+- ctx.axios
+- ctx.faker
+- ctx.discord
+- ctx.mongoose
+- ctx.sequelize
+- ctx.aws
+- ctx.moment
+- ctx.chalk
+- ctx.validator
+- ctx.cheerio
+- ctx.nodemailer
+- ctx.multer
+- ctx.cryptojs
+- ctx.validator
+- ctx.prometheus
+- ctx.package (package.json)
+- ctx.deepMerge
+- ctx.helpers
+- ctx.app (Express App. Fookie JS uses express for http server.)
+
+
+# Plugins
+
+Fookie JS is designed to be developed with plugins. Many features that come with fookie js are actually core plugins.
+
+## Write Plugin
+
+```javascript
+fookie.use(async function(ctx){
+   ctx.model(...)
+   ctx.rule("..",async (payload,ctx)=>{})
+   ctx.role("..",async (payload,ctx)=>{})
+   ctx.effect("..",async (payload,ctx)=>{})
+   ctx.store.set("pagination_page_limit",16)   
+   ctx.routine("cpu",30*1000,async function(ctx){
+      console.log("cpu_usage")
+   })
+   ctx.models.get("store").methods.set("set",async (payload,ctx)=>{
+      ctx.store.set(payload.key,payload.body)
+      return payload.body
+   })
+    ctx.models.get("store").methods.set("get",async (payload,ctx)=>{
+      return ctx.store.get(payload.key,payload.body)
+   })
+
+   ctx.app.get("/metrics", async (req, res) => {
+        res.status(200).json(await ctx.prometheus.register.metrics())
+    })
+})
+```
+## Core Plugins
+
+### System User
+
+#### login
+```javascript
+fookie.run({
+   method:"login",
+   model:"system_user",
+   body:{
+      email:"admin",
+      password:"admin"
+   }
+})
+```
+#### register
+
+```javascript
+fookie.run({
+   method:"register",
+   model:"system_user",
+   body:{
+      email:"example@example.com",
+      password:"pwpwpwpw"
+   }
+})
+```
+
+### Health Check
+
+It is used to check the health status of your http server. This is a core plugin.
+
+```javascript
+const fookie = new Fookie({
+   corePlugins:["health_check"]
+})
+
+// localhost:3000/health_check <- GET
+// {status:200,data:{ok:true}}
+```
+
+### Metric
+
+```javascript
+const fookie = new Fookie({
+   corePlugins:["metrics"]
+})
+
+// localhost:3000/metrics <- GET
+// # <metric_name> val
+```
+
+# Test
+
+
+## Unit testing
+
+```javascript
+//todo 
+```
+
+## Fuzzer
+
+Fookie JS can test your application with automatically generated random requests. This feature is under development and if you use it in production, there may be cases of data loss.
+
+```javascript
+    fookie.fuzzer(500000)
+```
+
+# Examples
+
+## Blog
 
 ```javascript
 const Fookie = require("fookie");
@@ -248,131 +685,7 @@ const Fookie = require("fookie");
 })();
 ```
 
-# Basics
-
-## Model
-
-database -> system_model
-
-```javascript
-{
-    name:"blog_post", // this is your model name.Similar with Table name.
-    display:"title", // this is useless for fookiejs, for client
-    schema:{...},
-    mixin:["model2"],
-}
-```
-
-##### Field
-
-Orm schema.You can add some extra custom keys here.
-
-```javascript
-{//model def
-    ...
-    ...
-    schema:{
-        field1:{
-            type:"number" , // "string" , "number" , "object" , "boolean",
-            onlyClient:true, // same with required but data must be in request body.
-            min:0 // only number
-            max:12, // only number
-            equal:5, //
-            includes:"asd", // for string and array
-            write:[], // Role array. for patch post defalut:[]
-            read:["nobody"],// Role array. Who can read this field ? Nobody.FookieJS trim this field when you want to read(get getALl etc.). defalut:[]
-            input:"color",//this is useless for fookie backend but You can use on client-side
-            },
-            relation:"system_user"// same with referance
-    }
-}
-```
-
-##### lifecycle
-
-what your app does is determined here.You can think of this as a request lifecycle.All of the rules must return true to continue. Otherwise, the request return warnings. But if only one role is correct, you will continue to do the operation. Let's say you wrote a reject function for a role. If the user is not in this role. It works as if it were true, but the reject functions written for that role are executed and the process continues.
-
-```javascript
-{
-name:".."
-...
-lifecycle:{
-    post:{
-        preRule:[]
-        role:["loggedin"]// Who can make this?Loggedin.
-        reject:{//
-            loggedin:["add_something_to_query_modify"] // If requester is not loggedin Make this MODIFY.
-        }
-    }
-}
-
-}
-```
-
-# PLUGIN
-
-```javascript
-fookie.use(async (ctx)=>{ // ctx = fookie
-    ctx.model({
-        name:"bar",
-        ...
-        schema:{...}
-    }),
-    ctx.routine('hi',1000,()=>{
-    console.log("hi")
-
-    })
-    ctx.rule("nobody",async ()=>{
-       return false
-    })
-     ctx.modify("version_safe",async (payload,ctx)=>{
-       payload.query.__v = ctx.version // mongoose schema version __v
-    })
-    ctx.filter("foo",(payload,ctx)=>{...})
-    let model = ctx.models.get("store")
-    model.methods.set("set",(payload,ctx)=>{
-        ctx.store.set(payload.options.key,payload.body)
-    })
-    model.methods.set("get",(payload,ctx)=>{
-        return xtx.store.get(payload.options.key)
-    })
-})
-```
-
-# Payload
-
-Payload is very important because.All fucntions( like rule role filter etc. etc. but not model) get this parameter
-
-```javascript
-
-payload = {
-    token:"...",
-    system:true //admin. YOu cant add this field http request :).
-    user:{_id:"somemongooseID",email:"example@example.com"},
-    req:req, // ExpressJS request. If you are using fookie.listen(port)
-    method:"patch",
-    model:"system_user",
-    query:{
-        $eq:{
-            _id:"...someid",
-        }
-    },
-    body:{
-        password:"123",
-    },
-    options:{
-        simplified:false // like grpc simplified gives very small data but you need to use fookie-client-sdk return an array
-    }
-}
-fookie.run(payload)
-
-
-// Usage
-
-fookie.effect('send_email',async function(payload,ctx){
-    mockMailer(payload.body)
-})
-```
+## Example Requests
 
 ```javascript
 //Example Request
@@ -454,17 +767,16 @@ await axios.post("http://localhost:80808",
 
 ```
 
-### How to add custom methods
+## How to add custom methods
 
 ```javascript
 
 // Test method for can you make this request?.
 
-api.use((ctx)=>{
+fookie.use((ctx)=>{
     let model = ctx.models.get("system_model")
-    model.methods.set("test",function(payload,ctx)){ // payload {user,method,body,options,query,ctx}
-       await this.helpers.calcModify(payload,ctx)
-            return await this.helpers.check(payload,ctx)
+    model.methods.set("hi",function(payload,ctx)){ // payload {user,method,body,options,query,ctx}
+       console.log("hi")
     })
 })
 
