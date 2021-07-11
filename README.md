@@ -35,8 +35,9 @@ Fookie JS is a lifecycle-based web application development method. It does most 
 -  Querystring support.
 -  More database support.
 
-# Get Started
-
+# Documentation
+## Website
+http://fookiejs.com
 ## Github Pages
 https://umudikk.github.io/fookie/#/
 
