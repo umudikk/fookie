@@ -130,7 +130,7 @@ payload.body.__v = ctx.package.version // package.json
 ```
 ## Role
 
-role have to return boolean. when returned false a role, modifies run and manipulate the paylod. This is necessary for security. For example, if a user is not an admin, you do not want to give all the data and you make paging.
+role have to return boolean. when returned false a role, modifies run and manipulate the paylod. This is necessary for security. For example, if a user is not an admin, you do not want to give all the data and you make pagination.
 
 ```javascript
 
