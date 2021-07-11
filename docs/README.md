@@ -47,7 +47,7 @@ npm install fookie --save
 ```javascript
 
 const fookie = new Fookie({
-   corePlugins:["system_user","metric","system_file"]
+   corePlugins:["system_user","metrics","system_file"]
 });
 await fookie.connect("mongodb://db/test");
 fookie.model({
@@ -84,7 +84,7 @@ await fookie.listen(8080)
 This thing, which seems complicated, is actually very simple. I liken it to belts in factories. Many functions work in order and they change the payload little by little. The rules test the accuracy of this payload. Now let's examine all the steps one by one.
 
 ## preRule
-preRules have to return boolean
+It is an array of asynchronous functions. If all of them return true, the next step is passed. Here, some of the functions are added by fookiejs. Others are determinete in your the model.lifecycle.
 
 ```javascript
 
@@ -100,14 +100,14 @@ body:{
    password:"rawPassword"
    }
 }
-*/
+*/ 
 return ctx.validator.isEmail(payload.body.email) // validatorjs is in default library. 
 })
 
 ```
 ## Modify
 
-Modifiers are functions that manipulate payload. They work by reference.
+Modifiers are functions that manipulate payload. There is no need to return anything. They work by reference.
 
 ```javascript
 //set_version
@@ -137,6 +137,34 @@ role have to return boolean. when returned false a role, modifies run and manipu
 
 ```javascript
 
+fookie.model({
+   name:"blog_post",
+   schema:{
+      title:{
+         type:"string"
+      },
+      context:{
+         type:"string"
+      },
+      published:{
+         type:"boolean"
+      },
+   },
+   lifecycle:{
+      getAll:{
+         role:["system_admin","everybody"],
+         reject:{
+            system_admin:["pagination"]
+         }
+      }
+   }
+})
+fookie.modify("pagination",async function(payload,ctx){
+   payload.projection.limit = 16 
+   payload.projection.skip = payload.options.page 
+   payload.query.published = true
+})
+
 //is user a admin?
 fookie.role("system_admin",async function(payload,ctx){
    let res = await ctx.run({
@@ -150,23 +178,29 @@ fookie.role("system_admin",async function(payload,ctx){
    return res.data > 0
 })
 
-
-```javascript
-
-
-
-```
-## Rule
-same with preRule but works after modifies
-
-```javascript
-
 fookie.role("everybody",async function(payload,ctx){
   return true
 })
 
 fookie.role("nobody",async function(payload,ctx){
   return false
+})
+
+```
+
+## Rule
+It is an array of asynchronous functions. If all of them return true, the next step is passed. Here, some of the functions are added by fookiejs. Others are determinete in your the model.lifecycle.
+
+```javascript
+fookie.store.set("register",false)
+fookie.store.set("login",true)
+
+fookie.rule("allow_register",async function(payload,ctx){
+  return ctx.store.get("register")
+})
+
+fookie.rule("allow_login",async function(payload,ctx){
+  return ctx.store.get("login")
 })
 
 ```
@@ -192,11 +226,134 @@ fookie.effect("log",async function(payload,ctx){
   console.log(payload.response.status , payload.response.warnings)
 })
 
+fookie.effect("send_email",async function(payload,ctx){
+   let transporter = ctx.nodemailer.createTransport({
+      host: "smtp.ethereal.email",
+      port: 587,
+      secure: false,
+      auth: {
+         user: testAccount.user, 
+         pass: testAccount.pass, 
+      },
+  });
+
+  let info = await transporter.sendMail({
+      from: '"Fred Foo 👻" <foo@example.com>', 
+      to: "bar@example.com, baz@example.com", 
+      subject: "Created ✔", 
+      text: payload.body._id + "is created", 
+      html: "<b>Hello world?</b>", 
+  });
+
+  console.log(info)
+})
+
+```
+# Plugins
+
+Fookie JS is designed to be developed with plugins. Many features that come with fookie js are actually core plugins.
+
+## Write PLugin
+
+```javascript
+
+fookie.use(async function(ctx){
+
+   ctx.model(...)
+   ctx.rule("..",async (payload,ctx)=>{})
+   ctx.role("..",async (payload,ctx)=>{})
+   ctx.effect("..",async (payload,ctx)=>{})
+   ctx.store.set("pagination_page_limit",16)   
+   ctx.routine("cpu",30*1000,async function(ctx){
+      console.log("cpu_usage")
+   })
+   ctx.rules.get("check_type")
+   ctx.rules.get("check_require")
+   ctx.rules.get("only_client")
+   let postFunc = ctx.models.get("modelName").methods.get("post")
+
+   ctx.app.get("/metrics", async (req, res) => {
+        res.status(200).json(await ctx.prometheus.register.metrics())
+    })
+
+})
+
+```
+## Core Plugins
+
+### System User
+
+##### login
+```javascript
+
+fookie.run({
+   method:"login",
+   model:"system_user",
+   body:{
+      email:"admin",
+      password:"admin"
+   }
+})
+
+```
+##### register
+
+```javascript
+
+fookie.run({
+   method:"register",
+   model:"system_user",
+   body:{
+      email:"example@example.com",
+      password:"pwpwpwpw"
+   }
+})
+
 ```
 
-# Health Check
-# Metric
+### Health Check
+
+It is used to check the health status of your http server. This is a core plugin.
+
+```javascript
+
+const fookie = new Fookie({
+   corePlugins:["health_check"]
+})
+
+// localhost:3000/health_check <- GET
+// {status:200,data:{ok:true}}
+
+```
+
+### Metric
+
+```javascript
+const fookie = new Fookie({
+   corePlugins:["metrics"]
+})
+
+// localhost:3000/metrics <- GET
+// # <metric_name> val
+```
+
 # Test
+
+
+## Unit testing
+
+```javascript
+//todo 
+```
+
+## Fuzzer
+
+Fookie JS can test your application with automatically generated random requests. This feature is under development and if you use it in production, there may be cases of data loss.
+
+```javascript
+    fookie.fuzzer(500000)
+```
+
 # Examples
 
 ## Blog
