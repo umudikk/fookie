@@ -53,7 +53,7 @@ class Fookie {
       this.cheerio = cheerio;
       this.nodemailer = nodemailer;
       this.multer = multer;
-      this.CryptoJS = CryptoJS;
+      this.cryptojs = CryptoJS;
       this.prometheus = prometheus
       this.package = pckg;
       this.deepMerge = deepMerge
