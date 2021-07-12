@@ -45,8 +45,14 @@ https://umudikk.github.io/fookie/#/
 
 ```
 npm install fookie --save
-
 ```
-
+```javascript
+   const Fookie = require("fookie")
+    const fookie = new Fookie({
+       corePlugins:["system_user","metrics","health_check"]
+    });
+   await fookie.connect("mongodb://localhost/fookie");
+   fookie.listen(3000)
+```
 
 
