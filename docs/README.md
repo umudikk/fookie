@@ -303,6 +303,7 @@ payload = {
     user:{_id:"somemongooseID",email:"example@example.com"},
     method:"patch",
     model:"system_user",
+    attributes:["email"] // takes only the specified field 
     query:{
         $eq:{
             _id:"...someid",
@@ -329,7 +330,7 @@ fookie.effect('send_email',async function(payload,ctx){
 Merges two different model.
 ```javascript
 
-fookie.mixin({
+fookie.mixin("mixinName",{
    schema:{
       position:{
          type:"object"
