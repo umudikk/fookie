@@ -145,11 +145,14 @@ res = await fookie.run({
   system: true,
   model: "message",
   method: "test",
-  query: {
+  body: {
     text: "hi",
   },
+  options:{
+    method:"post"
+  }
 });
-console.log(res);
+console.log(res); // true or false
 
 res = await fookie.run({
   system: true,
