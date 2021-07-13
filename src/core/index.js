@@ -1,10 +1,10 @@
 module.exports = async function (ctx) {
    ctx.store.set("secret", "secret");
-   ctx.store.set("afters", ["metric","log"]);
-   ctx.store.set("befores", ["metric","default_payload", "set_user"]);
+   ctx.store.set("afters", ["metric", "log"]);
+   ctx.store.set("befores", ["metric", "default_payload", "set_user"]);
 
    // MIXIN
-   ctx.mixin("default_mixin",require("./mixin/default_mixin"))
+   ctx.mixin("default_mixin", require("./mixin/default_mixin"))
 
    //MODELS
    ctx.model(require("./model/system_model.js"));
@@ -64,7 +64,9 @@ module.exports = async function (ctx) {
    ctx.modify("version", require("./modify/version"));
    ctx.modify("metric", require("./modify/metric"));
 
-
+   // DATABASES
+   // mongoose
+   await ctx.use(require("./method/mongoose/index"));
 
    // PLUGINS
    //await ctx.use(require("./defaults/plugin/file_storage"))

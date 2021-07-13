@@ -22,5 +22,6 @@ module.exports = function (model) {
 
       schema[f].type = DataTypes[model.schema[f].type];
    }
-   return schema;
+   
+   return mongoose.model(model.name, new Schema(schema, { versionKey: false }));
 };

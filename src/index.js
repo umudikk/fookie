@@ -40,6 +40,8 @@ class Fookie {
       this.mixins = new Map();
       this.store = new Map();
       this.modelParser = new Map();
+      this.corePlugin = new Map();
+      this.databases = new Map();
       this.lodash = lodash;
       this.axios = axios;
       this.faker = faker;
@@ -102,59 +104,11 @@ class Fookie {
    }
 
    async model(model) {
-      //todo: mongoosu parametrik yap sequlize falan da yazabielim.
-
       schemaFixer(model);
       for (let i of model.mixin) {
          model = deepMerge(model, this.mixins.get(i))
       }
       schemaFixer(model);
-      let parsedSchema = mongooseModelParser(model);
-
-      let Model = mongoose.model(model.name, new Schema(parsedSchema, { versionKey: false }));
-      model.methods = new Map();
-      model.methods.set("get", async function (payload, ctx) {
-         let res = await Model.findOne(payload.query, payload.attributes, payload.projection);
-         return res;
-      });
-      model.methods.set("getAll", async function (payload, ctx) {
-         let res = await Model.find(payload.query, payload.attributes, payload.projection);
-         return res;
-      });
-      model.methods.set("post", async function (payload, ctx) {
-         let res = await Model.create(payload.body);
-         return res;
-      });
-      model.methods.set("delete", async function (payload, ctx) {
-         let res = await Model.deleteMany(payload.query);
-         return res;
-      });
-      model.methods.set("patch", async function (payload, ctx) {
-         return await Model.updateMany(payload.query, payload.body);
-      });
-      model.methods.set("model", async function (payload, ctx) {
-         return JSON.parse(JSON.stringify(model))
-      });
-      model.methods.set("count", async function (payload, ctx) {
-         let res = await Model.countDocuments(payload.query);
-         return res;
-      });
-
-      model.methods.set("test", async function (payload, ctx) {
-         payload.method = payload.options.method+'';
-         for (let b of ctx.store.get("befores")) {
-            await ctx.modifies.get(b)(payload, ctx);
-         }
-         if (await preRule(payload, ctx)) {
-            await modify(payload, ctx);
-            if (await rule(payload, ctx)) {
-               return true;
-            }
-         }
-         return false;
-      });
-
-      model.model = Model;
       this.models.set(model.name, model);
       return model;
    }
@@ -171,7 +125,7 @@ class Fookie {
       if (await preRule(payload, ctx)) {
          await modify(payload, ctx);
          if (await rule(payload, ctx)) {
-            payload.response.data = await this.models.get(payload.model).methods.get(payload.method)(payload, ctx);
+            payload.response.data = await this.databases.get(this.models.get(payload.model).database).methods.get(payload.method)(payload, ctx);
             if (payload.response.status == 200) {
                await filter(payload, ctx);
                effect(payload, ctx);
