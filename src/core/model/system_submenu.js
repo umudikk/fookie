@@ -1,13 +1,13 @@
 module.exports = {
-   name: "system_submenu",
-   database:"mongoose",
+   name: "submenu",
+   database:"system",
    display: "_id",
    schema: {
-      system_model: {
-         relation: "system_model",
+      model: {
+         relation: "model",
       },
-      system_menu: {
-         relation: "system_menu",
+      menu: {
+         relation: "menu",
       },
       icon: {
          input: "text",
@@ -23,21 +23,21 @@ module.exports = {
          role: ["everybody"],
       },
       patch: {
-         role: ["system_admin"],
+         role: ["admin"],
          effect: ["sync"],
       },
       post: {
-         role: ["system_admin"],
+         role: ["admin"],
          effect: ["sync"],
       },
       delete: {
-         role: ["system_admin"],
+         role: ["admin"],
       },
       model: {
          role: ["everybody"],
       },
       count: {
-         role: ["system_admin"],
+         role: ["admin"],
       },
    },
 };

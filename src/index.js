@@ -125,7 +125,7 @@ class Fookie {
       if (await preRule(payload, ctx)) {
          await modify(payload, ctx);
          if (await rule(payload, ctx)) {
-            payload.response.data = await this.databases.get(this.models.get(payload.model).database).methods.get(payload.method)(payload, ctx);
+            payload.response.data = await this.models.get(payload.model).methods.get(payload.method)(payload, ctx);
             if (payload.response.status == 200) {
                await filter(payload, ctx);
                effect(payload, ctx);

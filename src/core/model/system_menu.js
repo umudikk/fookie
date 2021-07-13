@@ -1,6 +1,6 @@
 module.exports = {
-   name: "system_menu",
-   database:"mongoose",
+   name: "menu",
+   database:"system",
    display: "name",
    schema: {
       name: {
@@ -16,27 +16,24 @@ module.exports = {
    lifecycle: {
       get: {
          role: ["everybody"],
-      },
-      getAll: {
-         filter: [],
-         role: ["everybody"],
-      },
-      patch: {
-         role: ["system_admin"],
-         effect: [],
+         rule:["need_key"],
       },
       post: {
-         role: ["system_admin"],
-         effect: [],
+         modify:["set_methods"],
+         role: ["admin"],
+         rule:["need_key"],
       },
       delete: {
-         role: ["system_admin"],
+         role: ["admin"],
+         rule:["need_key"],
       },
       model: {
-         role: [],
+         role: ["everybodt"],
+         rule:["need_key"],
       },
-      count: {
-         role: ["system_admin"],
+      size: {
+         role: ["admin"],
+         rule:["need_key"],
       },
    },
 };

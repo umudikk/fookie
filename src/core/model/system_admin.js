@@ -1,27 +1,27 @@
 module.exports = {
-   name: "system_admin",
-   database:"mongoose",
+   name: "admin",
+   database:"system",
    display: "_id",
    schema: {
-      system_user: {
-         relation: "system_user",
+      user: {
+         relation: "user",
       },
    },
    lifecycle: {
       get: {
-         role: ["system_admin"],
+         role: ["admin"],
       },
       getAll: {
-         role: ["system_admin"],
+         role: ["admin"],
       },
       patch: {
-         role: ["system_admin"],
+         role: ["admin"],
       },
       post: {
-         role: ["system_admin"],
+         role: ["admin"],
       },
       delete: {
-         role: ["system_admin"],
+         role: ["admin"],
       },
       model: {
          role: ["everybody"],

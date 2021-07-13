@@ -10,7 +10,6 @@ module.exports = {
       },
       display: {
          input: "text",
-         required: true,
          type: "string",
          default: "_id",
       },
@@ -33,26 +32,24 @@ module.exports = {
    lifecycle: {
       get: {
          role: ["everybody"],
-      },
-      getAll: {
-         role: ["everybody"],
-      },
-      patch: {
-         role: ["admin"],
-         effect: ["sync"],
+         rule:["need_key"],
       },
       post: {
+         modify:["set_methods"],
          role: ["admin"],
-         effect: ["sync"],
+         rule:["need_key"],
       },
       delete: {
          role: ["admin"],
+         rule:["need_key"],
       },
       model: {
-         role: [],
+         role: ["everybodt"],
+         rule:["need_key"],
       },
-      count: {
+      size: {
          role: ["admin"],
+         rule:["need_key"],
       },
    },
 };
