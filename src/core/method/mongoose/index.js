@@ -1,6 +1,6 @@
 const mongooseModelParser = require("../../../helpers/mongooseModelParser")
 
-module.exports = async function (ctx) {
+module.exports = async function (model,ctx) {
     ctx.databases.set("mongoose" , {methods:new Map})
 
     ctx.databases.get("mongoose").methods.set("get", async function (payload, ctx) {
@@ -8,7 +8,7 @@ module.exports = async function (ctx) {
         let res = await Model.findOne(payload.query, payload.attributes, payload.projection);
         return res;
     });
-
+    model.meth
     ctx.databases.get("mongoose").methods.set("getAll", async function (payload, ctx) {
         let Model = mongooseModelParser(ctx.models.get(payload.model))
         let res = await Model.find(payload.query, payload.attributes, payload.projection);
