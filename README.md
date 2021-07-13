@@ -136,7 +136,7 @@ res = await fookie.run({
   model: "message",
   method: "count",
   query: {
-    text: "hi",
+  
   },
 });
 console.log(res);
@@ -145,16 +145,19 @@ res = await fookie.run({
   system: true,
   model: "message",
   method: "test",
-  query: {
+  body: {
     text: "hi",
   },
+  options:{
+    method:"post"
+  }
 });
-console.log(res);
+console.log(res); // true or false
 
 res = await fookie.run({
   system: true,
-  model: "patch",
-  method: "test",
+  model: "message",
+  method: "patch",
   query: {
     text: "hi",
   },
@@ -166,7 +169,7 @@ console.log(res);
 
 res = await fookie.run({
   system: true,
-  model: "patch",
+  model: "message",
   method: "delete",
   query: {
     text: "Hello World!",
