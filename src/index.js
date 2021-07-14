@@ -109,8 +109,14 @@ class Fookie {
          model = deepMerge(model, this.mixins.get(i))
       }
       schemaFixer(model);
-      this.models.set(model.name, model);
-      return model;
+      let res = await this.run({
+         system:true,
+         model:"model",
+         method:"post",
+         body:model
+      })
+
+      return res.data;
    }
 
    async effect(name, effect) {

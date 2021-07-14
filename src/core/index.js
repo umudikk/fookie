@@ -10,7 +10,6 @@ module.exports = async function (ctx) {
    ctx.model(require("./model/system_model.js"));
    ctx.model(require("./model/system_menu.js"));
    ctx.model(require("./model/system_submenu.js"));
-   ctx.model(require("./model/system_admin.js"));
    ctx.model(require("./model/webhook.js"));
 
    // IMPORTANT PLUGINS
@@ -66,7 +65,7 @@ module.exports = async function (ctx) {
 
    // DATABASES
    // mongoose
-   await ctx.use(require("./new_core/model/index.js"));
+   await ctx.use(require("./database/mongoose/index"));
 
    // PLUGINS
    //await ctx.use(require("./defaults/plugin/file_storage"))
