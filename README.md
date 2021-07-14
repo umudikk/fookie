@@ -45,12 +45,15 @@ our application with small code pieces.
 # Documentation
 
 ## Website
-
 http://fookiejs.com
 
 ## Github Pages
-
 https://umudikk.github.io/fookie/#/
+
+## Discord
+https://discord.gg/XJBTyG73TG
+
+
 
 ## Installation
 
