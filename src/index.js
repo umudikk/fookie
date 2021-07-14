@@ -109,6 +109,7 @@ class Fookie {
          model = deepMerge(model, this.mixins.get(i))
       }
       schemaFixer(model);
+      
       let res = await this.run({
          system:true,
          model:"model",

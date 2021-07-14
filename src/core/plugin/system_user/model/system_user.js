@@ -1,5 +1,5 @@
 module.exports = {
-   name: "system_user",
+   name: "user",
    database: "mongoose",
    display: "email",
    schema: {
@@ -24,21 +24,21 @@ module.exports = {
    },
    lifecycle: {
       get: {
-         role: ["system_admin"],
+         role: ["admin"],
       },
       getAll: {
-         role: ["system_admin"],
+         role: ["admin"],
       },
       patch: {
-         role: ["system_admin"],
+         role: ["admin"],
       },
       post: {
-         role: ["system_admin"],
+         role: ["admin"],
          modify: ["password"],
       },
       delete: {
          rule:["is_last_admin"], //TODO: eğer admin tek kaldıysa izin verme silmesine
-         role: ["system_admin"],
+         role: ["admin"],
       },
       model: {
          role: ["everybody"],
