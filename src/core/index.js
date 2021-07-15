@@ -66,6 +66,7 @@ module.exports = async function (ctx) {
    // DATABASES
    // mongoose
    await ctx.use(require("./database/mongoose/index"));
+   await ctx.use(require("./new_core/index"))
 
    // PLUGINS
    //await ctx.use(require("./defaults/plugin/file_storage"))
